@@ -1,0 +1,12 @@
+name: LOUP-GAROUS
+version: 0.1
+author: Aiidor
+main: fr.aiidor.LGUHC
+commands:
+  bypass:
+    description: Permet de forcer une action
+    permission: force.use
+  lg:
+    description: Permet d'effectuer les commandes joueurs du LG
+  test:
+    descrition: test
