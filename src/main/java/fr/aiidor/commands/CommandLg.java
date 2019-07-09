@@ -20,7 +20,7 @@ import fr.aiidor.roles.use.LGCupidon;
 import fr.aiidor.roles.use.LGEnfantS;
 import fr.aiidor.roles.use.LGRenard;
 import fr.aiidor.roles.use.LGSalvateur;
-import fr.aiidor.roles.use.LGSorcière;
+import fr.aiidor.roles.use.LGSorciere;
 import fr.aiidor.roles.use.LGTrublion;
 import fr.aiidor.roles.use.LGVoyante;
 import fr.aiidor.utils.LGVote;
@@ -367,7 +367,7 @@ public class CommandLg implements CommandExecutor {
 			//SORCIERE ------------------------------
 			if (args[0].equalsIgnoreCase("revive")) {
 				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Sorcière) {
+				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Sorciere) {
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oSorcière §cpour effectuer cette commande !");
 					return true;
 				}
@@ -390,7 +390,7 @@ public class CommandLg implements CommandExecutor {
 					if (LGRoleManager.mortD.get(Target.getUniqueId()) == LGCamps.VILLAGEOIS) {
 						
 						LGRoleManager.Power.remove(player.getUniqueId());
-						LGSorcière.Revive(Target.getUniqueId());
+						LGSorciere.Revive(Target.getUniqueId());
 						return true;
 					}
 				}

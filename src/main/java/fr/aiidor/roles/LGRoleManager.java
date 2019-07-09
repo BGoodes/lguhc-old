@@ -38,7 +38,7 @@ public class LGRoleManager extends JavaPlugin {
 			Power.put(p, 3);
 		}
 		
-		if (LGRoles.getRole(p) == LGRoles.Ancien || LGRoles.getRole(p) == LGRoles.LgInfect || LGRoles.getRole(p) == LGRoles.Sorcière || LGRoles.getRole(p) == LGRoles.Cupidon 
+		if (LGRoles.getRole(p) == LGRoles.Ancien || LGRoles.getRole(p) == LGRoles.LgInfect || LGRoles.getRole(p) == LGRoles.Sorciere || LGRoles.getRole(p) == LGRoles.Cupidon
 			|| LGRoles.getRole(p) == LGRoles.Voleur || LGRoles.getRole(p) == LGRoles.EnfantS) {
 			Power.put(p, 1);
 		}

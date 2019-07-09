@@ -20,7 +20,7 @@ import fr.aiidor.roles.LGRoleManager;
 import fr.aiidor.roles.LGRoles;
 import fr.aiidor.roles.use.LGEnfantS;
 import fr.aiidor.roles.use.LGRevive;
-import fr.aiidor.roles.use.LGSorcière;
+import fr.aiidor.roles.use.LGSorciere;
 
 public class LGDeathDelay extends BukkitRunnable{
 	
@@ -58,8 +58,8 @@ public class LGDeathDelay extends BukkitRunnable{
 			
 			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
 				
-				if (LGRoles.getRole(uuid) == LGRoles.Sorcière && LGRoleManager.Power.containsKey(uuid)) {
-					LGSorcière.ReviveMsg(uuid, player);
+				if (LGRoles.getRole(uuid) == LGRoles.Sorciere && LGRoleManager.Power.containsKey(uuid)) {
+					LGSorciere.ReviveMsg(uuid, player);
 				}
 			}
 		}

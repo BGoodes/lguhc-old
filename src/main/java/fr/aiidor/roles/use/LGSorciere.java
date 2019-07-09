@@ -11,7 +11,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class LGSorcière {
+public class LGSorciere {
 	
 	public static void ReviveMsg(UUID uuid, Player damaged) {
 		

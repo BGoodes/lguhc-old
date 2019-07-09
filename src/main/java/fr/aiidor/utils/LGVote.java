@@ -21,7 +21,7 @@ public class LGVote {
 	
 	private static int voteNumber = 0;
 	private static HashMap<UUID, Integer> vote = new HashMap<>();
-	private static ArrayList<UUID> égalité = new ArrayList<>();
+	private static ArrayList<UUID> egalite = new ArrayList<>();
 	public static Player cible;
 	
 	public static void AnounceVote() {
@@ -115,7 +115,7 @@ public class LGVote {
 		for (UUID uuid : vote.keySet()) {
 			
 			if (vote.get(uuid) == max) {
-				égalité.add(uuid);
+				egalite.add(uuid);
 			}
 		}
 		
@@ -128,20 +128,20 @@ public class LGVote {
 		}
 		
 		//!EGALITE
-		if (égalité.size() == 1) {
+		if (egalite.size() == 1) {
 			
-			VoteEffect(égalité.get(0));
+			VoteEffect(egalite.get(0));
 			return;
 		}
 		
 		//EGALITE
 		
-		if (égalité.size() > 1) {
+		if (egalite.size() > 1) {
 			
 			Random ran = new Random();
-			int choose = ran.nextInt(égalité.size());
+			int choose = ran.nextInt(egalite.size());
 			
-			VoteEffect(égalité.get(choose));
+			VoteEffect(egalite.get(choose));
 			return;
 		}
 		
@@ -156,6 +156,6 @@ public class LGVote {
 		
 		aVote.clear();
 		vote.clear();
-		égalité.clear();
+		egalite.clear();
 	}
 }

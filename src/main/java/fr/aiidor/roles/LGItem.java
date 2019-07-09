@@ -57,7 +57,7 @@ public class LGItem {
 		}
 		
 		
-		if (role == LGRoles.Sorcière) {
+		if (role == LGRoles.Sorciere) {
 			
 			//INSTANT HEALTH
 			ItemStack Health = new ItemStack(Material.SPLASH_POTION, 3);

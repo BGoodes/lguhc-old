@@ -70,7 +70,7 @@ public class RoleDescription {
 				return desc.toString();
 			}
 			
-			if (LGRoles.getRole(p) == LGRoles.Sorcière) {
+			if (LGRoles.getRole(p) == LGRoles.Sorciere) {
 				
 				String role = "§9Afin d'y arriver, vous avez le pouvoir de ressusciter un joueur mort dans la partie durant un lapse de temps définit."
 						+ "Pour se faire, vous pourrez utiliser la commande /lg Revive <Pseudo> ou cliquer sur un message message spécifique !";

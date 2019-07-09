@@ -6,7 +6,7 @@ public enum LGRoles {
 	
 	//Villageois
     Voyante(1, "Voyante", 1), Renard(0, "Renard", 1), Montreur(0, "Montreur D'ours", 1), Petite(0, "Petite fille", 1), 
-	Ancien(0, "Ancien", 1), Sorcière(0, "Sorcière", 1),  Cupidon(1, "Cupidon", 1), Salvateur(0, "Salvateur", 1), Mineur(0, "Mineur", 1),
+	Ancien(0, "Ancien", 1), Sorciere(0, "Sorciere", 1),  Cupidon(1, "Cupidon", 1), Salvateur(0, "Salvateur", 1), Mineur(0, "Mineur", 1),
 	Ange(0, "Ange", 1), Trublion(1, "Trublion", 1),
 	
 	//Loups Garous
