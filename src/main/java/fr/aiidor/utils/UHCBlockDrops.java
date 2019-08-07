@@ -11,14 +11,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
+import fr.aiidor.LGUHC;
+
 public class UHCBlockDrops implements Listener {
 	
 	@EventHandler
 	public void breakBlock(BlockBreakEvent e) {
 		
-		Location loc = e.getBlock().getLocation();
+		if (LGUHC.getInstance().Run == false) return;
 		
-
+		Location loc = e.getBlock().getLocation();
 		
 		if (e.getBlock().getType() == Material.IRON_ORE) {
 			

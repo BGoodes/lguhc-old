@@ -16,7 +16,7 @@ public class LGTime extends BukkitRunnable{
 	
 	private long time;
 	
-	public LGTime(LGUHC lguhc) {
+	public LGTime(LGUHC main) {
 	}
 
 	@Override

@@ -22,18 +22,11 @@ public class LGSalvateur {
 			if (LGRoles.getRole(uuid) == LGRoles.Salvateur) {
 				
 				LGRoleManager.Power.put(uuid, 1);
-				Bukkit.getPlayer(uuid).sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§b Vous avez 2 minutes pour protéger un joueur grâce à la commande /lg protect <Pseudo>");
+				
+				Bukkit.getPlayer(uuid).sendMessage(" ");
+				Bukkit.getPlayer(uuid).sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§b Vous avez 5 minutes pour protéger un joueur grâce à la commande /lg protect <Pseudo>");
 			}
 		}
-		
-		Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				cannotChoose();
-			}
-		}, 20*60*2);	
 	}
 	
 	public static void cannotChoose() {
@@ -49,6 +42,7 @@ public class LGSalvateur {
 					Player pl = Bukkit.getPlayer(uuid);
 					LGRoleManager.Power.remove(uuid);
 					
+					pl.sendMessage("");
 					pl.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez attendu plus de 2 minutes, vous pourrez donc utiliser votre pouvoir qu'à partir du prochaine épisode !");
 				}
 				

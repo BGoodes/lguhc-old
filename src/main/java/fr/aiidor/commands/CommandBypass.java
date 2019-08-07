@@ -1,9 +1,14 @@
 package fr.aiidor.commands;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.UHCState;
@@ -46,6 +51,20 @@ public class CommandBypass implements CommandExecutor {
 				player.sendMessage("§b§l[§6§lUHC§b§l]§6 Lancement de la partie !");
 				return true;
 			}
+			 
+			 if (args[0].equalsIgnoreCase("config")) {
+				 
+				Inventory inv = Bukkit.createInventory(null, 27, "§5Menu: §dConfiguration");
+				
+				inv.setItem(11, getItem(Material.DIAMOND_SWORD, "§6Scénarios"));
+				inv.setItem(15, getItem(Material.BOOKSHELF, "§6Rôles"));
+				inv.setItem(26, getItem(Material.BARRIER, "§cExit =>"));
+				
+				player.openInventory(inv);
+				return true;
+			}
+			 
+			 
 		}
 		
 		//ROLE
@@ -145,6 +164,17 @@ public class CommandBypass implements CommandExecutor {
 		}
 
 		return false;
+	}
+	
+	private static ItemStack getItem(Material material, String Name) {
+		
+		ItemStack Item = new ItemStack(material);
+		ItemMeta ItemM = Item.getItemMeta();
+		
+		ItemM.setDisplayName(Name);
+		Item.setItemMeta(ItemM);
+		
+		return Item;
 	}
 
 }

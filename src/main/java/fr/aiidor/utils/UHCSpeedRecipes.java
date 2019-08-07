@@ -9,11 +9,14 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.aiidor.LGUHC;
+
 public class UHCSpeedRecipes implements Listener {
 	
 	@EventHandler
 	public void ChangeCraft(PrepareItemCraftEvent e) {
 		
+		if (LGUHC.getInstance().Run == false) return;
 		
 		//Craft se passe dans une zone de craft
 		if (e.getInventory() instanceof CraftingInventory) {

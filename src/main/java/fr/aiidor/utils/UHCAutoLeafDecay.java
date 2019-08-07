@@ -25,6 +25,7 @@ public class UHCAutoLeafDecay implements Listener {
 	@EventHandler
 	public void BreakWood(BlockBreakEvent e) {
 		
+		if (LGUHC.getInstance().Run == false) return;
 		Material mat = e.getBlock().getType();
 		
 		if (mat == Material.LOG ||mat == Material.LOG_2) {

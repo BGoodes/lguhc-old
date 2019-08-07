@@ -25,31 +25,31 @@ public class LGSetRole {
 			//TOUS LES JOUEURS IN GAME
 			while (HasRole.contains(pl)) {
 				
-				if (!(LGUHC.getInstance().PlayerInGame.contains(pl))) { //!
-					break;
-				}
 				random = new Random().nextInt(Bukkit.getServer().getOnlinePlayers().size());
 				p = (Player) Bukkit.getServer().getOnlinePlayers().toArray()[random];
 				pl = p.getUniqueId();
 				
 			}
 			
-			//TOUS LES ROLES
-			for (LGRoles role : LGRoles.values()) {
+			HasRole.add(pl);
+			
+			if (LGUHC.getInstance().PlayerInGame.contains(pl)) {
 				
-				if (role.number >= 1) {
+				//TOUS LES ROLES
+				for (LGRoles role : LGRoles.values()) {
 					
-					HasRole.add(pl);
-					giveRole(pl, role);
-					role.number --;
-					
-					break;
+					if (role.number >= 1) {
+						
+						
+						giveRole(pl, role);
+						role.number --;
+						break;
+					}
 				}
 			}
 		}
 		
 	}
-	
 	
 	
 	private static void giveRole(UUID uuid, LGRoles role) {

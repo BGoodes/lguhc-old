@@ -80,7 +80,7 @@ public class LGDeathDelay extends BukkitRunnable{
 			death(player, grave, killer);
 			
 			cancel();
-        	}
+        }
 		
 	}
 	
@@ -187,9 +187,11 @@ public class LGDeathDelay extends BukkitRunnable{
 			for (UUID uuid : LGRoleManager.couple) {
 				if (uuid != player.getUniqueId()) {
 					
-					Player couple = Bukkit.getPlayer(uuid);
-					death(couple, couple.getLocation(), null);
+					if (LGRoleManager.mortD.containsKey(uuid)) return;
 					
+					Player couple = Bukkit.getPlayer(uuid);
+					
+					death(couple, couple.getLocation(), null);
 					Bukkit.broadcastMessage("§b§l[§6§lLOUP-GAROUS§b§l]§9 Dans un élan de chagrin §6" + couple.getName() + "§3 à décidé de le rejoindre dans sa tombe ! §c♥");
 					
 				}
@@ -199,6 +201,7 @@ public class LGDeathDelay extends BukkitRunnable{
 	
 	public static void vole(Player player, Player damager) {
 		
+		//VOLEUR
 		if (damager != null) {
 			if (LGRoles.getRole(damager.getUniqueId()) != LGRoles.Voleur) {
 				return;

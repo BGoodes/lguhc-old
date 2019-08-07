@@ -16,6 +16,7 @@ import fr.aiidor.roles.LGSetRole;
 import fr.aiidor.roles.RoleDescription;
 import fr.aiidor.roles.use.LG;
 import fr.aiidor.roles.use.LGCupidon;
+import fr.aiidor.roles.use.LGEnfantS;
 import fr.aiidor.roles.use.LGMontreur;
 import fr.aiidor.roles.use.LGPermEffects;
 import fr.aiidor.roles.use.LGSalvateur;
@@ -31,7 +32,7 @@ import fr.aiidor.utils.LGVote;
 public class UHCGame extends BukkitRunnable{
 	
 	public static int timer = 0;
-	private int nextEP = 10; //TEMPORAIRE (Vrai valeur = 1200)
+	private int nextEP = 1200; //TEMPORAIRE (Vrai valeur = 1200)
 	public static int ep = 1;
 	private boolean vote = false;
 	public long time;
@@ -62,7 +63,13 @@ public class UHCGame extends BukkitRunnable{
 			
 			int min = UHCGame.timer/60;
 			int sec = UHCGame.timer%60;;
-			sign.getValue().setLine(5, "§6Timer : §e" + min + " §6Min§e " + sec);
+			
+			if (sec<10) {
+				sign.getValue().setLine(5, "§6Timer : §e" + min + " §6:§e 0" + sec);
+			}
+			else {
+				sign.getValue().setLine(5, "§6Timer : §e" + min + " §6:§e " + sec);
+			}
 			sign.getValue().setLine(6, "§2Border : §a" + wbT);
 			
 		}
@@ -136,11 +143,30 @@ public class UHCGame extends BukkitRunnable{
 			LGVote.Result();
 		}
 		
-		//EPISODES ----------------------------
+		//POWER LIMITE
+		if (timer == nextEP - 900 && ep > 1) {
+			LGVoyante.cannotSee();
+			LGSalvateur.cannotChoose();
+		}
+		
+		if (timer == nextEP - 900 && ep == 2) {
+			LGCupidon.Cannotchoose();
+			LGEnfantS.Cannotchoose();
+		}
+		
+		if (timer == nextEP - 900 && ep == 3) {
+			LGTrublion.cannotSwitch();
+		}
+		
+		//EPISODES ----------------------------             /////////////////////////////////////////////////////////
 		if (timer == nextEP) {
 			if (ep == 1) { //EPISODE 1 = ANNONCE DES ROLES +  -----------------------------------
 				
 				UHCState.setState(UHCState.GAMEPVP);
+				
+				LGTime start = new LGTime(LGUHC.getInstance());
+				start.runTaskTimer(LGUHC.getInstance(), 0, 1);
+				
 				Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §bPVP activé dans 10 min !");
 				Bukkit.broadcastMessage("§b-------- Fin Episode " + ep + " --------");
 				
@@ -163,23 +189,21 @@ public class UHCGame extends BukkitRunnable{
 							
 							//BUFF LGB
 							LGroleSolo.LGBBuff(pl);
-						}	
+						}
 					}
 				}, 60);
 				
-				//TIME
-				LGTime start = new LGTime(LGUHC.getInstance());
-				start.runTaskTimer(LGUHC.getInstance(), 0, 1);	
 				
-				//POUVOIRS EP1
 				Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
 					
 					@Override
 					public void run() {
-						
-						LGCupidon.canChoose();
-					}
-				}, 40);
+							
+							LGVoyante.canSee();
+							LGSalvateur.EndProtect();
+							LGSalvateur.canChoose();
+						}
+					}, 80);
 			}
 			
 			
@@ -187,6 +211,20 @@ public class UHCGame extends BukkitRunnable{
 			
 			if (ep != 1) {
 				Bukkit.broadcastMessage("§b-------- Fin Episode " + ep + " --------");
+				
+				Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
+					
+					@Override
+					public void run() {
+							
+							LGVoyante.canSee();
+							
+							LGEnfantS.canChoose();
+							
+							LGSalvateur.EndProtect();
+							LGSalvateur.canChoose();
+					}
+				}, 80);
 			}
 			
 			Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
@@ -210,37 +248,18 @@ public class UHCGame extends BukkitRunnable{
 					//------------------------
 					
 				}
-			}, 40);
+			}, 100);
 			
 			if (ep == 2) {
 				LGTrublion.canSwitch();
 			}
 			
 			if (ep == 5) {
-				
-				Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
-					
-					@Override
-					public void run() {
-						Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l]§4 La World Border va commencé à diminuer ! Elle réduira la map jusqu'en 300 / -300 !");
-						nextWb = timer + 5;
-					}
-				}, 40);
+				Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l]§4 La World Border va commencé à diminuer ! Elle réduira la map jusqu'en 300 / -300 !");
+				nextWb = timer + 5;
 			}
 			
-			//POUVOIR:
-			Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
-				
-				@Override
-				public void run() {
-					LGVoyante.canSee();
-					LGSalvateur.EndProtect();
-					LGSalvateur.canChoose();
-					
-				}
-			}, 40);
 
-			
 			nextEP = nextEP + 1200;
 			ep ++;
 			

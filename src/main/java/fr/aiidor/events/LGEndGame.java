@@ -19,6 +19,7 @@ public class LGEndGame {
 			return;
 		}
 		
+		
 		int vil = 0;
 		int lg = 0;
 		int lgb = 0;

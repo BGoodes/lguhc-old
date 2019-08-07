@@ -42,7 +42,7 @@ public class LGPetiteFille {
 			}
 		}
 
-		
+		p.sendMessage(" ");
 		if (Joueur == 0) {
 			p.sendMessage("§cAucun joueur ne se trouve dans un rayon de 100 blocs !");
 			return;

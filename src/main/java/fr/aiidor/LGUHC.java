@@ -22,12 +22,13 @@ import fr.aiidor.scoreboard.ScoreboardSign;
 public class LGUHC extends JavaPlugin {
 	
 	public ArrayList<UUID> PlayerInGame = new ArrayList<>();
+	public ArrayList<UUID> Spectator = new ArrayList<>();
 	public HashMap<UUID, String> PlayerName = new HashMap<>();
 	public int PlayerMin = 1;
 	
 	public HashMap<Player, ScoreboardSign> boards = new HashMap<>();
 	
-	public boolean Run = true;
+	public boolean Run = false;
 	
 	//TITLE
 	public Titles title = new Titles();
@@ -35,11 +36,13 @@ public class LGUHC extends JavaPlugin {
 	//INSTANCE
 	public static LGUHC instance;
 	
-	public WorldBorder wb = Bukkit.getWorld("world").getWorldBorder();
-	
 	public static LGUHC getInstance() {
 		return instance;
 	}
+	
+	public WorldBorder wb = Bukkit.getWorld("world").getWorldBorder();
+	
+
 	
 	//LOAD
 	@Override
@@ -51,7 +54,7 @@ public class LGUHC extends JavaPlugin {
 		EventsManager.registerEvents(this);
 		
 		UHCState.setState(UHCState.WAIT);
-		Bukkit.getWorld("world").setPVP(true);
+		Bukkit.getWorld("world").setPVP(false);
 		
 		//GAMERULE
 		Bukkit.getWorld("world").setGameRuleValue("reducedDebugInfo", "true");
@@ -75,7 +78,9 @@ public class LGUHC extends JavaPlugin {
 	}
 	
 	public String getNameString(UUID uuid) {
+		
 		return PlayerName.get(uuid);
 	}
+
 
 }

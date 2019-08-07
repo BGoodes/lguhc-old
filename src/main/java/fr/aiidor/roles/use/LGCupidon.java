@@ -21,6 +21,7 @@ public class LGCupidon implements Listener{
 		
 		for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
 			if (LGRoles.getRole(uuid) == LGRoles.Cupidon) {
+				Bukkit.getPlayer(uuid).sendMessage(" ");
 					Bukkit.getPlayer(uuid).sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§b Vous avez 5 minutes pour choisir le couple grâce à la commande /lg love <Pseudo1> <Pseudo2>");
 				}
 			}
@@ -39,15 +40,6 @@ public class LGCupidon implements Listener{
 			LGCamps.SetCamp(a.getUniqueId(), LGCamps.COUPLE);
 			LGCamps.SetCamp(b.getUniqueId(), LGCamps.COUPLE);
 		}
-		
-		Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				Cannotchoose();
-			}
-		}, 20*60*5);
 	}
 	
 	public static void Cannotchoose() {

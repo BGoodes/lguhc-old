@@ -9,10 +9,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
+import fr.aiidor.LGUHC;
+
 public class UHCSpeedLoot implements Listener{
 	
 	@EventHandler
 	public void onMobDeath(EntityDeathEvent e) {
+		
+		if (LGUHC.getInstance().Run == false) return;
 		
 		if (e.getEntity().getType() == EntityType.COW) {
 			

@@ -19,6 +19,7 @@ public class LGTrublion {
 			if (LGRoles.getRole(uuid) == LGRoles.Trublion) {
 				
 				LGRoleManager.Power.put(uuid, 1);
+				Bukkit.getPlayer(uuid).sendMessage(" ");
 				Bukkit.getPlayer(uuid).sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§3 C'est le moment ! Vous avez 5min pour échanger le rôle de 2 joueurs avec la commande "
 						+ "§9/lg switch <Pseudo1> <Pseudo2> !");
 			}
@@ -42,6 +43,7 @@ public class LGTrublion {
 					
 					Player pl =Bukkit.getPlayer(uuid);
 					LGRoleManager.Power.remove(uuid);
+					pl.sendMessage(" ");
 					pl.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez attendu plus de 5 min, vous pourrez donc plus utiliser votre pouvoir !");
 				}
 				

@@ -48,6 +48,9 @@ public class UHCJoin implements Listener {
 		//GAME EN COURS
 		if (!(UHCState.isState(UHCState.WAIT) || UHCState.isState(UHCState.STARTING)) && !(LGUHC.getInstance().PlayerInGame.contains(player.getUniqueId()))) {
 			
+			if (LGUHC.getInstance().Spectator.contains(player.getUniqueId())) {
+				return;
+			}
 			if (FriendsMode) {
 				if (LGRoleManager.PlayerRole.containsKey(player.getUniqueId())) {
 					
@@ -56,14 +59,15 @@ public class UHCJoin implements Listener {
 					return;
 				}
 			}
-			
 			if (LGUHC.getInstance().PlayerInGame.contains(player.getUniqueId())) {
 				LGUHC.getInstance().PlayerInGame.remove(player.getUniqueId());
 			}
 			
 			player.sendMessage("§b§l[§6§lUHC§b§l] §cLa partie à déjà commencé ! Vous allez être mis en spectateur !");
 			player.setGameMode(GameMode.SPECTATOR);
-			e.setJoinMessage("§b§l[§6§lUHC§b§l] §6" + player.getName() + " §3à rejoint la partie ! §b(Spectateur)");
+			LGUHC.getInstance().Spectator.add(player.getUniqueId());
+			
+			e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7) §b(Spectateur)");
 			
 			reset(player);
 			return;
@@ -109,8 +113,11 @@ public class UHCJoin implements Listener {
 		
 		if (LGUHC.getInstance().PlayerInGame.contains(player.getUniqueId())) {
 			LGUHC.getInstance().PlayerInGame.remove(player.getUniqueId());
-			return;
 		}	
+		
+		if (UHCState.isState(UHCState.GAMEPVP) || UHCState.isState(UHCState.FINISH)) {
+			LGUHC.getInstance().Spectator.add(player.getUniqueId());
+		}
 
 	}
 	

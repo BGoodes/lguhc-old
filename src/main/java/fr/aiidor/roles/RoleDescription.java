@@ -123,6 +123,22 @@ public class RoleDescription {
 				return desc.toString();
 			}
 			
+			if (LGRoles.getRole(p) == LGRoles.Ange) {
+				
+				String role = "c pa fé ";
+					
+				desc.append(role);
+				return desc.toString();
+			}
+			
+			if (LGRoles.getRole(p) == LGRoles.Trublion) {
+				
+				String role = " c pa fé ";
+					
+				desc.append(role);
+				return desc.toString();
+			}
+			
 			if (LGRoles.getRole(p) == LGRoles.SV || LGRoles.getRole(p) == LGRoles.LGA) {
 				
 				String role = "§9Mais vous ne disposez d'aucun pouvoir particulier !";
@@ -218,7 +234,7 @@ public class RoleDescription {
 		
 		if (LGCamps.getCamp(p) == LGCamps.VOLEUR) {
 			
-			String role = "§9Vous n'appartenez à aucun camps ! Votre objectif est de récuperer un rôle un joueur en le tuant !"
+			String role = "§9Vous n'appartenez à aucun camps ! Votre objectif est de récuperer un rôle un joueur en le tuant ! "
 					+ "Pour cela, vous avez l'effet de résistance I jusqu'à votre premier meurtre !";
 			
 			return role;

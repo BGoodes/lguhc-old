@@ -57,6 +57,7 @@ public class UHCStart extends BukkitRunnable{
 			xpReset();
 			UHCState.setState(UHCState.WAIT);
 			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §cAnnulation de la partie : §6Pas assez de joueurs !");	
+			
 		}		
 			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
 				Player pl = Bukkit.getPlayer(uuid);

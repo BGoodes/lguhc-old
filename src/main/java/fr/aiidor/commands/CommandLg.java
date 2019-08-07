@@ -154,17 +154,20 @@ public class CommandLg implements CommandExecutor {
 		if (args[0].equalsIgnoreCase("love")) {
 			
 			if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Cupidon) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oCupidon §cpour effectuer cette commande !");
 				return true;
 			}
 			
 			
 			if (args.length < 3) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez choisir 2 personnes !");
 			}	
 			
 			
 			if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
 				return true;
 			}
@@ -173,12 +176,14 @@ public class CommandLg implements CommandExecutor {
 			String targetName2 = args[2];
 			
 			if (targetName1 == targetName2) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas mettre 2 fois la même personne dans le couple !");
 				
 				return true;
 			}
 			if (Bukkit.getPlayer(targetName1) == null || Bukkit.getPlayer(targetName2) == null) {
 				
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, l'un des joueurs n'est pas en partie §fou §cn'existe pas !");
 				return true;
 			}
@@ -195,21 +200,24 @@ public class CommandLg implements CommandExecutor {
 			return true;
 		}
 		
-		//CUPIDON -------------------------------------------
+		//TRUBLION -------------------------------------------
 		if (args[0].equalsIgnoreCase("switch")) {
 			
 			if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Trublion) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oTrublion §cpour effectuer cette commande !");
 				return true;
 			}
 			
 			
 			if (args.length < 3) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez choisir 2 personnes !");
 			}	
 			
 			
 			if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité ou avez attendu trop longtemps !");
 				return true;
 			}
@@ -219,15 +227,18 @@ public class CommandLg implements CommandExecutor {
 			
 			
 			if (targetName1 == player.getName() || targetName2 == player.getName()) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas vous choisir vous même !");
 				return true;
 			}
 			if (targetName1 == targetName2) {
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas choisir 2 fois la même personne !");
 				return true;
 			}
 			if (Bukkit.getPlayer(targetName1) == null || Bukkit.getPlayer(targetName2) == null) {
 				
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, l'un des joueurs n'est pas en partie §fou §cn'existe pas !");
 				return true;
 			}
@@ -237,6 +248,7 @@ public class CommandLg implements CommandExecutor {
 			
 			LGTrublion.Switch(Target1, Target2);
 			
+			player.sendMessage(" ");
 			player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§3 Vous avez bien mis §6" + targetName1 + "§3 et §6" + targetName2 +  "§3 !");
 			return true;
 		}
@@ -249,6 +261,7 @@ public class CommandLg implements CommandExecutor {
 		
 		if (args.length == 2) {
 			if (!LGUHC.getInstance().PlayerInGame.contains(player.getUniqueId())) { 
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être en partie pour effectuer cette commande !");
 				return true;
 				}
@@ -257,11 +270,13 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("vote")) {
 				
 				if (!LGVote.canVote) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous ne pouvez pas effectuer cette commandes actuellement !");
 					return true;
 				}
 				
 				if (LGVote.aVote.contains(player.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déjà voté ! Attendez le prochaine épisode !");
 					return true;
 				}
@@ -269,6 +284,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -276,6 +292,7 @@ public class CommandLg implements CommandExecutor {
 				Player Target = Bukkit.getPlayer(targetName);
 				
 				if (!LGUHC.getInstance().PlayerInGame.contains(Target.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §cest mort ou n'est pas dans la partie !");
 					return true;
 				}
@@ -292,6 +309,7 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("flairer")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Renard) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oRenard §cpour effectuer cette commande !");
 					return true;
 				}
@@ -299,6 +317,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -315,6 +334,7 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("see")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Voyante) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oVoyante §cour effectuer cette commande !");
 					return true;
 				}
@@ -322,6 +342,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -334,11 +355,13 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("infect")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.LgInfect) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oInfect Père des loups §cpour effectuer cette commande !");
 					return true;
 				}
 				
 				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
 					return true;
 				}
@@ -346,6 +369,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -361,6 +385,7 @@ public class CommandLg implements CommandExecutor {
 					}
 				}
 				
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Le joueur §e" + targetName + " §cne peut pas être infecté !");
 				return true;
 			}
@@ -368,11 +393,13 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("revive")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Sorciere) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oSorcière §cpour effectuer cette commande !");
 					return true;
 				}
 				
 				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
 					return true;
 				}
@@ -380,6 +407,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -395,6 +423,7 @@ public class CommandLg implements CommandExecutor {
 					}
 				}
 				
+				player.sendMessage(" ");
 				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Le joueur §e" + targetName + " §cne peut pas être réanimé !");
 				return true;
 			}
@@ -403,11 +432,13 @@ public class CommandLg implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("protect")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Salvateur) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oSalvateur §cpour effectuer cette commande !");
 					return true;
 				}
 				
 				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité ou attendu plus de 2 minutes dans cette épisode ! Attendez le prochain !");
 					return true;
 				}
@@ -415,6 +446,7 @@ public class CommandLg implements CommandExecutor {
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -422,6 +454,7 @@ public class CommandLg implements CommandExecutor {
 				Player Target = Bukkit.getPlayer(targetName);
 				
 				if (LGSalvateur.Aprotect.contains(Target.getUniqueId())) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous ne pouvez pas protéger la même personne deux épisodes d'affilé !");
 					return true;
 				}
@@ -430,25 +463,28 @@ public class CommandLg implements CommandExecutor {
 				
 				LGRoleManager.Power.remove(player.getUniqueId());
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §aVous avez bien protégé pour" + targetName);
+				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §aVous avez bien protégé " + targetName);
 				return true;
 			}
 			
 			if (args[0].equalsIgnoreCase("choose")) {
 				
 				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.EnfantS) {
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oEnfant Sauvage §cpour effectuer cette commande !");
 					return true;
 				}
 				
 				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
+					player.sendMessage(" ");
+					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déjà utilisé votre capacité ou avez attendu plus de 5 min !");
 					return true;
 				}
 				
 				String targetName = args[1];
 				if (Bukkit.getPlayer(targetName) == null) {
 					
+					player.sendMessage(" ");
 					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
 					return true;
 				}
@@ -460,7 +496,7 @@ public class CommandLg implements CommandExecutor {
 				}
 				
 				LGRoleManager.Power.remove(player.getUniqueId());
-				LGEnfantS.choose(Target, player);
+				LGEnfantS.choose(player, Target);
 				
 				return true;
 			}

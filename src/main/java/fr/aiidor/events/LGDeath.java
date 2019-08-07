@@ -84,6 +84,8 @@ public class LGDeath implements Listener {
 		
 		if((damaged.getHealth()-e.getDamage()) <= 0) {
 			
+			if (LGRoleManager.mortD.containsKey(damaged.getUniqueId())) return;
+			
 			damaged.setGameMode(GameMode.SPECTATOR);
 			e.setCancelled(true);
 			//MORT
@@ -148,6 +150,8 @@ public class LGDeath implements Listener {
 	@EventHandler
 	public void PVE(EntityDamageEvent e) {
 		
+		
+		
 		if (!(e.getEntity() instanceof Player)) return;	
 		
 		if (e.getCause() == DamageCause.ENTITY_ATTACK || 
@@ -176,6 +180,8 @@ public class LGDeath implements Listener {
 		
 		//MORT
 		if((damaged.getHealth()-e.getDamage()) <= 0) {
+			
+			if (LGRoleManager.mortD.containsKey(damaged.getUniqueId())) return;
 			
         	e.setCancelled(true);
         	Location grave = damaged.getLocation();

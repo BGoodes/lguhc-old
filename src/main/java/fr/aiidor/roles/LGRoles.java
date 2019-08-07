@@ -4,28 +4,23 @@ import java.util.UUID;
 
 public enum LGRoles {
 	
-	//Villageois
-    Voyante(1, "Voyante", 1), Renard(0, "Renard", 1), Montreur(0, "Montreur D'ours", 1), Petite(0, "Petite fille", 1), 
-	Ancien(0, "Ancien", 1), Sorciere(0, "Sorciere", 1),  Cupidon(1, "Cupidon", 1), Salvateur(0, "Salvateur", 1), Mineur(0, "Mineur", 1),
-	Ange(0, "Ange", 1), Trublion(1, "Trublion", 1),
+    Voyante(0, "Voyante", 1), Renard(0, "Renard", 1),  VilainPL(0, "Vilain Petit Loup", 2), Montreur(0, "Montreur D'ours", 1), 
+    Petite(0, "Petite fille", 1), Voleur(0, "Voleur", 4),
+    
+    LGB(0, "Loup-Garou Blanc", 2), Assassin(0, "Assassin", 3),  LG(1, "Loup-Garou", 2),
 	
-	//Loups Garous
-	LG(1, "Loup-Garou", 2), LgInfect(0, "Infect père des loups", 2), VilainPL(0, "Vilain Petit Loup", 2), 
-	LGA(0, "Loup-Garou Amnésique", 2),
+	Ancien(0, "Ancien", 1), Sorciere(0, "Sorciere", 1), LgInfect(0, "Infect père des loups", 2),
+	Cupidon(0, "Cupidon", 1), Salvateur(0, "Salvateur", 1),
+	Ange(0, "Ange", 1), Trublion(0, "Trublion", 1),
 	
 	EnfantS(0, "Enfant Sauvage", 1),
 	
-	//Loup Garous blanc
-	LGB(0, "Loup-Garou Blanc", 2),
+	Mineur(0, "Mineur", 1),
 	
-	//Assassin
-	Assassin(0, "Assassin", 3),
-	
-	//Voleur
-	Voleur(0, "Voleur", 4),
+	LGA(0, "Loup-Garou Amnésique", 2),
 	
 	//ROLE TAMPON
-	 SV(0, "Simple Villageois", 1);
+	 SV(1, "Simple Villageois", 1), Thanos(0, "Thanos", 1);
 	
 	public int number;
 	private String Name;

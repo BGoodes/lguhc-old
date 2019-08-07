@@ -18,18 +18,10 @@ public class LGVoyante {
 			if (LGRoles.getRole(uuid) == LGRoles.Voyante) {
 				
 				LGRoleManager.Power.put(uuid, 1);
+				Bukkit.getPlayer(uuid).sendMessage(" ");
 				Bukkit.getPlayer(uuid).sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§b Vous avez 5 minutes pour connaître le rôle d'un joueur grâce à la commande /lg see <Pseudo> !");
 			}
 		}
-		
-		Bukkit.getScheduler().runTaskLater(LGUHC.getInstance(), new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				cannotSee();
-			}
-		}, 20*60*5);
 	}
 	
 	public static void cannotSee() {
@@ -40,6 +32,8 @@ public class LGVoyante {
 					
 					Player pl =Bukkit.getPlayer(uuid);
 					LGRoleManager.Power.remove(uuid);
+					
+					pl.sendMessage(" ");
 					pl.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez attendu plus de 5 min, vous pourrez donc utiliser votre pouvoir qu'à partir du prochaine épisode !");
 				}
 				
@@ -50,14 +44,19 @@ public class LGVoyante {
 	public static void SeeRole(Player p, Player Target) {
 		
 		if (!LGRoleManager.Power.containsKey(p.getUniqueId())) {
+			p.sendMessage(" ");
 			p.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déjà utilisé votre pouvoir ou avez attendu trop longtemps (5min) ! Attendez le prochaine épisode avant de pouvoir le réutiliser !");
 			return;
 		}
 		
+		p.sendMessage(" ");
 		p.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§a Le joueur que vous avez espionné est " + LGRoles.getRoleName(Target.getUniqueId()));
+		
 		
 		LGRoleManager.Power.remove(p.getUniqueId());
 		if (VoyanteBavarde) {
+			
+			p.sendMessage(" ");
 			Bukkit.broadcastMessage("§b§l[§6§lLOUP-GAROUS§b§l]§4 La voyante Bavarde à espionné un joueur qui est... §l" + LGRoles.getRoleName(Target.getUniqueId()));
 		}
 	}
