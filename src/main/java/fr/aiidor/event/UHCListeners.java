@@ -53,14 +53,13 @@ public class UHCListeners implements Listener{
 	
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
-		
 		if (e.getItem() != null) {
 			ItemStack clicked = e.getItem();
 			Player player = e.getPlayer();
-			
+
 				if (clicked.getType() == Material.ENDER_CHEST) {
 					if (clicked.hasItemMeta()) {
-						if (clicked.getItemMeta().getDisplayName().equalsIgnoreCase("§d§lConfiguration")) {
+						if (clicked.getItemMeta().getDisplayName().startsWith("§d§lConfiguration")) {
 							e.setCancelled(true);
 							e.getPlayer().updateInventory();
 							main.configInvBuilder(e.getPlayer());

@@ -169,7 +169,7 @@ public class Joueur {
 			Power = 1;
 		}
 		
-		if (role == LGRoles.Sorcière || role == LGRoles.IPL) {
+		if (role == LGRoles.Sorciere || role == LGRoles.IPL) {
 			Power = 1;
 		}
 	}

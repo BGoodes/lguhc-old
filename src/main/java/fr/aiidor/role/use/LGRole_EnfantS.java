@@ -8,100 +8,100 @@ import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGRoles;
 
 public class LGRole_EnfantS {
-	
+
 	private LGUHC main;
 	public LGRole_EnfantS(LGUHC main) {
 		this.main = main;
 	}
-	
+
 	public void canChoose() {
-		
+
 		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-			
+
 			@Override
 			public void run() {
 				cannotChoose();
 			}
 		}, 6000);
-		
+
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.EnfantS) {
 				if (!j.isDead()) {
 					j.setPower(1);
-					
+
 					if (j.isConnected()) {
-						j.getPlayer().sendMessage(main.gameTag + "§bVous avez 5 minutes pour choisir votre modèle avec la commande §l/lg choose <pseudo> §b!");
+						j.getPlayer().sendMessage(main.gameTag + "Â§bVous avez 5 minutes pour choisir votre modÃ¨le avec la commande Â§l/lg choose <pseudo> Â§b!");
 					}
 				}
 			}
 		}
 	}
-	
-	
+
+
 	private void cannotChoose() {
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.EnfantS) {
 				if (!j.isDead()) {
 					if (j.getPower() > 0) {
-						
+
 						j.setPower(0);
-						
+
 						if (j.isConnected()) {
-							j.getPlayer().sendMessage(main.gameTag + "§cVous avez attendu plus de 5 min, vous pourrez donc plus choisir votre modèle et resterez donc villageois !");
+							j.getPlayer().sendMessage(main.gameTag + "Â§cVous avez attendu plus de 5 min, vous pourrez donc plus choisir votre modÃ¨le et resterez donc villageois !");
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	public void canChoose(Joueur j, String targetname) {
-		
+
 		Player p = j.getPlayer();
-		
+
 		if (j.getRole() != LGRoles.EnfantS) {
-			p.sendMessage(main.gameTag + "§cErreur, vous devez être §oEnfant Sauvage §cpour effectuer cette commande !");
+			p.sendMessage(main.gameTag + "Â§cErreur, vous devez Ãªtre Â§oEnfant Sauvage Â§cpour effectuer cette commande !");
 			return;
 		}
-		
+
 		if (j.getPower() < 1 ) {
-			p.sendMessage(main.gameTag + "§cVous avez déjà choisit votre modèle ou avez attendu trop longtemps (5min) !");
+			p.sendMessage(main.gameTag + "Â§cVous avez dÃ©jÃ  choisit votre modÃ¨le ou avez attendu trop longtemps (5min) !");
 			return;
 		}
-		
+
 		if (targetname.equalsIgnoreCase(j.getName())) {
-			p.sendMessage(main.gameTag + "§cVous ne pouvez pas vous choisir comme modèle !");
+			p.sendMessage(main.gameTag + "Â§cVous ne pouvez pas vous choisir comme modÃ¨le !");
 			return;
 		}
-		
+
 		if (Bukkit.getPlayer(targetname) == null) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur "+ targetname + " n'est pas connecté ou n'existe pas !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur "+ targetname + " n'est pas connectÃ© ou n'existe pas !");
 			return;
 		}
-		
+
 		Player Target = Bukkit.getPlayer(targetname);
-		
+
 		if (main.getPlayer(Target.getUniqueId()) == null) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur visé doit être dans la partie !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur visÃ© doit Ãªtre dans la partie !");
 			return;
 		}
-		
+
 		Joueur TargetJ = main.getPlayer(Target.getUniqueId());
-		
+
 		if (TargetJ.isDead()) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur visé doit être en vie !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur visÃ© doit Ãªtre en vie !");
 			return;
 		}
-		
+
 		choose(j, TargetJ);
 	}
-	
+
 	private void choose(Joueur j, Joueur t) {
-		
+
 		Player p = j.getPlayer();
-		
+
 		j.setPower(0);
-		p.sendMessage("§aVous avez bien choisit §6" + t.getName() + " §a comme modèle ! Si il vient à mourrir, vous passerez dans le camp des Loups-Garous !");
+		p.sendMessage("Â§aVous avez bien choisit Â§6" + t.getName() + " Â§a comme modÃ¨le ! Si il vient Ã  mourrir, vous passerez dans le camp des Loups-Garous !");
 		j.Model = t;
 	}
 }

@@ -1,6 +1,6 @@
 name: LOUP-GAROUS
 version: 0.3
-author: Aiidor
+author: B_Goodes
 main: fr.aiidor.LGUHC
 commands:
   config:

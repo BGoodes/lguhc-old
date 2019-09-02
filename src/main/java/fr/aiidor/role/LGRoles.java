@@ -4,8 +4,8 @@ public enum LGRoles {
 	
 	LG("Loup-garou", LGCamps.LoupGarou, 1),
 	VPL("Vilain petit Loup", LGCamps.LoupGarou, 0),
-	IPL("Infect Père des Loups", LGCamps.LoupGarou, 0),
-	LGA("Loup-garou Amnésique", LGCamps.Village, 0),
+	IPL("Infect PÃ¨re des Loups", LGCamps.LoupGarou, 0),
+	LGA("Loup-garou AmnÃ©sique", LGCamps.Village, 0),
 	
 	Voyante("Voyante", LGCamps.Village, 0),
 	VoyanteB("Voyante (Bavarde)", LGCamps.Village, 0),
@@ -14,7 +14,7 @@ public enum LGRoles {
 	MontreurDours("Montreur d'ours", LGCamps.Village, 0),
 	PetiteFille("Petite Fille", LGCamps.Village, 0),
 	Ancien("Ancien", LGCamps.Village, 0),
-	Sorcière("Sorcière", LGCamps.Village, 0),
+	Sorciere("SorciÃ¨re", LGCamps.Village, 0),
 	Salvateur("Salvateur", LGCamps.Village, 0),
 	Ange("Ange", LGCamps.Village, 0),
 	Citoyen("Citoyen", LGCamps.Village, 0),

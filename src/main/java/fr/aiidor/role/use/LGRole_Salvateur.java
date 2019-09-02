@@ -10,110 +10,110 @@ import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGRoles;
 
 public class LGRole_Salvateur {
-	
+
 	private LGUHC main;
 	public LGRole_Salvateur(LGUHC main) {
 		this.main = main;
 	}
-	
+
 	public void canProtect() {
-		
+
 		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-			
+
 			@Override
 			public void run() {
 				cannotProtect();
 			}
 		}, 2400);
-		
+
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Salvateur) {
 				if (!j.isDead()) {
 					j.setPower(1);
-					
+
 					if (j.isConnected()) {
-						j.getPlayer().sendMessage(main.gameTag + "§bVous avez 2 minutes pour protéger un joueur grâce à la commande §l/lg protect <Pseudo> §b!");
+						j.getPlayer().sendMessage(main.gameTag + "Â§bVous avez 2 minutes pour protÃ©ger un joueur grÃ¢ce Ã  la commande Â§l/lg protect <Pseudo> Â§b!");
 					}
 				}
 			}
 		}
 	}
-	
-	
+
+
 	private void cannotProtect() {
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Salvateur) {
 				if (!j.isDead()) {
 					if (j.getPower() > 0) {
-						
+
 						j.setPower(0);
 						j.whoProtect = null;
-						
+
 						if (j.isConnected()) {
-							j.getPlayer().sendMessage(main.gameTag + "§cVous avez attendu plus de 2 min, vous pourrez donc utiliser votre pouvoir qu'à partir du prochaine épisode !");
+							j.getPlayer().sendMessage(main.gameTag + "Â§cVous avez attendu plus de 2 min, vous pourrez donc utiliser votre pouvoir qu'Ã  partir du prochaine Ã©pisode !");
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	public void canProtect(Joueur j, String targetname) {
-		
+
 		Player p = j.getPlayer();
-		
+
 		if (j.getRole() != LGRoles.Salvateur) {
-			p.sendMessage(main.gameTag + "§cErreur, vous devez être §oSalvateur §cpour effectuer cette commande !");
+			p.sendMessage(main.gameTag + "Â§cErreur, vous devez Ãªtre Â§oSalvateur Â§cpour effectuer cette commande !");
 			return;
 		}
-		
+
 		if (j.getPower() < 1 ) {
-			p.sendMessage(main.gameTag + "§cVous avez déjà utilisé votre pouvoir ou avez attendu trop longtemps (2min) ! Attendez le prochaine épisode avant de pouvoir le réutiliser !");
+			p.sendMessage(main.gameTag + "Â§cVous avez dÃ©jÃ  utilisÃ© votre pouvoir ou avez attendu trop longtemps (2min) ! Attendez le prochaine Ã©pisode avant de pouvoir le rÃ©utiliser !");
 			return;
 		}
-		
+
 		if (Bukkit.getPlayer(targetname) == null) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur "+ targetname + " n'est pas connecté ou n'existe pas !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur "+ targetname + " n'est pas connectÃ© ou n'existe pas !");
 			return;
 		}
-		
+
 		Player Target = Bukkit.getPlayer(targetname);
-		
+
 		if (main.getPlayer(Target.getUniqueId()) == null) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur visé doit être dans la partie !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur visÃ© doit Ãªtre dans la partie !");
 			return;
 		}
-		
+
 		Joueur TargetJ = main.getPlayer(Target.getUniqueId());
-			
+
 		if (TargetJ.isDead()) {
-			p.sendMessage(main.gameTag + "§cErreur, le joueur visé doit être en vie !");
+			p.sendMessage(main.gameTag + "Â§cErreur, le joueur visÃ© doit Ãªtre en vie !");
 			return;
 		}
-		
+
 		if (j.whoProtect != null) {
 			if (TargetJ.equals(j.whoProtect)) {
-				p.sendMessage(main.gameTag + "§cVous ne pouvez pas la même personne 2 épisodes de suite !");
+				p.sendMessage(main.gameTag + "Â§cVous ne pouvez pas la mÃªme personne 2 Ã©pisodes de suite !");
 				return;
 			}
 		}
 
-		
+
 		protect(j, TargetJ);
 	}
-	
+
 	private void protect(Joueur j, Joueur t) {
-		
+
 		Player p = j.getPlayer();
-		
-		p.sendMessage(main.gameTag + "§aVous avez bien donné la salvation à " + t.getName());
+
+		p.sendMessage(main.gameTag + "Â§aVous avez bien donnÃ© la salvation Ã  " + t.getName());
 		p.sendMessage(" ");
 		j.setPower(0);
 		j.whoProtect = t;
-		
+
 		t.salvation = true;
-		t.getPlayer().sendMessage(main.gameTag + "§aLe salvateur à décidé de vous protèger ! "
-				+ "Vous ne prendrez plus de dégâts de chute et obtenez l'effet de résistance I pendant un épisode !"); 
+		t.getPlayer().sendMessage(main.gameTag + "Â§aLe salvateur Ã  dÃ©cidÃ© de vous protÃ¨ger ! "
+				+ "Vous ne prendrez plus de dÃ©gÃ¢ts de chute et obtenez l'effet de rÃ©sistance I pendant un Ã©pisode !");
 		p.sendMessage(" ");
 		new Sounds(t.getPlayer()).PlaySound(Sound.DRINK);
 	}
