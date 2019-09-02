@@ -1,24 +1,23 @@
 package fr.aiidor.scoreboard;
 
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import net.minecraft.server.v1_12_R1.IScoreboardCriteria;
-import net.minecraft.server.v1_12_R1.Packet;
-import net.minecraft.server.v1_12_R1.PacketPlayOutScoreboardDisplayObjective;
-import net.minecraft.server.v1_12_R1.PacketPlayOutScoreboardObjective;
-import net.minecraft.server.v1_12_R1.PacketPlayOutScoreboardScore;
-import net.minecraft.server.v1_12_R1.PacketPlayOutScoreboardTeam;
-import net.minecraft.server.v1_12_R1.PlayerConnection;
-
+import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
+import net.minecraft.server.v1_8_R3.Packet;
+import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardDisplayObjective;
+import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardObjective;
+import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardScore;
+import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardTeam;
+import net.minecraft.server.v1_8_R3.PlayerConnection;
 
 /**
  * @author zyuiop
- * Updated by MrZalTy
  */
 public class ScoreboardSign {
 	private boolean created = false;
@@ -140,7 +139,6 @@ public class ScoreboardSign {
 		return ((CraftPlayer) player).getHandle().playerConnection;
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void sendLine(int line) {
 		if (line > 14)
 			return;
@@ -151,7 +149,7 @@ public class ScoreboardSign {
 
 		int score = (15 - line);
 		VirtualTeam val = getOrCreateTeam(line);
-		for (Packet packet : val.sendLine())
+		for (@SuppressWarnings("rawtypes") Packet packet : val.sendLine())
 			getPlayer().sendPacket(packet);
 		getPlayer().sendPacket(sendScore(val.getCurrentPlayer(), score));
 		val.reset();
@@ -259,13 +257,13 @@ public class ScoreboardSign {
 		private PacketPlayOutScoreboardTeam createPacket(int mode) {
 			PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
 			setField(packet, "a", name);
+			setField(packet, "h", mode);
 			setField(packet, "b", "");
 			setField(packet, "c", prefix);
 			setField(packet, "d", suffix);
 			setField(packet, "i", 0);
 			setField(packet, "e", "always");
-			setField(packet, "g", 0);
-			setField(packet, "i", mode);
+			setField(packet, "f", 0);
 
 			return packet;
 		}
@@ -281,7 +279,7 @@ public class ScoreboardSign {
 		public PacketPlayOutScoreboardTeam removeTeam() {
 			PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
 			setField(packet, "a", name);
-			setField(packet, "i", 1);
+			setField(packet, "h", 1);
 			first = true;
 			return packet;
 		}
@@ -329,10 +327,10 @@ public class ScoreboardSign {
 		public PacketPlayOutScoreboardTeam addOrRemovePlayer(int mode, String playerName) {
 			PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
 			setField(packet, "a", name);
-			setField(packet, "i", mode);
+			setField(packet, "h", mode);
 
 			try {
-				Field f = packet.getClass().getDeclaredField("h");
+				Field f = packet.getClass().getDeclaredField("g");
 				f.setAccessible(true);
 				((List<String>) f.get(packet)).add(playerName);
 			} catch (NoSuchFieldException | IllegalAccessException e) {

@@ -1,32 +1,42 @@
 package fr.aiidor.commands;
 
-import java.util.UUID;
+import java.util.Arrays;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import fr.aiidor.LGUHC;
-import fr.aiidor.events.UHCListeners;
-import fr.aiidor.game.UHCGame;
-import fr.aiidor.roles.LGCamps;
-import fr.aiidor.roles.LGRoleManager;
-import fr.aiidor.roles.LGRoles;
-import fr.aiidor.roles.RoleDescription;
-import fr.aiidor.roles.use.LG;
-import fr.aiidor.roles.use.LGCupidon;
-import fr.aiidor.roles.use.LGEnfantS;
-import fr.aiidor.roles.use.LGRenard;
-import fr.aiidor.roles.use.LGSalvateur;
-import fr.aiidor.roles.use.LGSorciere;
-import fr.aiidor.roles.use.LGTrublion;
-import fr.aiidor.roles.use.LGVoyante;
-import fr.aiidor.utils.LGVote;
+import fr.aiidor.game.Joueur;
+import fr.aiidor.game.LGVote;
+import fr.aiidor.role.LGCamps;
+import fr.aiidor.role.LGDesc;
+import fr.aiidor.role.LGRoles;
+import fr.aiidor.role.use.LGRole_Chasseur;
+import fr.aiidor.role.use.LGRole_Citoyen;
+import fr.aiidor.role.use.LGRole_Cupidon;
+import fr.aiidor.role.use.LGRole_EnfantS;
+import fr.aiidor.role.use.LGRole_IPL;
+import fr.aiidor.role.use.LGRole_Renard;
+import fr.aiidor.role.use.LGRole_Salvateur;
+import fr.aiidor.role.use.LGRole_Soeur;
+import fr.aiidor.role.use.LGRole_Sorciere;
+import fr.aiidor.role.use.LGRole_Trublion;
+import fr.aiidor.role.use.LGRole_Voyante;
 
 public class CommandLg implements CommandExecutor {
-
+	
+	private LGUHC main;
+	public CommandLg(LGUHC main) {
+		this.main = main;
+	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		
@@ -38,472 +48,490 @@ public class CommandLg implements CommandExecutor {
 		
 		Player player = (Player) sender;
 		
-		
 		//RACINE == /HELP
 		if (args.length == 0) {
-			player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§3 Les commandes :");
-			player.sendMessage("§3- /lg role : §6Permet d'avoir des infos sur sont rôle ! (Commandes et description)");
-			player.sendMessage("§3- /lg info : §6Permet d'avoir des infos sur la partie en cours");
-			player.sendMessage("§3- /lg compo : §6Permet d'avoir des infos sur la composition de la partie");
-			player.sendMessage("§3- /lg rules : §6Permet d'avoir les règles de la partie");
-			player.sendMessage(" ");
+			player.sendMessage(main.gameTag + "§3 Les commandes :");
+			player.sendMessage("§9- /lg role : §6Permet d'avoir des infos sur son rôle !");
+			player.sendMessage("§9- /lg compo : §6Permet de voir la composition de la game !");
+			player.sendMessage("§9- /lg compo Chat : §6Permet de voir la composition de la game !");
+			player.sendMessage("§9- /lg report: §6Permet de report les bugs, les joueurs, ...");
 			
 			return true;
 		}
 		
-		if (args.length == 1) {
-			//LG ROLE -----------------------------------------------
-			if (args[0].equalsIgnoreCase("role")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) == null) {
-					
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Erreur, Vous devez avoir un rôle pour effectuer cette commande !");
-					return true;
-				}
-				//LOUP-GAROUS AMNESIQUE
-				if (LGRoles.getRole(player.getUniqueId()) == LGRoles.LGA && !LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§9 [Privé] Vous êtes §o" + "Simple Villageois" + ".");
-				}
-				
-				else {
-					//INFECT
-					if (LGRoleManager.Infect.contains(player.getUniqueId())) {
-						player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§9 [Privé] Vous êtes §o" + LGRoles.getRoleName(player.getUniqueId()) + " §4Infecté.");
-					}
-					
-					else if (LGRoles.getRole(player.getUniqueId()) == LGRoles.EnfantS && LGCamps.getCamp(player.getUniqueId()) == LGCamps.LOUPGAROUS) {
-						player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§9 [Privé] Vous êtes §o" + LGRoles.getRoleName(player.getUniqueId()) + " §4Transformé.");
-					}
-					else {
-						player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§9 [Privé] Vous êtes §o" + LGRoles.getRoleName(player.getUniqueId()) + ".");
-					}
-				}
-				player.sendMessage(RoleDescription.desc(player.getUniqueId()));
-				
-				LG.LGCompo(player);
-				player.sendMessage("");
-				return true;
-			}
-			//-----------------------------------------------
+		//COMMANDE ROLE
+		if (args[0].equalsIgnoreCase("role")) {
 			
-			if (args[0].equalsIgnoreCase("info")) {
-				
-				player.sendMessage("§2  --- Information ---");
-				
-				int min = UHCGame.timer/60;
-				int sec = UHCGame.timer%60;;
-				player.sendMessage("§cTimer : §6" + min + " §eMin§6 " + sec);
-				
-				player.sendMessage("§cJoueur : §6" + LGUHC.getInstance().PlayerInGame.size());
-				player.sendMessage("§cLimite de groupe : §6" + UHCGame.GroupLimit);
-				
-				return true;
-			}
-			//-----------------------------------------------
-			
-			if (args[0].equalsIgnoreCase("compo")) {
-				
-				player.sendMessage("§2  --- Composition ---");
-				
-				StringBuilder compo = new StringBuilder();
-				
-				for (UUID uuid : LGRoleManager.PlayerRole.keySet()) {
-					
-					if (LGUHC.getInstance().PlayerInGame.contains(uuid)) {
-						
-						compo.append("§6" + LGRoles.getRoleName(uuid) + "§6   ");
-					}
-					else {
-						compo.append("§c§m" + LGRoles.getRoleName(uuid) + "§c   ");
-					}
-				}
-				
-				player.sendMessage(compo.toString());
-				return true;
-			}
-			//-----------------------------------------------
-			
-			if (args[0].equalsIgnoreCase("rules")) {
-				
-				player.sendMessage("§2  --- Règles ---");
-				if (UHCListeners.DiamondLimit) {
-					player.sendMessage("§6Limite de diamant : §b" + UHCListeners.DiamondMax);
-				}
-				player.sendMessage("§6Limite de stuff : §b2 pièces diamant max §3(Armure)");
-				player.sendMessage("§6Limite d'enchant : §bP2 sur les armures §3(en diamants)§b, T4 pour les épées");
-				player.sendMessage("§6Enchants : §bFlame et Fire Aspect Interdit !");
-				player.sendMessage("§6Items : §cBouclier + Rod interdit en pvp !");
-				player.sendMessage("§cInterdit aux msg privés §3(Sauf pour des Questions aux admins)");
-				
-				player.sendMessage("§2  --- Scénario ---");
-				//RUN
-				if (LGUHC.getInstance().Run) {
-					player.sendMessage("§6Run : §aActivé ");
+			if (args.length == 1) {
+				if (main.getPlayer(player.getUniqueId()) == null) {
+					player.sendMessage(main.gameTag + "§cErreur, vous devez avoir un rôle pour effectuer cette commande !");
 				}
 				else {
-					player.sendMessage("§6Run : §cDésactivé ");
+					main.getPlayer(player.getUniqueId()).sendDesc();
+					
+					if (main.canSeeLgList()) {
+						if (main.getPlayer(player.getUniqueId()).isLg()) {
+							new LGDesc(main).sendLGList(player);
+						}
+					}
 				}
-				player.sendMessage("§6FastSmelting : §cDésactivé ! ");
 				return true;
 			}
 			
+			player.sendMessage(main.gameTag + "§cErreur, la commande est §e/lg role");
+			return true;
 		}
 		
+		//COMMANDE ROLE
+		if (args[0].equalsIgnoreCase("compo")) {
+			
+			if (!main.PlayersHasRole()) {
+				player.sendMessage(main.gameTag + "§cLes joueurs n'ont pas encore de rôles !");
+				return true;
+			}
+			
+			if (main.hidecompo && !main.Spectator.contains(player.getUniqueId())) {
+				player.sendMessage(main.gameTag + "§cLa composition est caché !");
+				return true;
+			}
+			
+			if (args.length == 1) {
+				
+				int slot = 0;
+					
+				Inventory inv = Bukkit.createInventory(null, 27, "§dComposition :");
+				for (LGRoles role : LGRoles.values()) {
+					if (main.compo.contains(role)) {
+							
+						inv.setItem(slot, getRoleIcon(role, main.getPlayerRolesOff(role).size()));
+						slot++;
+					}
+				}
+					
+				player.openInventory(inv);
+				return true;
+			}
+			
+			if (args.length == 2) {
+				if (args[1].equalsIgnoreCase("chat")) {
+					player.sendMessage(main.gameTag + "§d§lComposition : ");
+					for (LGRoles role : LGRoles.values()) {
+						if (main.compo.contains(role)) {
+							player.sendMessage(getMessage(role, main.getPlayerRolesOff(role).size()));
+						}
+					}
+					return true;
+				}
+			}
+			
+			player.sendMessage(main.gameTag + "§cErreur, la commande est §e/lg compo OU /lg compo chat OU /lg compo book");
+			return true;
+		}
 		
-		//CUPIDON -------------------------------------------
+		if (args[0].equalsIgnoreCase("report")) {	
+			if (args.length == 1) {
+				player.sendMessage("§6La commande : /lg report <message>");
+				return true;
+			}
+			StringBuilder bs = new StringBuilder();
+			int size = 0;
+			for (String s : args) {
+				if (size > 0) {
+					bs.append(s + " ");
+				}
+				size ++;
+			}
+			
+			player.sendMessage("§aVotre Report à bien été enregistré !");
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				if (p.getUniqueId().equals(main.host) || main.orgas.contains(p.getUniqueId())) {
+					p.sendMessage("§3(Staff : §6Report§3) §8Le joueur §c" + player.getName() + " §8a report :");
+					p.sendMessage("§7" + bs.toString());
+				}
+			}
+			
+			return true;
+		}
+		
+		//VOTE
+		if (args[0].equalsIgnoreCase("vote")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg vote <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg vote <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGVote(main).vote(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		//FLAIRER
+		if (args[0].equalsIgnoreCase("flairer")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg flairer <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			Joueur j = main.getPlayer(player.getUniqueId());
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg flairer <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				String targetname = args[1];
+				new LGRole_Renard(main, j).canFlaire(targetname);
+				return true;
+			}
+		}
+		
+		//SEE
+		if (args[0].equalsIgnoreCase("see")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg see <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg see <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_Voyante(main).canSee(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		//REA
+		if (args[0].equalsIgnoreCase("revive")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg revive <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg revive <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_Sorciere(main).canRea(args[1], main.getPlayer(player.getUniqueId()));
+				return true;
+			}
+		}
+		
+		//INFECT
+		if (args[0].equalsIgnoreCase("infect")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg infect <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg infect <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_IPL(main).canRea(args[1], main.getPlayer(player.getUniqueId()));
+				return true;
+			}
+		}
+		
+		if (args[0].equalsIgnoreCase("pan")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg pan <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (main.getPlayer(player.getUniqueId()) == null) {
+				player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
+				return true;
+			}
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg pan <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_Chasseur(main).canPan(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		//ENFANTS
+		if (args[0].equalsIgnoreCase("choose")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg choose <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg choose <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_EnfantS(main).canChoose(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		//CUPIDON
 		if (args[0].equalsIgnoreCase("love")) {
 			
-			if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Cupidon) {
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg love <Joueur1> <Joueur2>");
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oCupidon §cpour effectuer cette commande !");
 				return true;
 			}
 			
+			if (!canCommand(player)) return true;
 			
-			if (args.length < 3) {
+			if (args.length != 3) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg love <Joueur1> <Joueur2>");
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez choisir 2 personnes !");
-			}	
-			
-			
-			if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
 				return true;
 			}
 			
-			String targetName1 = args[1];
-			String targetName2 = args[2];
-			
-			if (targetName1 == targetName2) {
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas mettre 2 fois la même personne dans le couple !");
-				
+			if (args.length == 3) {
+				new LGRole_Cupidon(main).canChoose(main.getPlayer(player.getUniqueId()), args[1], args[2]);
 				return true;
 			}
-			if (Bukkit.getPlayer(targetName1) == null || Bukkit.getPlayer(targetName2) == null) {
-				
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, l'un des joueurs n'est pas en partie §fou §cn'existe pas !");
-				return true;
-			}
-			
-			Player Target1 = Bukkit.getPlayer(targetName1);
-			Player Target2 = Bukkit.getPlayer(targetName1);
-			
-			LGCupidon.choose(Target1, Target2);
-			
-			player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§d Vous avez bien mis §6" + targetName1 + "§d et §6" + targetName2 + "§d en couple ! Si l'un meurt, l'autre ne pourrais supporter "
-					+ "cette souffrance et se suiciderais immédiatement !");
-			player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§2 Vous pouvez gagnez avec eux ou avec le village !");
-			
-			return true;
 		}
 		
-		//TRUBLION -------------------------------------------
+		//TRUBLION
 		if (args[0].equalsIgnoreCase("switch")) {
 			
-			if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Trublion) {
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg switch <Joueur1> <Joueur2>");
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oTrublion §cpour effectuer cette commande !");
 				return true;
 			}
 			
+			if (!canCommand(player)) return true;
 			
-			if (args.length < 3) {
+			if (args.length != 3) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg switch <Joueur1> <Joueur2>");
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez choisir 2 personnes !");
-			}	
-			
-			
-			if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité ou avez attendu trop longtemps !");
 				return true;
 			}
 			
-			String targetName1 = args[1];
-			String targetName2 = args[2];
-			
-			
-			if (targetName1 == player.getName() || targetName2 == player.getName()) {
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas vous choisir vous même !");
+			if (args.length == 3) {
+				new LGRole_Trublion(main).canChoose(main.getPlayer(player.getUniqueId()), args[1], args[2]);
 				return true;
 			}
-			if (targetName1 == targetName2) {
+		}
+		
+		//CITOYEN
+		if (args[0].equalsIgnoreCase("SeeVote")) {
+			
+			if (args.length != 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg SeeVote");
 				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cVous ne pouvez pas choisir 2 fois la même personne !");
-				return true;
-			}
-			if (Bukkit.getPlayer(targetName1) == null || Bukkit.getPlayer(targetName2) == null) {
-				
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, l'un des joueurs n'est pas en partie §fou §cn'existe pas !");
 				return true;
 			}
 			
-			Player Target1 = Bukkit.getPlayer(targetName1);
-			Player Target2 = Bukkit.getPlayer(targetName1);
+			if (!canCommand(player)) return true;
 			
-			LGTrublion.Switch(Target1, Target2);
+			if (args.length == 1) {
+				new LGRole_Citoyen(main).canSee(main.getPlayer(player.getUniqueId()));
+				return true;
+			}
+		}
+		
+		if (args[0].equalsIgnoreCase("SeeKiller")) {
 			
-			player.sendMessage(" ");
-			player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§3 Vous avez bien mis §6" + targetName1 + "§3 et §6" + targetName2 +  "§3 !");
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg SeeKiller role|name");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length == 2) {
+				if (args[1].equalsIgnoreCase("name")) {
+					new LGRole_Soeur(main).canSee(main.getPlayer(player.getUniqueId()), true);
+					return true;
+				}
+				if (args[1].equalsIgnoreCase("role")) {
+					new LGRole_Soeur(main).canSee(main.getPlayer(player.getUniqueId()), false);
+					return true;
+				}
+				player.sendMessage(main.gameTag + "§cErruer, La commande : /lg SeeKiller role|name");
+				player.sendMessage(" ");
+			}
+		}
+		
+		if (args[0].equalsIgnoreCase("protect")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg protect <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg protect <Joueur>");
+				player.sendMessage(" ");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_Salvateur(main).canProtect(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		
+		player.sendMessage(main.gameTag + "§cErreur, Les commandes :");
+		player.sendMessage("§9- /lg role : §6Permet d'avoir des infos sur son rôle !");
+		player.sendMessage("§9- /lg compo : §6Permet de voir la composition de la game !");
+		player.sendMessage("§9- /lg compo Chat : §6Permet de voir la composition de la game !");
+		player.sendMessage("§9- /lg report: §6Permet de report les bugs, les joueurs, ...");
+		player.sendMessage(" ");
+		return false;
+	}
+	
+	private boolean canCommand(Player player) {
+		
+		if (main.getPlayer(player.getUniqueId()) == null) {
+			player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
 			return true;
+		} else {
+			
+			Joueur j = main.getPlayer(player.getUniqueId());
+			if (j.isDead() || j.isDying()) {
+				player.sendMessage(main.gameTag + "§cVous devez être en vie pour effectuer cette commande !");
+				return true;
+			}
+			
 		}
-		
-		
-		
-		
-		
-		
-		
-		if (args.length == 2) {
-			if (!LGUHC.getInstance().PlayerInGame.contains(player.getUniqueId())) { 
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être en partie pour effectuer cette commande !");
-				return true;
-				}
-			
-			//VOTE----------------------------------------------------------------------
-			if (args[0].equalsIgnoreCase("vote")) {
-				
-				if (!LGVote.canVote) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous ne pouvez pas effectuer cette commandes actuellement !");
-					return true;
-				}
-				
-				if (LGVote.aVote.contains(player.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déjà voté ! Attendez le prochaine épisode !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				
-				if (!LGUHC.getInstance().PlayerInGame.contains(Target.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §cest mort ou n'est pas dans la partie !");
-					return true;
-				}
-				
-				LGVote.AddVote(Target.getUniqueId());
-				
-				LGVote.aVote.add(player.getUniqueId());
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §aVous avez bien voté pour §f" + targetName);
-			}
-			
-			
-			//RENARD ---------------------------------------
-			if (args[0].equalsIgnoreCase("flairer")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Renard) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oRenard §cpour effectuer cette commande !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				
-				if (!LGUHC.getInstance().PlayerInGame.contains(Target.getUniqueId())) {
-					
-				}
-				LGRenard.Renard(player, Target);
-			}
-			
-			//VOYANTE -----------------------------------------
-			if (args[0].equalsIgnoreCase("see")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Voyante) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oVoyante §cour effectuer cette commande !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				LGVoyante.SeeRole(player, Target);
-			}
-			
-			//INFECT PERE DES LOUPS ------------------------------
-			if (args[0].equalsIgnoreCase("infect")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.LgInfect) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oInfect Père des loups §cpour effectuer cette commande !");
-					return true;
-				}
-				
-				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				
-				if (LGRoleManager.mortD.containsKey(Target.getUniqueId())) {
-					if (LGRoleManager.mortD.get(Target.getUniqueId()) == LGCamps.LOUPGAROUS) {
-						
-						LGRoleManager.Power.remove(player.getUniqueId());
-						LG.Infect(Target.getUniqueId());
-						return true;
-					}
-				}
-				
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Le joueur §e" + targetName + " §cne peut pas être infecté !");
-				return true;
-			}
-			//SORCIERE ------------------------------
-			if (args[0].equalsIgnoreCase("revive")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Sorciere) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oSorcière §cpour effectuer cette commande !");
-					return true;
-				}
-				
-				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				
-				if (LGRoleManager.mortD.containsKey(Target.getUniqueId())) {
-					if (LGRoleManager.mortD.get(Target.getUniqueId()) == LGCamps.VILLAGEOIS) {
-						
-						LGRoleManager.Power.remove(player.getUniqueId());
-						LGSorciere.Revive(Target.getUniqueId());
-						return true;
-					}
-				}
-				
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Le joueur §e" + targetName + " §cne peut pas être réanimé !");
-				return true;
-			}
-			
-			//SALVATEUR ------------------------------------------------
-			if (args[0].equalsIgnoreCase("protect")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.Salvateur) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oSalvateur §cpour effectuer cette commande !");
-					return true;
-				}
-				
-				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déja utilisé votre capacité ou attendu plus de 2 minutes dans cette épisode ! Attendez le prochain !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				
-				if (LGSalvateur.Aprotect.contains(Target.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous ne pouvez pas protéger la même personne deux épisodes d'affilé !");
-					return true;
-				}
-				
-				LGSalvateur.choose(Target.getUniqueId());
-				
-				LGRoleManager.Power.remove(player.getUniqueId());
-				player.sendMessage(" ");
-				player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §aVous avez bien protégé " + targetName);
-				return true;
-			}
-			
-			if (args[0].equalsIgnoreCase("choose")) {
-				
-				if (LGRoles.getRole(player.getUniqueId()) != LGRoles.EnfantS) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous devez être §oEnfant Sauvage §cpour effectuer cette commande !");
-					return true;
-				}
-				
-				if (!LGRoleManager.Power.containsKey(player.getUniqueId())) {
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous avez déjà utilisé votre capacité ou avez attendu plus de 5 min !");
-					return true;
-				}
-				
-				String targetName = args[1];
-				if (Bukkit.getPlayer(targetName) == null) {
-					
-					player.sendMessage(" ");
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§cErreur, le joueur §e" + targetName + " §c n'est pas connecté §fou §cn'existe pas !");
-					return true;
-				}
-				
-				Player Target = Bukkit.getPlayer(targetName);
-				if (Target == player) {
-					player.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§c Vous ne pouvez pas vous choisir comme modèle !");
-					return true;
-				}
-				
-				LGRoleManager.Power.remove(player.getUniqueId());
-				LGEnfantS.choose(player, Target);
-				
-				return true;
-			}
-		}
-		
 		
 		return true;
+	}
+	
+	private ItemStack getRoleIcon(LGRoles role, int number) {
+		
+		ItemStack it = new ItemStack(Material.SKULL_ITEM, 1, (byte) 4);
+		
+		if (number == 0) it = new ItemStack(Material.SKULL_ITEM, 1, (byte) 0);
+		else it = new ItemStack(Material.SKULL_ITEM, number, (byte) 3);
+		
+		SkullMeta itM = (SkullMeta) it.getItemMeta();
+		StringBuilder name = new StringBuilder();
+		
+		if (role.camp == LGCamps.Village) {
+			name.append("§a");
+			if (number != 0) itM.setOwner("Villager");
+		}
+		if (role.camp == LGCamps.LoupGarou || role == LGRoles.LGA) {
+			name.append("§c");
+			if (number != 0) itM.setOwner("Verzide");
+		}
+		
+		if (role.camp == LGCamps.LGB) {
+			name.append("§4");
+			if (number != 0) itM.setOwner("SomeWerewolf");
+		}
+		if (role.camp == LGCamps.Assassin) {
+			name.append("§6");
+			if (number != 0) itM.setOwner("julagamer2007");
+		}
+		if (role.camp == LGCamps.Voleur) {
+			name.append("§b");
+			if (number != 0) itM.setOwner("Madben");
+		}
+		
+		
+		if (number == 0) {
+			name.append("§m");
+			itM.setLore(Arrays.asList("§c§l[MORT]"));
+		}
+		else itM.setLore(Arrays.asList("§6Nombre : §e" + number));
+		
+		name.append(role.name);
+		itM.setDisplayName(name.toString());
+		
+		
+		it.setItemMeta(itM);
+		return it;
+	}
+	
+	private String getMessage(LGRoles role, int number) {
+		
+		StringBuilder msg = new StringBuilder();
+		
+		if (role.camp == LGCamps.Village) msg.append("§a");
+		if (role.camp == LGCamps.LoupGarou) msg.append("§c");
+		if (role.camp == LGCamps.LGB) msg.append("§4");
+		if (role.camp == LGCamps.Assassin) msg.append("§6");
+		if (role.camp == LGCamps.Voleur) msg.append("§b");
+		if (role == LGRoles.LGA) msg.append("§c");
+		
+		if (number == 0) msg.append("§m");
+		msg.append(role.name);
+		
+		if (number != 0) msg.append(" §f: " + number);
+		
+		return msg.toString();
+	}
+	
+	
+	public ItemStack newBook() {
+		
+	  BookMeta meta = (BookMeta) Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+	  meta.setTitle("§dComposition");
+	  meta.setAuthor(main.gameTag);
+	   
+	  ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+	  book.setItemMeta(meta);
+	  return book;
 	}
 
 }

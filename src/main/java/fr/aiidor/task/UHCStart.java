@@ -1,161 +1,188 @@
 package fr.aiidor.task;
 
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.aiidor.LGUHC;
-import fr.aiidor.effects.Sounds;
+import fr.aiidor.effect.Sounds;
+import fr.aiidor.effect.Titles;
 import fr.aiidor.game.UHCGame;
 import fr.aiidor.game.UHCState;
-import fr.aiidor.utils.UHCTeleport;
+import fr.aiidor.scoreboard.ScoreboardSign;
 
-public class UHCStart extends BukkitRunnable{
-
-	public static int timer = 10;
+public class UHCStart extends BukkitRunnable {
 	
 	private LGUHC main;
-	public boolean pause = false;
+	private Integer Timer = 10;
 	
 	public UHCStart(LGUHC main) {
 		this.main = main;
 	}
-
-
+	
+	
 	@Override
 	public void run() {
 		
-		if (timer == 120) {
-			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §3Début de la partie dans §62 minutes §3!");
-			
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
-				
-				new Sounds(pl).PlaySound(Sound.ENTITY_ARROW_HIT_PLAYER);
-			}
-		}
-		
-		
-		//TIMER --
-		if (!pause) {
-			timer --;
-		}
-		
-		//PAS ASSEZ DE JOUEURS
-		if (LGUHC.getInstance().PlayerInGame.size() < LGUHC.getInstance().PlayerMin) {
-			
+		if (main.cancelStart) {
+			main.cancelStart = false;
 			cancel();
+			Bukkit.broadcastMessage(main.gameTag + "Â§cAnnulation de la partie");
 			
-			timer = 120;
+			main.setState(UHCState.WAITING);
 			
-			xpReset();
-			UHCState.setState(UHCState.WAIT);
-			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §cAnnulation de la partie : §6Pas assez de joueurs !");	
-			
-		}		
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
-				
-				pl.setLevel(timer);
-			}
-			
-			
-		
-		if (timer == 60) {
-			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §3Début de la partie dans §61 minute §3!");
-			
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
-				
-				new Sounds(pl).PlaySound(Sound.ENTITY_ARROW_HIT_PLAYER);
-			}
+		    for (Entry<Player, ScoreboardSign> sign : main.boards.entrySet()) {
+		    	sign.getValue().setLine(1, "Â§ePartie en Attente !");
+		     }
+		    
+			return;
 		}
 		
-		if (timer == 45 || timer == 30 || timer == 20 || timer == 15) {
-			
-			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §3Début de la partie  dans §6" + timer + " §3s");
-			
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
-				
-				new Sounds(pl).PlaySound(Sound.ENTITY_ARROW_HIT_PLAYER);
+		if (Timer == 60) {
+			Bukkit.broadcastMessage(main.gameTag + "Â§9DÃ©but de la partie dans Â§61 minute Â§9!");
+			for (Player pl : Bukkit.getOnlinePlayers()) {
+				new Sounds(pl).PlaySound(Sound.SHOOT_ARROW);
 			}
+			
 		}
 		
-		if (timer <= 10) {
-			Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §3Début de la partie  dans §6" + timer + " §3s");
+		if (Timer == 45 || Timer == 30 || Timer == 20 || Timer == 15) {
 			
-			
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
-				
-				new Sounds(pl).PlaySound(Sound.BLOCK_NOTE_PLING);
+			Bukkit.broadcastMessage(main.gameTag + "Â§9DÃ©but de la partie  dans Â§6" + Timer + " Â§9s");
+			for (Player pl : Bukkit.getOnlinePlayers()) {
+				new Sounds(pl).PlaySound(Sound.SHOOT_ARROW);
 			}
+			
 		}
 		
-		
-		//START
-		if (timer == 0) {
+		if (Timer <= 10) {
+			Bukkit.broadcastMessage(main.gameTag + "Â§9DÃ©but de la partie  dans Â§6" + Timer + " Â§9s");
+			for (Player pl : Bukkit.getOnlinePlayers()) {
+				new Sounds(pl).PlaySound(Sound.NOTE_PLING);
+			}
 			
+		}
+		
+		if (Timer == 0) {
 			cancel();
 			Start();
-			
-			if (LGUHC.getInstance().Run == false) {
-				UHCGame start = new UHCGame(main);
-				start.runTaskTimer(main, 0, 20);
-			}
-			else {
-				UHCGame start = new UHCGame(main);
-				start.runTaskTimer(main, 0, 20);  //A MODIFIER ==> 20 > 10
-			}
-
+			return;
 		}
+		
+	    for (Entry<Player, ScoreboardSign> sign : main.boards.entrySet()) {
+	    	sign.getValue().setLine(1, "Â§6Lancement : Â§e" + Timer + "s");
+	     }
+	    
+		Timer --;
+		
+		main.world.setTime(23500);
 	}
 	
 	private void Start() {
 		
-		Bukkit.broadcastMessage("§b§l[§6§lUHC§b§l] §3Début de la partie !");
-		xpReset();
+		Bukkit.broadcastMessage(main.gameTag + "Â§6DÃ©but de la partie !");
+		Bukkit.broadcastMessage(" ");
+		main.setState(UHCState.PREGAME);
 		
-		for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-			Player pl = Bukkit.getPlayer(uuid);
+		main.wb.setSize(main.Map * 2);
+		
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			main.reset(pl);
 			
-			pl.setGameMode(GameMode.SURVIVAL);
-			
-			UHCTeleport.tpRandom(pl);;
-		}
-		
-		UHCState.setState(UHCState.PREGAME);
-		Bukkit.getWorld("world").setTime(23500);
-		
-		//VERSION RUN
-		if (LGUHC.getInstance().Run) {
-			for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-				Player pl = Bukkit.getPlayer(uuid);
+			if (main.Spectator.contains(pl.getUniqueId())) {
+				pl.setGameMode(GameMode.SPECTATOR);
 				
-				pl.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 6000, 1, false, false), true);
-				pl.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 6000, 0, false, false), true);
+				pl.sendMessage("Â§6===============Â§kÂ§60Â§6===============");
+				pl.sendMessage("Â§bVous Ãªtes spectateur : Â§9faites /spec Â§bpour accÃ©der aux commandes des spectateurs !");
+				pl.sendMessage("Â§6===============Â§kÂ§60Â§6===============");
+				pl.sendMessage(" ");
+				
+			} else {
+				pl.setGameMode(GameMode.SURVIVAL);
+				main.PlayerInGame.add(pl.getUniqueId());
+				
+				main.randomTp(pl, main.Map);
+				
+				if (main.startItem != null) {
+					int slot = 0;
+					for (ItemStack it : main.startItem) {
+						if (it != null) {
+							if (slot == 36) pl.getInventory().setHelmet(it);
+							else if (slot == 37) pl.getInventory().setChestplate(it);
+							else if (slot == 38) pl.getInventory().setLeggings(it);
+							else if (slot == 39) pl.getInventory().setBoots(it);
+							else pl.getInventory().setItem(slot, it);
+							
+							pl.updateInventory();
+						}
+						
+						slot ++;
+						
+						if (slot == 40) break;
+					}
+				}
+				
 			}
 		}
+		
+		for (UUID uuid : main.PlayerInGame) {
+			Player p = Bukkit.getPlayer(uuid);
+			
+			p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, true));
+			p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 254, true, true));
+			p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 254, false, false));
+			
+			if (main.fun && main.goneFishin) {
+				goneFishin(p);
+			}
+			
+			new Titles().sendTitle(p, "Â§2Lancement .", "Â§6", 60);
+		}
+		
+		
+	    for (Entry<Player, ScoreboardSign> sign : main.boards.entrySet()) {
+	    	sign.getValue().setLine(1, "Â§aInitialisation de la partie");
+	     }
+	    
+	    
+		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				UHCGame task = new UHCGame(main);
+				task.runTaskTimer(main, 0, 20);
+				for (UUID uuid : main.PlayerInGame) {
+					Player p = Bukkit.getPlayer(uuid);
+					for(PotionEffect effect:p.getActivePotionEffects()){p.removePotionEffect(effect.getType());}
+					
+					new Titles().sendTitle(p, "Â§cLG-UHC", "Â§6", 60);
+				}
+			}
+		}, 200);
 	}
 	
-	private void xpReset() {
+	private void goneFishin(Player p) {
+		ItemStack rod = new ItemStack(Material.FISHING_ROD);
+		ItemMeta rodM = rod.getItemMeta();
 		
-		if (LGUHC.getInstance().PlayerInGame.size() == 0) return;
+		rodM.addEnchant(Enchantment.LUCK, 250, true);
+		rodM.addEnchant(Enchantment.DURABILITY, 250, true);
+		rod.setItemMeta(rodM);
 		
-		
-		for (UUID uuid : LGUHC.getInstance().PlayerInGame) {
-			Player pl = Bukkit.getPlayer(uuid);
-			
-			pl.setLevel(0);
-			pl.setExp(0);
-		}
+		p.getInventory().addItem(rod);
+		p.getInventory().addItem(new ItemStack(Material.ANVIL, 20));
 	}
-
+	
 }
