@@ -20,7 +20,7 @@ public class LGDecription {
 
 		StringBuilder roleName = new StringBuilder();
 
-		if (j.getRole() == LGRoles.LGA && !j.isLg() && j.getPower() == 0) {
+		if (j.getRole() == LGRoles.LGA && j.getPower() == 0) {
 			roleName.append(gameTag + "§9[Privé] Vous êtes §o§9" + LGRoles.SV.name);
 		} else {
 			roleName.append(gameTag + "§9[Privé] Vous êtes §o§9" + j.getRole().name);
@@ -41,10 +41,23 @@ public class LGDecription {
 
 		StringBuilder desc = new StringBuilder();
 
-		if (camp == LGCamps.Village) desc.append("§9Votre objectif est d'éliminer les Loups-Garous. ");
-		if (camp == LGCamps.LoupGarou) desc.append("§9Votre objectif est de tuer tous les Villageois ! ");
+		if (camp == LGCamps.Village && role != LGRoles.LGA) desc.append("§9Votre objectif est d'éliminer les Loups-Garous. ");
+		if (camp == LGCamps.LoupGarou && role != LGRoles.LGA) desc.append("§9Votre objectif est de tuer tous les Villageois ! ");
 		if (camp == LGCamps.Voleur) desc.append("§9Vous n'appartenez à aucun camps ! Votre objectif est de récuperer un rôle un joueur en le tuant ! ");
 		if (camp == LGCamps.LGB || camp == LGCamps.Assassin ) desc.append("§9Votre objectif est de gagner seul ! ");
+
+		if (role == LGRoles.LGA) {
+
+			if (j.getRole() == LGRoles.LGA && j.getPower() == 0) {
+				desc.append("§9Votre objectif est d'éliminer les Loups-Garous. ");
+				desc.append("§9Mais vous ne disposez d'aucun pouvoir particulier !");
+				j.getPlayer().sendMessage(desc.toString());
+				return;
+
+			} else {
+				desc.append("§9Votre objectif est de tuer tous les Villageois ! ");
+			}
+		}
 
 		if (role == LGRoles.SV) {
 
@@ -123,9 +136,11 @@ public class LGDecription {
 
 		if (role == LGRoles.Ancien) {
 
-			String role_Use = "§9Pour cela, vous disposez d'un effet de Resistance I ainsi que d'un pouvoir : \n"
-					+ "- Si vous mourrez par un LG, vous survivrez (une fois) \n"
-					+ "- Si vous mourrez par un non-LG (ou PVE), vous perdrez 1/2 de votre vie et votre effet de resistance ";
+			String role_Use = "§9Pour cela, vous disposez d'un effet de Resistance I ainsi que d'un pouvoir :\n"
+					+ "- Si vous mourrez par un LG, vous survivrez (une fois)\n"
+					+ "- Si vous mourrez par un non-LG (ou PVE), vous mourrerrez directement !\n"
+					+ "- Si en plus votre meurtrier est du Village celui ci perdra sa vie de moitié ainsi que ses pouvoirs !";
+
 
 
 			desc.append(role_Use);
@@ -133,7 +148,7 @@ public class LGDecription {
 			return;
 		}
 
-		if (role == LGRoles.Sorciere) {
+		if (role == LGRoles.Sorcière) {
 
 			String role_Use = "§9Afin d'y arriver, vous avez le pouvoir de ressusciter un joueur mort dans la partie durant un lapse de temps définit."
 					+ "Pour se faire, vous pourrez utiliser la commande /lg Revive <Pseudo> ou cliquer sur un message message spécifique !";
@@ -232,7 +247,7 @@ public class LGDecription {
 				j.getPlayer().sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §dLe pseudo de votre soeur est §l" + soeur);
 
 			}
-			else j.getPlayer().sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §dMalheuresement, vous n'avez pas de Seour !");
+			else j.getPlayer().sendMessage("§b§l[§6§lLOUP-GAROUS§b§l] §dMalheuresement, vous n'avez pas de Soeur !");
 			return;
 		}
 
@@ -302,30 +317,6 @@ public class LGDecription {
 		}
 
 
-		if (role == LGRoles.Valentin) {
-
-			String role_Use = "§9Buvez de l'eau ! Dans 20-30 ans il y en aura plus !";
-
-			desc.append(role_Use);
-			j.getPlayer().sendMessage(desc.toString());
-			return;
-		}
-
-		if (role == LGRoles.LGA && !j.isLg()) {
-
-			if (j.getPower() == 1) {
-				desc.append("§9Toutes les 5 minutes, le nom d'un des Loups-Garous vous sera révélé !");
-				j.getPlayer().sendMessage(desc.toString());
-				j.getPlayer().sendMessage("§cCependant prenez garde car vos congénères ne connaitrons votre identité que dans 5 minutes !");
-				j.getPlayer().sendMessage(" ");
-			} else {
-				desc.append("§9Mais vous ne disposez d'aucun pouvoir particulier !");
-				j.getPlayer().sendMessage(desc.toString());
-			}
-			return;
-		}
-
-
 		//LG
 		if (j.isLg()) {
 			String kill = "§9A chaque kill vous gagnez l'effet speed I pendant 1 minute et deux coeurs d'absorption "
@@ -355,6 +346,10 @@ public class LGDecription {
 				desc.append(effet);
 				desc.append(kill);
 				if (j.getPower() == 1) {
+					desc.append("§cFaites attention cependant, vos aliés ne vous reconnaitrons que dans 5 min !");
+				}
+
+				if (j.getPower() == 2) {
 					desc.append("§9Toutes les 5 minutes, le nom d'un des Loups-Garous vous sera révélé !");
 				}
 			}

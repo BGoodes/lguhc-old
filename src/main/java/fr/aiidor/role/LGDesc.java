@@ -19,7 +19,9 @@ public class LGDesc {
 			if (main.getPlayer(p.getUniqueId()).getRole() == LGRoles.LGA) {
 				Joueur lga = main.getPlayer(p.getUniqueId());
 
-				if (lga.getPower() == 1) {
+				if (lga.getPower() == 0 || lga.getPower() == 1)  return;
+
+				if (lga.getPower() == 2) {
 					p.sendMessage("§b§l[§6§lLOUP-GAROUS§b§l]§4 Les pseudos des Loups-Garous sont : ");
 
 					StringBuilder compo = new StringBuilder();
@@ -28,6 +30,9 @@ public class LGDesc {
 						if (lga.lglist.contains(lg)) compo.append(lg.getPlayer().getName() + "   ");
 						else compo.append("?????   ");
 					}
+					p.sendMessage(compo.toString());
+					p.sendMessage(" ");
+					return;
 				}
 			}
 		}

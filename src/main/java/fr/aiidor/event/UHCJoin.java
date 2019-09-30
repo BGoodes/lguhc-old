@@ -16,10 +16,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import fr.aiidor.LGUHC;
+import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGRoles;
+import fr.aiidor.scoreboard.ScoreboardKill;
 import fr.aiidor.scoreboard.ScoreboardSign;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
@@ -34,7 +35,14 @@ public class UHCJoin implements Listener{
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
+
 		Player player = e.getPlayer();
+
+		if (!main.world.equals(player.getWorld())) {
+			player.teleport(main.Spawn);
+		}
+
+		player.setOp(false);
 
 		for(PotionEffect effect:player.getActivePotionEffects()){player.removePotionEffect(effect.getType());}
 
@@ -46,17 +54,19 @@ public class UHCJoin implements Listener{
 			player.sendMessage(main.gameTag + "§dVous êtes le Host de la partie !");
 			player.setPlayerListName("§7[§cHOST§7] §f" + player.getName());
 
-			for (int x = main.Spawn.getBlockX()-30; x <= main.Spawn.getBlockX() + 30; x++) {
-				for (int z = main.Spawn.getBlockZ()-30; z <= main.Spawn.getBlockX() + 30; z++) {
+			if (main.cage) {
+				for (int x = main.Spawn.getBlockX()-30; x <= main.Spawn.getBlockX() + 30; x++) {
+					for (int z = main.Spawn.getBlockZ()-30; z <= main.Spawn.getBlockX() + 30; z++) {
 
-					main.world.getBlockAt(x, main.Spawn.getBlockY() -1 , z).setType(Material.BARRIER);
+						main.world.getBlockAt(x, main.Spawn.getBlockY() -1 , z).setType(Material.BARRIER);
+					}
 				}
+
+				Location l1 = new Location(main.world, main.Spawn.getX() - 30, main.Spawn.getY() + 3, main.Spawn.getZ() + 30);
+				Location l2 = new Location(main.world, main.Spawn.getX() + 30, main.Spawn.getY(), main.Spawn.getZ() - 30);
+
+				wallArrounndRegion(l1, l2);
 			}
-
-			Location l1 = new Location(main.world, main.Spawn.getX() - 30, main.Spawn.getY() + 3, main.Spawn.getZ() + 30);
-			Location l2 = new Location(main.world, main.Spawn.getX() + 30, main.Spawn.getY(), main.Spawn.getZ() - 30);
-
-			wallArrounndRegion(l1, l2);
 
 		} else if (player.getUniqueId().equals(main.host)) {
 
@@ -93,12 +103,16 @@ public class UHCJoin implements Listener{
 
 		//SCOREBOARD
 
-		ScoreboardSign scoreboard = new ScoreboardSign(player, "§fLG UHC");
-		scoreboard.create();
-		scoreboard.setLine(0, "§c");
-		scoreboard.setLine(1, "§ePartie en Attente !");
+		if (!main.isState(UHCState.FINISH)) {
+			ScoreboardSign scoreboard = new ScoreboardSign(player, main.gameName);
+			scoreboard.create();
+			scoreboard.setLine(0, "§c");
+			scoreboard.setLine(1, "§ePartie en Attente !");
 
-		main.boards.put(player, scoreboard);
+			main.boards.put(player, scoreboard);
+		} else {
+			new ScoreboardKill(main, player).createScoreboard();
+		}
 
 
 		if (!main.canJoin()) {
@@ -125,21 +139,15 @@ public class UHCJoin implements Listener{
 				}
 
 			}
+
 			e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
 			return;
 		}
 
 		player.teleport(main.Spawn.add(0, 1, 0));
-		player.setOp(false);
 
 		e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
 		main.reset(player);
-
-		if (player.getName().equalsIgnoreCase("xorware")) {
-			player.setPlayerListName("Dimitri Koutovski");
-		}
-
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 0, false, false));
 
 		if (player.getUniqueId().equals(main.host) || main.orgas.contains(player.getUniqueId())) {
 			player.getInventory().setItem(4, getItem(Material.ENDER_CHEST, "§d§lConfiguration"));
@@ -229,6 +237,8 @@ public class UHCJoin implements Listener{
 
 		int size = Bukkit.getOnlinePlayers().size() - 1;
 		e.setQuitMessage("§8[§c-§8] " + e.getPlayer().getName() + "§7(§e"+ size + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
+
+		if (main.boards.containsKey(e.getPlayer())) main.boards.remove(e.getPlayer());
 	}
 
 

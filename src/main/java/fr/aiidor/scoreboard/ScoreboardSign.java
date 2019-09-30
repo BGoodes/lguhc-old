@@ -171,9 +171,9 @@ public class ScoreboardSign {
 		setField(packet, "a", player.getName());
 
 		// Mode
-		// 0 : cr�er
+		// 0 : créer
 		// 1 : Supprimer
-		// 2 : Mettre � jour
+		// 2 : Mettre à jour
 		setField(packet, "d", mode);
 
 		if (mode == 0 || mode == 2) {

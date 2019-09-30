@@ -60,6 +60,8 @@ public class LGRole_Soeur {
 	}
 	
 	public void canSeeMsg(Joueur j) {
+		
+		if (j.noPower) return;
 		j.setPower(1);
 		
 		j.getPlayer().sendMessage(main.gameTag + "§cVotre Soeur est morte ! Mais vous avez la possiilité de récupérer une information sur le tueur !");

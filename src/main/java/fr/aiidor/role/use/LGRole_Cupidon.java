@@ -2,11 +2,13 @@ package fr.aiidor.role.use;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.aiidor.LGUHC;
+import fr.aiidor.effect.Sounds;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.task.LGCompass;
@@ -32,11 +34,12 @@ public class LGRole_Cupidon {
 			if (j.getRole() == LGRoles.Cupidon) {
 				if (!j.isDead()) {
 					j.setPower(1);
-					
+						
 					if (j.isConnected()) {
 						j.getPlayer().sendMessage(main.gameTag + "§bVous avez 5 minutes pour créer un couple avec la commande §l/lg love <pseudo1> <pseudo2> §b!");
 					}
 				}
+
 			}
 		}
 	}
@@ -112,26 +115,29 @@ public class LGRole_Cupidon {
 		if (j != null) {
 			Player p = j.getPlayer();
 			
-			p.sendMessage(main.gameTag + "");
 			p.sendMessage(" ");
 			j.setPower(0);
 			
 			p.sendMessage(main.gameTag + "§aVous avez bien mis §d" + t.getName() + "§a et §d" + t2.getName() + "§a en couple ! Si l'un meurt, l'autre ne pourrais supporter "
 					+ "cette souffrance et se suiciderais immédiatement !");
 			p.sendMessage(main.gameTag + "§2Vous pouvez gagnez avec eux ou avec le village !");
-			p.sendMessage(main.gameTag + " ");
+			p.sendMessage(" ");
 		}
 
 		t.setCouple(t2);
 		t2.setCouple(t);
 		
+		new Sounds(t.getPlayer()).PlaySound(Sound.LEVEL_UP);
 		t.getPlayer().sendMessage(" ");
-		t.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §6" + t2.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt !");
+		t.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §6" + t2.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
+				+ "Vous pouvez cependant lui offrir de votre vie grâve a la commande /lg don <% de vie>.");
 		
 		giveItemStack(t.getPlayer(), getItem(Material.COMPASS, "§dBoussole des amoureux"));
 		
+		new Sounds(t2.getPlayer()).PlaySound(Sound.LEVEL_UP);
 		t2.getPlayer().sendMessage(" ");
-		t2.getPlayer().sendMessage(main.gameTag +  "§c♥§3 Vous êtes amoureux de §6" + t.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt !");
+		t2.getPlayer().sendMessage(main.gameTag +  "§c♥§3 Vous êtes amoureux de §6" + t.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
+				+ "Vous pouvez cependant lui offrir de votre vie grâve a la commande /lg don <% de vie>.");
 		
 		giveItemStack(t2.getPlayer(), getItem(Material.COMPASS, "§dBoussole des amoureux"));
 		

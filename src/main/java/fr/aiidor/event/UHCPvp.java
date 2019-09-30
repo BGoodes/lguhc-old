@@ -12,8 +12,9 @@ import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.FishHook;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -29,9 +30,9 @@ import org.bukkit.potion.PotionEffectType;
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.WorldSound;
 import fr.aiidor.game.Joueur;
+import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
-import fr.aiidor.role.use.LGRole_Ancien;
 import fr.aiidor.role.use.LGRole_IPL;
 import fr.aiidor.task.LGDeath;
 import fr.aiidor.task.LGLga;
@@ -133,14 +134,6 @@ public class UHCPvp implements Listener{
 				}
 			}
 		}
-
-		if (e.getItem().getType() == Material.POTION) {
-			if (main.getPlayer(e.getPlayer().getUniqueId()) != null) {
-				if (main.getPlayer(e.getPlayer().getUniqueId()).getRole() == LGRoles.Valentin) {
-					Valentin(e.getPlayer());
-				}
-			}
-		}
 	}
 
 	private void effect(Player player) {
@@ -177,8 +170,14 @@ public class UHCPvp implements Listener{
 				@Override
 				public void run() {
 
+					String village = "Le village";
+
+					if (main.PlayerHasVillage(player.getUniqueId())) {
+						village = main.getVillage(player.getUniqueId()).getName();
+					}
+
 					Bukkit.broadcastMessage("§c§l==========§4§k0§c§l==========");
-					Bukkit.broadcastMessage("§2Le village à perdu un de ses membres : §l" + player.getName());
+					Bukkit.broadcastMessage("§2" + village + " à perdu un de ses membres : §l" + player.getName());
 					Bukkit.broadcastMessage("§c§l=====================");
 
 					for (Player pl : Bukkit.getOnlinePlayers()) {
@@ -198,12 +197,39 @@ public class UHCPvp implements Listener{
 			return;
 		}
 
-		if (main.getPlayer(player.getUniqueId()) == null) return;
+		if (main.isState(UHCState.FINISH)) {
+			new LGDeath(main, player.getUniqueId(), null, loc, inv(player)).death();
+			return;
+		}
+
+		if (!main.isInGame(player.getUniqueId())) return;
 		main.getPlayer(player.getUniqueId()).setNoFall(true);
 
 		if (e.getEntity().getKiller() != null) {
 
+			Joueur dead = main.getPlayer(player.getUniqueId());
+
 			Player killer = e.getEntity().getKiller();
+
+			if (dead.getRole() == LGRoles.Ancien && dead.getPower() == 1) {
+				if (main.isInGame(killer.getUniqueId())) {
+					Joueur tueur = main.getPlayer(killer.getUniqueId());
+
+					if (tueur.isLg()) {
+
+						dead.setPower(0);
+						e.setDroppedExp(0);
+
+						player.sendMessage(main.gameTag + "§bVotre pouvoir vous a sauvé !");
+						main.respawn(player);
+
+						return;
+					}
+				}
+			}
+
+
+
 			player.sendMessage(main.gameTag + "§bVous êtes mort mais vous avez peut être une chance d'être réssuscité ! Veuillez attendre quelques secondes.");
 			player.sendMessage(" ");
 
@@ -219,7 +245,6 @@ public class UHCPvp implements Listener{
 							new LGRole_IPL(main).ReaMsg(player);
 						}
 					}
-
 				}
 				return;
 			}
@@ -250,6 +275,7 @@ public class UHCPvp implements Listener{
 	//ANCIEN
 	@EventHandler
 	public void onDamageByEntity(EntityDamageByEntityEvent e) {
+
 		//ANTI ROD
 		if (main.RodLess) {
 			if (e.getDamager() instanceof FishHook) {
@@ -258,14 +284,27 @@ public class UHCPvp implements Listener{
 			}
 		}
 
-		if (main.Cupid) {
+		if (main.NightMare) {
 			if (e.getDamager() instanceof Arrow) {
 				Arrow arrow = (Arrow) e.getDamager();
 
-				if (arrow.getShooter() instanceof Player && e.getEntity() instanceof Player) {
+				if (arrow.getShooter() instanceof Skeleton && e.getEntity().getType().isAlive()) {
+					LivingEntity damaged = (LivingEntity) e.getEntity();
+
+					damaged.removePotionEffect(PotionEffectType.POISON);
+					damaged.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 0));
+				}
+			}
+		}
+
+		if (main.Cupid) {
+			if (e.getDamager() instanceof Arrow && e.getEntity() instanceof Player) {
+				Arrow arrow = (Arrow) e.getDamager();
+
+				if (arrow.getShooter() instanceof Player) {
 					Player player = (Player) arrow.getShooter();
 
-					if (player.getHealth() + 1/5 < 20) player.setHealth(player.getHealth() + 1/5);
+					if (player.getHealth() + 0.2 < 20) player.setHealth(player.getHealth() + 0.2);
 					else player.setHealth(20);
 
 				}
@@ -273,31 +312,47 @@ public class UHCPvp implements Listener{
 		}
 
 		if (e.getEntity() instanceof Player) {
+
 			Player player = (Player) e.getEntity();
-			if (main.getPlayer(player.getUniqueId()) == null) return;
+			if (!main.isInGame(player.getUniqueId())) return;
 
 			Joueur j = main.getPlayer(player.getUniqueId());
 
+
+			//CUPIDON
+			if (e.getDamager() instanceof Arrow) {
+				Arrow arrow = (Arrow) e.getDamager();
+				if (arrow.getShooter() instanceof Player) {
+
+					Player damager = (Player) arrow.getShooter();
+
+					if (main.isInGame(damager.getUniqueId())) {
+						if (main.getPlayer(damager.getUniqueId()).getRole() == LGRoles.Cupidon) {
+							if (new Random().nextInt(3) == 0) {
+								damager.sendMessage(main.gameTag + "§aGrâce a votre pouvoir, les dégats de cette flèche seront augmenté.");
+
+								player.damage(e.getFinalDamage() * 0.25);
+							}
+						}
+					}
+				}
+
+			}
+
 			//LGA
-			if (j.getRole() == LGRoles.LGA) {
+			if (j.getRole() == LGRoles.LGA && j.getPower() == 0) {
 				if (e.getDamager() instanceof Player) {
 					Player damager = (Player) e.getDamager();
 
 					if (!main.isInGame(damager.getUniqueId())) return;
 					Joueur k = main.getPlayer(damager.getUniqueId());
 					if (k.isLg()) {
+
 						//LGA EFFECT
 						j.getPlayer().sendMessage(main.gameTag + "§cAu contact de votre agresseur, vous êtes frappé d'une révélation ! Soudainement la mémoire vous revient :"
 								+ " vous êtes Loup-Garou vous aussi !");
+
 						j.setPower(1);
-
-						Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-
-							@Override
-							public void run() {
-								j.sendDesc();
-							}
-						}, 120);
 
 						new LGLga(main, j).runTaskTimer(main, 0, 20);
 					}
@@ -308,63 +363,6 @@ public class UHCPvp implements Listener{
 			}
 
 
-
-			//MORT
-			if((player.getHealth()-e.getFinalDamage()) <= 0) {
-
-				//INGAME
-				if (main.isInGame(player.getUniqueId())) {
-					//ANCIEN
-					if (j.getRole() == LGRoles.Ancien) {
-
-						//POWER
-						if (j.getPower() == 0) return;
-
-						e.setCancelled(true);
-						main.getPlayer(player.getUniqueId()).setPower(0);
-
-						//ASSASSINE
-						if (e.getDamager() instanceof Player) {
-							Player killer = (Player) e.getDamager();
-
-							if (main.isInGame(killer.getUniqueId())) {
-								Joueur k = main.getPlayer(killer.getUniqueId());
-
-								if (!k.isLg()) {
-									main.getPlayer(player.getUniqueId()).setPower(0);
-									player.setMaxHealth(10);
-								}
-							}
-
-
-						} else {
-
-							//ARROW
-							if (e.getDamager() instanceof Projectile) {
-								Projectile arrow = (Projectile) e.getDamager();
-
-								if (arrow.getShooter() instanceof Player) {
-									Player killer = (Player) arrow.getShooter();
-
-									if (main.isInGame(killer.getUniqueId())) {
-										Joueur k = main.getPlayer(killer.getUniqueId());
-
-										if (!k.isLg()) {
-											main.getPlayer(player.getUniqueId()).setPower(0);
-											player.setMaxHealth(10);
-										}
-									}
-								}
-							}
-
-							else main.getPlayer(player.getUniqueId()).setPower(0);
-						}
-
-						new LGRole_Ancien(main, player.getUniqueId()).Revive();
-						return;
-					}
-				}
-			}
 		}
 	}
 
@@ -373,30 +371,20 @@ public class UHCPvp implements Listener{
 	@EventHandler
 	public void onDamage(EntityDamageEvent e) {
 
-		if (e.getCause() == DamageCause.ENTITY_ATTACK) return;
-		if (e.getCause() == DamageCause.ENTITY_EXPLOSION) return;
-		if (e.getCause() == DamageCause.MAGIC) return;
-		if (e.getCause() == DamageCause.PROJECTILE) return;
-		if (e.getCause() == DamageCause.THORNS) return;
+		if (!(e.getEntity() instanceof Player)) return;
 
-		if (e.getEntity() instanceof Player) {
-			Player player = (Player) e.getEntity();
+		if (main.isState(UHCState.WAITING) || main.isState(UHCState.STARTING) || main.isState(UHCState.PREGAME)) {
+			e.setCancelled(true);
+			return;
+		}
 
-			if((player.getHealth()-e.getFinalDamage()) <= 0) {
-
-				if (main.isInGame(player.getUniqueId())) {
-					if (main.getPlayer(player.getUniqueId()).getRole() == LGRoles.Ancien) {
-
-						if (main.getPlayer(player.getUniqueId()).getPower() == 0) return;
-
-						main.getPlayer(player.getUniqueId()).setPower(0);
-						player.setMaxHealth(10);
-						new LGRole_Ancien(main, player.getUniqueId()).Revive();
-						e.setCancelled(true);
-					}
-				}
+		//NO FALL
+		Player pl = (Player) e.getEntity();
+		if (main.isInGame(pl.getUniqueId()) && e.getCause() == DamageCause.FALL) {
+			if (main.getPlayer(pl.getUniqueId()).hasNoFall()) {
+				e.setCancelled(true);
+				return;
 			}
-
 		}
 	}
 
@@ -404,36 +392,5 @@ public class UHCPvp implements Listener{
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
 		e.setRespawnLocation(main.Spawn);
-	}
-
-	private void Valentin(Player p) {
-		int Choose = new Random().nextInt(10);
-
-		switch (Choose) {
-			case 0:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 6000, 0, false, false));
-				break;
-			case 1:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 6000, 0, false, false));
-				break;
-			case 5:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 6000, 0, false, false));
-				break;
-			case 6:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 6000, 0, false, false));
-				break;
-			case 7:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 6000, 0, false, false));
-				break;
-			case 8:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 6000, 0, false, false));
-				break;
-			case 9:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 6000, 0, false, false));
-				break;
-			case 10:
-				p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 6000, 1, false, false));
-				break;
-		}
 	}
 }

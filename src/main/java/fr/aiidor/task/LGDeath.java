@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.Sounds;
 import fr.aiidor.game.Joueur;
+import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.role.use.LGRole_Chasseur;
@@ -93,6 +94,9 @@ public class LGDeath extends BukkitRunnable {
         }
 	}
 	
+	public void death() {
+		death(dead, grave, inv);
+	}
 	
 	private void death(UUID dead, Location grave, List<ItemStack> inv) {
 		Joueur j = main.getPlayer(dead);
@@ -100,7 +104,9 @@ public class LGDeath extends BukkitRunnable {
 		//LOOT DE STUFF
 		if (!inv.isEmpty()) {
 			for (ItemStack item : inv) {
-				if (item.getType() != Material.AIR) grave.getWorld().dropItem(grave, item);
+				if (item != null) {
+					if (item.getType() != Material.AIR) grave.getWorld().dropItem(grave, item);
+				}
 			}
 		}
 		
@@ -129,7 +135,9 @@ public class LGDeath extends BukkitRunnable {
 			int slot = 0;
 			for (ItemStack it : main.deathItem) {
 				if (it != null) {
-					grave.getWorld().dropItemNaturally(grave, it);
+					if (it.getType() != Material.AIR) {
+						grave.getWorld().dropItemNaturally(grave, it);
+					}
 				}
 				
 				slot ++;
@@ -144,16 +152,20 @@ public class LGDeath extends BukkitRunnable {
 		j.setDead(true);
 		main.Spectator.add(dead);
 		
-		main.death.add(j);
+		if (!main.isState(UHCState.FINISH)) main.death.add(j);
+		
+		String village = "Le village";
 		
 		if (main.PlayerInGame.contains(dead)) main.PlayerInGame.remove(dead);
-		
+		if (main.PlayerHasVillage(dead)) {
+			village = main.getVillage(dead).getName();
+		}
 		
 		if (j.hasCouple() && j.getCouple().isDead()) {
 			
 			Bukkit.broadcastMessage("§c§l==========§4§k0§c§l==========");
 			
-			if (j.Rob) Bukkit.broadcastMessage("§2§l" + j.getName() + " à décidé de le rejoindre dans sa tombe §c♥ §2 il étais §o" + LGRoles.Voleur.name);
+			if (j.Rob) Bukkit.broadcastMessage("§2§l" + j.getName() + " à décidé de rejoindre §l" + j.getCouple().getName() + " §2dans sa tombe §c♥ §2 il étais §o" + LGRoles.Voleur.name);
 			else Bukkit.broadcastMessage("§2§l" + j.getName() + " §2à décidé de le rejoindre dans sa tombe §c♥ §2 il étais §o" + j.getRole().name);
 			
 			Bukkit.broadcastMessage("§c§l=====================");	
@@ -161,8 +173,8 @@ public class LGDeath extends BukkitRunnable {
 		else {
 			Bukkit.broadcastMessage("§c§l==========§4§k0§c§l==========");
 			
-			if (j.Rob) Bukkit.broadcastMessage("§2Le village à perdu un de ses membres : §l" + j.getName() + "§2 qui étais §o" + LGRoles.Voleur.name);
-			else Bukkit.broadcastMessage("§2Le village à perdu un de ses membres : §l" + j.getName() + "§2 qui étais §o" + j.getRole().name);
+			if (j.Rob) Bukkit.broadcastMessage("§2" + village + " à perdu un de ses membres : §l" + j.getName() + "§2 qui étais §o" + LGRoles.Voleur.name);
+			else Bukkit.broadcastMessage("§2" + village + " à perdu un de ses membres : §l" + j.getName() + "§2 qui étais §o" + j.getRole().name);
 			
 			Bukkit.broadcastMessage("§c§l=====================");	
 		}
@@ -206,15 +218,14 @@ public class LGDeath extends BukkitRunnable {
 		if (main.compo.contains(LGRoles.EnfantS)) {
 			for (Joueur es : main.getPlayerRolesOff(LGRoles.EnfantS)) {
 				if (es.Model.equals(j)) {
-					if (!es.isLg()) {
+					
+					if (!es.isLg() && es.isConnected()) {
 						
-						main.addLg(es);
-						
-						if (es.isConnected()) {
-							es.getPlayer().sendMessage(main.gameTag + "§4Votre modèle §e" + j.getName() + "§4 vous faites désormais partie du camp des Loups-Garous !");
-							es.getPlayer().sendMessage(" ");
-						}
+						es.getPlayer().sendMessage(main.gameTag + "§6Votre modèle est mort ! Vous devenez donc un membre des loups garous et héritez de leurs pouvoirs !");
+						es.getPlayer().sendMessage(" ");
 					}
+					
+					main.addLg(es);
 				}
 			}
 		}
@@ -228,16 +239,21 @@ public class LGDeath extends BukkitRunnable {
 				} 
 				
 				Joueur k = main.getPlayer(killer);
+				if (!main.isState(UHCState.FINISH)) k.addkill();
 				
 				if (k.isConnected()) {
 					j.Killer = k;
 					
 					if (!Bukkit.getOnlinePlayers().contains(j.getPlayer())) return;
 					
+					k.getPlayer().removePotionEffect(PotionEffectType.ABSORPTION);
+					
 					if (k.isLg()) {	
-						if (k.getRole() == LGRoles.VPL) {
+						if (k.getRole() == LGRoles.VPL || k.getRole() == LGRoles.LGA && k.getPower() < 2) {
 							k.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0, false, false));
 						} else {
+							
+							k.getPlayer().removePotionEffect(PotionEffectType.SPEED);
 							
 							k.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1200, 0, false, false));
 							k.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1200, 0, false, false));
@@ -246,6 +262,18 @@ public class LGDeath extends BukkitRunnable {
 						
 						EntityLiving cp = ((CraftPlayer)k.getPlayer()).getHandle();
 						cp.setAbsorptionHearts(6);
+					}
+					
+					if (j.getRole() == LGRoles.Ancien && k.getCamp() == LGCamps.Village && k.getRole() != LGRoles.LGA) {
+						if (k.isConnected()) {
+							k.getPlayer().setMaxHealth(10);
+							k.getPlayer().damage(0);
+							k.getPlayer().sendMessage(main.gameTag + "§cVous avez tué l'ancien et perdez par conséquent la moitié de votre vie ainsi que votre pouvoir si vous en aviez un ");
+						}
+						
+						k.setPower(0);
+						k.noPower = true;
+						
 					}
 					
 					if (k.getRole() == LGRoles.Assassin) {
@@ -262,13 +290,19 @@ public class LGDeath extends BukkitRunnable {
 						
 						k.Rob = true;
 						
-						if (j.isLg()) {
+						if (!j.isLg()) {
 							main.addLg(k);
 						}
 						
 						k.setRole(j.getRole());
 						k.setPower(j.getPower());
-						k.setCamp(j.getCamp());
+						
+						if (!k.isInfect()) k.setCamp(j.getRole().camp);
+						
+						if (j.isInfect()) {
+							k.setInfect(true);
+							k.setCamp(LGCamps.LoupGarou);
+						}
 						
 						k.getPlayer().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 						k.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1200, 0, false, false));
@@ -310,12 +344,15 @@ public class LGDeath extends BukkitRunnable {
 						
 						//COUPLE
 						if (j.hasCouple() && !k.hasCouple()) {
-							j.getCouple().setCouple(k);
-							j.setCouple(null);
-							
-							k.setCouple(k);
-							
-							k.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §6" + k.getCouple().getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt !");
+							if (!j.getCouple().equals(k)) {
+								
+								j.getCouple().setCouple(k);
+								j.setCouple(null);
+								
+								k.setCouple(k);
+								
+								k.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §6" + k.getCouple().getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt !");
+							}
 						}
 					}
 				}
@@ -343,8 +380,6 @@ public class LGDeath extends BukkitRunnable {
 			}
 
 		}
-		
-
 	}
 	
 	private List<ItemStack> inv(Player player) {

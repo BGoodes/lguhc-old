@@ -1,16 +1,18 @@
 package fr.aiidor.task;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGCamps;
-import fr.aiidor.role.LGRoles;
 
 public class LGLga extends BukkitRunnable{
 
-	private LGUHC main;
-	private Joueur j;
+	private final LGUHC main;
+	private final Joueur j;
 	private int timer = 0;
 
 	private int nextReveal = 300;
@@ -24,55 +26,57 @@ public class LGLga extends BukkitRunnable{
 	public void run() {
 		timer ++;
 
+		if (timer == 5) {
+			j.sendDesc();
+		}
+
 		if (timer == 300) {
 
-			for (Joueur lg : main.getLg()) {
-				lg.getPlayer().sendMessage(main.gameTag + "§cUn nouveau joueur à rejoint votre camp ! Faites /lg role pour plus de détails !");
+			j.setPower(2);
 
-				if (lg.getRole() == LGRoles.LGA && lg.getPower() == 1) {
-					j.lglist.add(j);
-				}
-			}
+			main.addLg(j);
 
 			j.setCamp(LGCamps.LoupGarou);
 			j.lglist.add(j);
 
 			j.getPlayer().sendMessage(" ");
 			j.getPlayer().sendMessage(main.gameTag + "§cLes Loups-Garous vous reconnaissent à nouveau !");
-			j.getPlayer().sendMessage(" ");
-			j.getPlayer().sendMessage(main.gameTag + "§cVotre mémoire vous revient ! Vous connaissez un nouveau nom de Loup ! Faite /lg role pour en savoir plus !");
-
-
-			for (Joueur lg : main.getLg()) {
-				if (!j.lglist.contains(lg)) {
-					j.lglist.add(lg);
-				}
-			}
-			nextReveal = timer + 300;
 		}
 
+		//REVEAL -------------
 		if (timer == nextReveal) {
-			j.getPlayer().sendMessage(" ");
-			j.getPlayer().sendMessage(main.gameTag + "§cVotre mémoire vous revient ! Vous connaissez un nouveau nom de Loup ! Faite /lg role pour en savoir plus !");
+			ArrayList<Joueur> all = new ArrayList<>();
 
 			for (Joueur lg : main.getLg()) {
 				if (!j.lglist.contains(lg)) {
-					j.lglist.add(lg);
+					all.add(lg);
 				}
 			}
-		}
 
-		int Test = 0;
+			if (all.size() != 0) {
+				j.lglist.add(all.get(new Random().nextInt(all.size())));
+
+				j.getPlayer().sendMessage(" ");
+				j.getPlayer().sendMessage(main.gameTag + "§cVotre mémoire vous revient ! Vous connaissez un nouveau nom de Loup ! Faite /lg role pour en savoir plus !");
+			}
+
+			nextReveal = nextReveal + 300;
+		}
+		// ------------------
+
+		boolean Test = true;
 		for (Joueur lg : main.getLg()) {
 			if (!j.lglist.contains(lg)) {
-				Test++;
+				Test = false;
+				break;
 			}
 		}
 
-		if (Test == 0) {
-			j.setPower(0);
+		if (Test) {
 			j.getPlayer().sendMessage(" ");
 			j.getPlayer().sendMessage(main.gameTag + "§4Vous vous souvenez à nouveau de tous vos congénères ! Bienvenue chez les loups !");
+
+			j.setPower(3);
 
 			cancel();
 			return;

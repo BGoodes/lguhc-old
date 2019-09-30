@@ -28,7 +28,7 @@ public class LGRole_Salvateur {
 
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Salvateur) {
-				if (!j.isDead()) {
+				if (!j.isDead() && !j.noPower) {
 					j.setPower(1);
 
 					if (j.isConnected()) {

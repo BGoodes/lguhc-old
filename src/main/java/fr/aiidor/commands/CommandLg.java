@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +31,10 @@ import fr.aiidor.role.use.LGRole_Soeur;
 import fr.aiidor.role.use.LGRole_Sorciere;
 import fr.aiidor.role.use.LGRole_Trublion;
 import fr.aiidor.role.use.LGRole_Voyante;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.minecraft.server.v1_8_R3.PacketDataSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutCustomPayload;
 
 public class CommandLg implements CommandExecutor {
 
@@ -55,6 +60,7 @@ public class CommandLg implements CommandExecutor {
 			player.sendMessage("§9- /lg compo : §6Permet de voir la composition de la game !");
 			player.sendMessage("§9- /lg compo Chat : §6Permet de voir la composition de la game !");
 			player.sendMessage("§9- /lg report: §6Permet de report les bugs, les joueurs, ...");
+			player.sendMessage(" ");
 
 			return true;
 		}
@@ -96,19 +102,18 @@ public class CommandLg implements CommandExecutor {
 			}
 
 			if (args.length == 1) {
-
 				int slot = 0;
-
 				Inventory inv = Bukkit.createInventory(null, 27, "§dComposition :");
 				for (LGRoles role : LGRoles.values()) {
 					if (main.compo.contains(role)) {
 
-						inv.setItem(slot, getRoleIcon(role, main.getPlayerRolesOff(role).size()));
+						inv.setItem(slot, getRoleIcon(role, getCompo(role)));
 						slot++;
 					}
 				}
 
 				player.openInventory(inv);
+
 				return true;
 			}
 
@@ -117,14 +122,15 @@ public class CommandLg implements CommandExecutor {
 					player.sendMessage(main.gameTag + "§d§lComposition : ");
 					for (LGRoles role : LGRoles.values()) {
 						if (main.compo.contains(role)) {
-							player.sendMessage(getMessage(role, main.getPlayerRolesOff(role).size()));
+							player.sendMessage(getMessage(role, getCompo(role)));
 						}
 					}
 					return true;
 				}
+
 			}
 
-			player.sendMessage(main.gameTag + "§cErreur, la commande est §e/lg compo OU /lg compo chat OU /lg compo book");
+			player.sendMessage(main.gameTag + "§cErreur, la commande est §e/lg compo OU /lg compo chat");
 			return true;
 		}
 
@@ -234,7 +240,18 @@ public class CommandLg implements CommandExecutor {
 				return true;
 			}
 
-			if (!canCommand(player)) return true;
+			//CAN COMMAND
+			if (main.getPlayer(player.getUniqueId()) == null) {
+				player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
+				return true;
+			} else {
+				Joueur j = main.getPlayer(player.getUniqueId());
+				if (j.isDead()) {
+					player.sendMessage(main.gameTag + "§cVous devez être en vie pour effectuer cette commande !");
+					return true;
+				}
+
+			}
 
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg revive <Joueur>");
@@ -257,7 +274,18 @@ public class CommandLg implements CommandExecutor {
 				return true;
 			}
 
-			if (!canCommand(player)) return true;
+			//CAN COMMAND
+			if (main.getPlayer(player.getUniqueId()) == null) {
+				player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
+				return true;
+			} else {
+				Joueur j = main.getPlayer(player.getUniqueId());
+				if (j.isDead()) {
+					player.sendMessage(main.gameTag + "§cVous devez être en vie pour effectuer cette commande !");
+					return true;
+				}
+
+			}
 
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg infect <Joueur>");
@@ -401,7 +429,7 @@ public class CommandLg implements CommandExecutor {
 					new LGRole_Soeur(main).canSee(main.getPlayer(player.getUniqueId()), false);
 					return true;
 				}
-				player.sendMessage(main.gameTag + "§cErruer, La commande : /lg SeeKiller role|name");
+				player.sendMessage(main.gameTag + "§cErreur, La commande : /lg SeeKiller role|name");
 				player.sendMessage(" ");
 			}
 		}
@@ -428,6 +456,59 @@ public class CommandLg implements CommandExecutor {
 			}
 		}
 
+		//DON DE VIE
+		if (args[0].equalsIgnoreCase("don")) {
+
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg don <% de vie>");
+				player.sendMessage(" ");
+				return true;
+			}
+
+			if (!canCommand(player)) return true;
+
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg don <% de vie>");
+				return true;
+			}
+
+			Joueur j = main.getPlayer(player.getUniqueId());
+
+			if (!j.hasCouple()) {
+				player.sendMessage(main.gameTag + "§cErreur, vous devez être en couple pour effectuer cette comande !");
+				return true;
+			}
+
+			if (!j.getCouple().isConnected()) {
+				player.sendMessage(main.gameTag + "§cErreur, votre âme-soeur n'est pas connecté !");
+				return true;
+			}
+			if (Double.valueOf(args[1]) == null) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg don <% de vie>");
+				return true;
+			}
+
+			double Health = Double.valueOf(args[1]);
+
+			if (player.getHealth() + 1 < Health/5) {
+				player.sendMessage(main.gameTag + "§cVous n'avez pas assez de point de vie pour effectuer cette action !");
+				return true;
+			}
+
+			if (j.getCouple().getPlayer().getHealth() + Health/5 > 20) {
+				player.sendMessage(main.gameTag + "§cVous ne pouvez pas donnez autant de vie car votre âme soeur ne manque pas d'autant !");
+				return true;
+			}
+
+			player.sendMessage(main.gameTag + "§aLe transfert de " + args[1] + " à " + j.getCouple().getName() + " à bien eu lieu !");
+
+			player.setHealth(player.getHealth() - Health/5);
+
+			j.getCouple().getPlayer().setHealth(j.getCouple().getPlayer().getHealth() + Health/5);
+			j.getCouple().getPlayer().sendMessage(main.gameTag + "§aVous avez reçut un don de " + args[1] + "% de vie de la part de " + player.getName());
+			return true;
+		}
+
 
 		player.sendMessage(main.gameTag + "§cErreur, Les commandes :");
 		player.sendMessage("§9- /lg role : §6Permet d'avoir des infos sur son rôle !");
@@ -442,13 +523,12 @@ public class CommandLg implements CommandExecutor {
 
 		if (main.getPlayer(player.getUniqueId()) == null) {
 			player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
-			return true;
+			return false;
 		} else {
-
 			Joueur j = main.getPlayer(player.getUniqueId());
 			if (j.isDead() || j.isDying()) {
 				player.sendMessage(main.gameTag + "§cVous devez être en vie pour effectuer cette commande !");
-				return true;
+				return false;
 			}
 
 		}
@@ -459,6 +539,10 @@ public class CommandLg implements CommandExecutor {
 	private ItemStack getRoleIcon(LGRoles role, int number) {
 
 		ItemStack it = new ItemStack(Material.SKULL_ITEM, 1, (byte) 4);
+
+		if (role == LGRoles.Voleur) {
+			number = getVoleurs();
+		}
 
 		if (number == 0) it = new ItemStack(Material.SKULL_ITEM, 1, (byte) 0);
 		else it = new ItemStack(Material.SKULL_ITEM, number, (byte) 3);
@@ -488,7 +572,6 @@ public class CommandLg implements CommandExecutor {
 			if (number != 0) itM.setOwner("Madben");
 		}
 
-
 		if (number == 0) {
 			name.append("§m");
 			itM.setLore(Arrays.asList("§c§l[MORT]"));
@@ -507,6 +590,10 @@ public class CommandLg implements CommandExecutor {
 
 		StringBuilder msg = new StringBuilder();
 
+		if (role == LGRoles.Voleur) {
+			number = getVoleurs();
+		}
+
 		if (role.camp == LGCamps.Village) msg.append("§a");
 		if (role.camp == LGCamps.LoupGarou) msg.append("§c");
 		if (role.camp == LGCamps.LGB) msg.append("§4");
@@ -517,21 +604,79 @@ public class CommandLg implements CommandExecutor {
 		if (number == 0) msg.append("§m");
 		msg.append(role.name);
 
-		if (number != 0) msg.append(" §f: " + number);
+		if (number != 0) msg.append(" §f §7(" + number + ")");
 
 		return msg.toString();
 	}
 
 
-	public ItemStack newBook() {
+	public void newBook(Player p) {
 
-		BookMeta meta = (BookMeta) Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+
+		BookMeta meta = (BookMeta) book.getItemMeta();
 		meta.setTitle("§dComposition");
 		meta.setAuthor(main.gameTag);
 
-		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+		StringBuilder sb = new StringBuilder();
+		sb.append("§d§nComposition : \n\n");
+
+		int count = 0;
+
+		for (LGRoles role : LGRoles.values()) {
+			if (count == 13) break;
+			if (!main.compo.contains(role)) {
+				sb.append("§f-" + getMessage(role, getCompo(role))+ "\n");
+				count++;
+			}
+		}
+
+		meta.setPages(sb.toString());
 		book.setItemMeta(meta);
-		return book;
+
+		openBook(book, p);
+	}
+
+	private void openBook(ItemStack book, Player p) {
+
+		int slot = p.getInventory().getHeldItemSlot();
+		ItemStack old = p.getInventory().getItem(slot);
+		p.getInventory().setItem(slot, book);
+
+		ByteBuf buf = Unpooled.buffer(256);
+		buf.setByte(0, (byte)0);
+		buf.writerIndex(1);
+
+		PacketPlayOutCustomPayload packet = new PacketPlayOutCustomPayload("MC|BOpen", new PacketDataSerializer(buf));
+		((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
+		p.getInventory().setItem(slot, old);
+
+	}
+
+	public int getVoleurs() {
+		int number = 0;
+		for (Joueur j : main.Players) {
+			if (!j.isDead()) {
+				if (j.Rob || j.getRole() == LGRoles.Voleur) {
+					number++;
+				}
+			}
+		}
+		return number;
+	}
+
+	public int getCompo(LGRoles role) {
+		int joueurs = 0;
+		for (Joueur j : main.Players) {
+			if (!j.Rob) {
+				if (j.getRole() == role) {
+					if (!j.isDead()) {
+						joueurs ++;
+					}
+				}
+			}
+		}
+		return joueurs;
 	}
 
 }

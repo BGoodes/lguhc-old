@@ -5,8 +5,11 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -44,6 +47,8 @@ public final class UHCGame extends BukkitRunnable {
 	
 	private int SkyDamage = 0;
 	
+	private int LootCrate = 600;
+	
 	@Override
 	public void run() {
 		
@@ -73,7 +78,17 @@ public final class UHCGame extends BukkitRunnable {
 			sign.getValue().setLine(2, "§c" + main.getPlayers().size() + " §4Joueurs");
 			
 			if (main.ep > 1) {
-				sign.getValue().setLine(3, "§4Groupes de §c" + main.GroupLimit);
+				if (main.fun && main.Civilisation) {
+					
+					if (main.PlayerHasVillage(sign.getKey().getUniqueId())) {
+						sign.getValue().setLine(3, "§e" + main.getVillage(sign.getKey().getUniqueId()).getName());
+						
+					} else sign.getValue().setLine(3, "§e(Village)");
+					
+				} else {
+					sign.getValue().setLine(3, "§4Groupes de §c" + main.GroupLimit);
+				}
+				
 			}
 			
 			sign.getValue().setLine(4, "§b ");
@@ -92,15 +107,37 @@ public final class UHCGame extends BukkitRunnable {
 			
 		}
 		
+		//EFFECT
 		long time = main.world.getTime();
 		
-		if (time > 13000 && time < 23500 ) {
+		if (time > 13000 && time < 23500) {
 			nightEffect();
 		}
 		
 		if (time > 23500 || time < 13000) {
 			dayEffect();
 		}
+		
+		//TIME CYCLE
+		
+		if (main.epTime >= 5) {
+			if (timer == nextEp - 900) {
+				main.world.setTime(13000);
+			}
+		}
+		
+		if (main.epTime >= 10) {
+			if (timer == nextEp - 600) {
+				main.world.setTime(23500);
+			}
+		}
+
+		if (main.epTime >= 15) {
+			if (timer == nextEp - 300) {
+				main.world.setTime(13000);
+			}
+		}
+
 		
 		Permeffect();
 		
@@ -114,39 +151,71 @@ public final class UHCGame extends BukkitRunnable {
 		//30Min PVP -----------------------------
 		if (timer == main.pvp * 60 - 300) {
 			Bukkit.broadcastMessage(main.gameTag + "§bPVP activé dans 5 min !");
-			main.world.setPVP(true);
 		}
 		
 		if (timer == main.pvp * 60) {
 			Bukkit.broadcastMessage(main.gameTag + "§cPVP activé !");
 			main.world.setPVP(true);
 			
-			if (main.FinalHeal) {
-				Bukkit.broadcastMessage(main.gameTag + "§aLe Final Heal est activé ! Tous les joueurs récupèrent leurs points de vie !");
-				for (Player pl : Bukkit.getOnlinePlayers()) {
-					pl.setHealth(pl.getMaxHealth());
-				}
-			}
-			
-			if (main.fun) {
-				if (main.skyHigh) {
-					
-					 SkyDamage = timer + 30;
-					 
-					Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-						
-						@Override
-						public void run() {
-							for (Player p : Bukkit.getOnlinePlayers()) {
-								new Sounds(p).PlaySound(Sound.ENDERDRAGON_GROWL);
-							}
-							Bukkit.broadcastMessage(main.gameTag + "§cAttention ! Le scénario Sky High est activé ! Si vous êtes a moins de 150 blocs en Y, vous "
-									+ "perderez 1 coeur toutes les 30 secondes !");
+			Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+				
+				@Override
+				public void run() {
+					if (main.FinalHeal) {
+						Bukkit.broadcastMessage(main.gameTag + "§aLe Final Heal est activé ! Tous les joueurs récupèrent leurs points de vie !");
+						for (Player pl : Bukkit.getOnlinePlayers()) {
+							pl.setHealth(pl.getMaxHealth());
 						}
-					}, 60);
+					}
+					
+					if (main.coupleAlea) {
+						if (main.PlayerHasRole) {
+						
+							if (!main.compo.contains(LGRoles.Cupidon)) {
+								if (main.Players.size() >= 2) {
+									 couple();
+								}
+							}
+						}
+						else Bukkit.broadcastMessage(main.gameTag + "§cLes rôles n'on pas été distribué, le couple aléatoire sera donc désactivé !");
+					}
+					
+					if (main.fun) {
+						if (main.skyHigh) {
+							
+							 SkyDamage = timer + 30;
+							 
+							 Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+								
+								@Override
+								public void run() {
+									for (Player p : Bukkit.getOnlinePlayers()) {
+										new Sounds(p).PlaySound(Sound.ENDERDRAGON_GROWL);
+									}
+									
+									Bukkit.broadcastMessage(main.gameTag + "§cAttention ! Le scénario Sky High est activé ! Si vous êtes a moins de 175 blocs en Y, vous "
+											+ "perderez 1 coeur toutes les 30 secondes !");
+								}
+							}, 60);
+						}
+					}
+				}
+			}, 20);
+
+		}
+		
+		if (main.ep == main.wbEP - 1 && timer == nextEp - 300) {
+			Bukkit.broadcastMessage(main.gameTag + "§bLa world border diminuera dans 5 min !");
+		}
+		
+		if (main.noMine && main.vanillaN) {
+			if (main.noMineEp != 1) {
+				if (main.ep == main.noMineEp - 1 && timer == nextEp - 300) {
+					Bukkit.broadcastMessage(main.gameTag + "§bVous n'aurez plus le droit de miner dans 5 min !");
 				}
 			}
 		}
+
 		
 		//SPEEDY MINER
 		if (main.run) {
@@ -156,26 +225,27 @@ public final class UHCGame extends BukkitRunnable {
 						if (pl.getLocation().getY() < 32) {
 							
 							pl.removePotionEffect(PotionEffectType.SPEED);
-							pl.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 0));
+							pl.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 0, true, false));
 						}
 					}
 				}
 			}
 		}
 		
-		//SKYHIGHT
-		if (main.fun) {
-			if (main.skyHigh) {
+		if (main.fun && main.skyHigh) {
+			if (timer == SkyDamage) {
 				if (timer >= main.pvp * 60) {
-					
-					if (timer == SkyDamage) {
-						SkyDamage = timer + 30;
-							
-						for (Player p : Bukkit.getOnlinePlayers()) {
-							if (p.getGameMode() == GameMode.SURVIVAL) {
-								if (p.getLocation().getY() < 150) {
-									p.damage(2);
-								}
+				
+				
+					SkyDamage = timer + 30;
+						
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						if (p.getGameMode() == GameMode.SURVIVAL) {
+							if (p.getLocation().getY() < 175) {
+								p.setHealth(p.getHealth() - 2);
+								p.damage(0);
+								p.sendMessage(main.gameTag + "§cMontez aux cieux avec §6une hauteur supérieur ou égal a 175 §cafin de ne pas prendre de dégâts");
+								p.sendMessage(" ");
 							}
 						}
 					}
@@ -186,7 +256,8 @@ public final class UHCGame extends BukkitRunnable {
 		if (main.vanilla) {
 			if (main.noHunger) {
 				for (Player p : Bukkit.getOnlinePlayers()) {
-					p.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 0, false, false));
+					p.setSaturation(20);
+					p.setFoodLevel(20);
 				}
 			}
 			if (main.infiniteEnc) {
@@ -194,8 +265,42 @@ public final class UHCGame extends BukkitRunnable {
 					p.setLevel(20000);
 				}
 			}
+			if (main.CatEyes) {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+				}
+			}
 		}
+		
+		if (main.vanillaN) {
+			if (main.noMine && main.isState(UHCState.GAME)) {
+				if (main.ep >= main.noMineEp) {
+					for (Player pl : main.getPlayers()) {
+						if (pl.getLocation().getY() < main.noMineCouche) {
+							pl.damage(0.5);
+						}
+					}
+				}
+			}
+		}
+		
+		if (main.fun && main.LootCrate) {
+			if (timer == LootCrate) {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					if (p.getGameMode() != GameMode.SPECTATOR) {
+						new Sounds(p).PlaySound(Sound.CHEST_OPEN);
+						giveItemStack(p, getItem(Material.CHEST, "§aLootcrate"));
+						p.sendMessage(main.gameTag + "§aVous recevez un Lootcrate !");
+					}
+				}
 				
+				LootCrate = LootCrate + 600;
+			}
+
+		}
+		
+
+		
 		//WORLDBORDER
 		if (main.ep >= main.wbEP && timer == nextWb) {
 			//WB
@@ -208,7 +313,7 @@ public final class UHCGame extends BukkitRunnable {
 			}
 		}
 		
-		if (timer == nextEp || timer == main.announceRole * 60) {
+		if ((timer == nextEp && main.ep != 1) || timer == main.announceRole * 60) {
 			if (main.ep == 1) {
 				
 				main.PlayerInGame.clear();
@@ -227,7 +332,6 @@ public final class UHCGame extends BukkitRunnable {
 						
 						for (Joueur j : main.getJoueurs()) {
 							j.sendDesc();
-							j.getPlayer().sendMessage(" ");
 						}
 						
 						main.PlayerHasRole = true;
@@ -239,6 +343,7 @@ public final class UHCGame extends BukkitRunnable {
 						}
 						
 						main.setLimitGroup();
+
 					}
 				}, 40);
 				
@@ -279,8 +384,14 @@ public final class UHCGame extends BukkitRunnable {
 				
 				if (main.ep == main.wbEP) {
 					//WB
-					Bukkit.broadcastMessage(main.gameTag + "§4 La World Border va commencé à diminuer ! Elle réduira la map jusqu'en " + main.wbMax + " / -" + main.wbMax);
+					Bukkit.broadcastMessage(main.gameTag + "§4La World Border va commencé à diminuer ! Elle réduira la map jusqu'en " + main.wbMax + " / -" + main.wbMax);
 					nextWb = timer + 5;
+				}
+				
+				if (main.vanillaN && main.noMineEp > 1) {
+					if (main.ep == main.noMineEp) {
+						Bukkit.broadcastMessage(main.gameTag + "§4Vous n'avez désormais plus le droit de miner ! Si vous restez en a une couche infèrieur a 32 vous perderez de la vie !");
+					}
 				}
 				
 				if (main.ep == 2) {
@@ -291,7 +402,7 @@ public final class UHCGame extends BukkitRunnable {
 					
 				}
 
-				if (main.ep >= 3) {
+				if (main.ep >= main.voteEp) {
 					Bukkit.getScheduler().runTaskLater(main, new Runnable() {
 						
 						@Override
@@ -345,11 +456,7 @@ public final class UHCGame extends BukkitRunnable {
 				
 			}
 			
-			if (main.epTime <= 10 && main.DailyCycle) {
-				
-				main.world.setTime(23500);
-			} else if (main.epTime <= 20) {
-				
+			if (main.DailyCycle) {
 				main.world.setTime(23500);
 			}
 			
@@ -433,27 +540,27 @@ public final class UHCGame extends BukkitRunnable {
 			
 			for (Joueur j : main.getJoueurs()) {
 				
-				if (j.getCamp() == LGCamps.LoupGarou || j.getCamp() == LGCamps.LGB ||j.getRole() == LGRoles.Voyante || j.getRole() == LGRoles.VoyanteB || j.getRole() == LGRoles.PetiteFille) {
+				if (!j.noPower && j.getCamp() == LGCamps.LoupGarou || j.getCamp() == LGCamps.LGB ||j.getRole() == LGRoles.Voyante || j.getRole() == LGRoles.VoyanteB || j.getRole() == LGRoles.PetiteFille) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Renard) {
+				if (!j.noPower && j.getRole() == LGRoles.Renard) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Ancien && j.getPower() > 0) {
+				if (!j.noPower && j.getRole() == LGRoles.Ancien) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Voleur) {
+				if (!j.noPower && j.getRole() == LGRoles.Voleur) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Mineur) {
+				if (!j.noPower && j.getRole() == LGRoles.Mineur) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, Integer.MAX_VALUE, 1, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Pyromane) {
+				if (!j.noPower && j.getRole() == LGRoles.Pyromane) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
@@ -462,7 +569,7 @@ public final class UHCGame extends BukkitRunnable {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
-				if (j.getRole() == LGRoles.Soeur) {
+				if (!j.noPower && j.getRole() == LGRoles.Soeur) {
 					if (j.Soeur != null) {
 						if (!j.Soeur.isDead() && j.Soeur.isConnected()) {
 							if (j.getPlayer().getLocation().distance(j.Soeur.getPlayer().getLocation()) <= 10) {
@@ -478,10 +585,8 @@ public final class UHCGame extends BukkitRunnable {
 	
 	private void nightEffect() {
 		for (Joueur j : main.getJoueurs()) {
-			if (Bukkit.getOnlinePlayers().contains(j.getPlayer())) {
-				if (j.isLg()) {
-					if (j.getRole() == LGRoles.LGA && j.getPower() == 0) return;
-					
+			if (j.isConnected() && !j.noPower) {
+				if (j.getCamp() == LGCamps.LoupGarou || j.getCamp() == LGCamps.LGB) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
@@ -504,7 +609,7 @@ public final class UHCGame extends BukkitRunnable {
 	
 	private void dayEffect() {
 		for (Joueur j : main.getJoueurs()) {
-			if (Bukkit.getOnlinePlayers().contains(j.getPlayer())) {
+			if (j.isConnected() && !j.noPower) {
 				
 				if (j.getRole() == LGRoles.Assassin) {
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 0, false, false));
@@ -564,8 +669,37 @@ public final class UHCGame extends BukkitRunnable {
 				for (Joueur j : main.getPlayerRoles(LGRoles.Chaman)) {
 					j.getPlayer().sendMessage(main.gameTag + "§cVous n'entendez plus les morts !");
 				}
+				
+				for (Joueur j : main.Players) {
+					if (j.isDead() && j.isConnected()) {
+						j.getPlayer().sendMessage(main.gameTag + "Vous ne pouvez plus envoyer de messages au Chaman !");
+					}
+				}
 			}
 		}, 600);
+	}
+	
+	private void couple() {
+		
+		if (main.PlayerHasRole) {
+			if (main.getJoueursOff().size() >= 2) {
+				
+				Joueur a = main.getJoueursOff().get(new Random().nextInt(main.getJoueursOff().size()));
+				Joueur b = main.getJoueursOff().get(new Random().nextInt(main.getJoueursOff().size()));
+				
+				while (a.equals(b)) {
+					a = main.Players.get(new Random().nextInt(main.Players.size()));
+				}
+				
+				new LGRole_Cupidon(main).choose(null, a, b);
+				
+			}
+			else {
+				Bukkit.broadcastMessage(main.gameTag + "§cIl n'y a pas assez de joueurs, le couple aléatoire sera donc désactivé !");
+				return;
+			}
+
+		}
 	}
 	
 
@@ -610,5 +744,25 @@ public final class UHCGame extends BukkitRunnable {
 			new Titles().sendActionText(player, "§5Distance au centre : §4✈ + de 1800 blocs");
 			return;
 		}
+	}
+	
+	private void giveItemStack(Player p, ItemStack it) {
+		if (isInventoryFull(p)) p.getWorld().dropItem(p.getLocation(), it);
+		else p.getInventory().addItem(it);
+	}
+	
+	private boolean isInventoryFull(Player p)
+	{
+	    return p.getInventory().firstEmpty() == -1;
+	}
+	
+	private ItemStack getItem(Material mat, String Name) {
+		
+		ItemStack it = new ItemStack(mat, 1);
+		ItemMeta itM = it.getItemMeta();
+		itM.setDisplayName(Name);
+		
+		it.setItemMeta(itM);
+		return it;
 	}
 }

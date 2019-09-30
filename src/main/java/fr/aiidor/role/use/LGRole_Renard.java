@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.Joueur;
-import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 
 public class LGRole_Renard {
@@ -65,7 +64,7 @@ public class LGRole_Renard {
 
 		Player p = renard.getPlayer();
 
-		if (target.getCamp() == LGCamps.LoupGarou || target.getCamp() == LGCamps.LGB || target.getRole() == LGRoles.LGA) {
+		if (target.isLg()) {
 
 			p.sendMessage(main.gameTag + "§e Le joueur §f" + target.getPlayer().getName() + "§e appartient au camp des Loups-Garous !");
 			return;

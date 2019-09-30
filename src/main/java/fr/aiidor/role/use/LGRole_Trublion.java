@@ -29,7 +29,7 @@ public class LGRole_Trublion {
 		
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Trublion) {
-				if (!j.isDead()) {
+				if (!j.isDead() && !j.noPower) {
 					j.setPower(1);
 					
 					if (j.isConnected()) {
@@ -130,8 +130,8 @@ public class LGRole_Trublion {
 		LGRoles role1 = t.getRole();
 		LGRoles role2 = t2.getRole();
 		
-		LGCamps camp1 = t.getCamp();
-		LGCamps camp2 = t2.getCamp();
+		LGCamps camp1 = t.getRole().camp;
+		LGCamps camp2 = t2.getRole().camp;
 		
 		int power1 = t.getPower();
 		int power2 = t2.getPower();
@@ -146,8 +146,8 @@ public class LGRole_Trublion {
 			t.lglist = list2;
 			t2.lglist = list1;
 			
-			t.lglist.add(t);
-			t2.lglist.add(t2);
+			if (!t.lglist.contains(t)) t.lglist.add(t);
+			if (!t2.lglist.contains(t2)) t2.lglist.add(t2);
 		}
 		
 		if (t.getRole() == LGRoles.EnfantS || t2.getRole() == LGRoles.EnfantS) {
@@ -178,8 +178,8 @@ public class LGRole_Trublion {
 		t.setRole(role2);
 		t2.setRole(role1);
 		
-		t.setCamp(camp2);
-		t2.setCamp(camp1);
+		if (t.isInfect()) t.setCamp(camp2);
+		if (t2.isInfect()) t2.setCamp(camp1);
 		
 		t.setPower(power2);
 		t2.setPower(power1);

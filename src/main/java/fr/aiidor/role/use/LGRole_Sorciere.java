@@ -25,7 +25,7 @@ public class LGRole_Sorciere {
 
 		Player p = sorcière.getPlayer();
 
-		if (sorcière.getRole() != LGRoles.Sorciere) {
+		if (sorcière.getRole() != LGRoles.Sorcière) {
 			p.sendMessage(main.gameTag + "§cErreur, vous devez être §oSorcière §cpour effectuer cette commande !");
 			return;
 		}
@@ -61,7 +61,7 @@ public class LGRole_Sorciere {
 		if (TargetJ.isDying() && TargetJ.isDyingState(LGCamps.Village)) {
 			TargetJ.setRea(true);
 
-			p.sendMessage(main.gameTag + "§aVous avez bien sauvé §f" + targetname + " !");
+			p.sendMessage(main.gameTag + "§aVous avez bien sauvé " + targetname + " !");
 			sorcière.setPower(0);
 			return;
 		} else  {
@@ -73,12 +73,12 @@ public class LGRole_Sorciere {
 
 	public void ReaMsg(Player damaged) {
 
-		for (Joueur j : main.getPlayerRoles(LGRoles.Sorciere)) {
+		for (Joueur j : main.getPlayerRoles(LGRoles.Sorcière)) {
 			if (j.getPower() > 0 ) {
 				TextComponent msg = new TextComponent(main.gameTag + "§6Le joueur §f" + damaged.getName() + " §6 est Mort ! Vous avez 6 secondes pour le réanimer en cliquant "
-						+ "sur le message ou en faisant /lg revive <Pseudo>");
+						+ "sur le message !");
 
-				msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§cRéanimer ?").create()));
+				msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Réanimer ?").create()));
 				msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg revive " + damaged.getName()));
 				j.getPlayer().spigot().sendMessage(msg);
 				j.getPlayer().sendMessage("");

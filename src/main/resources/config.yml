@@ -1,3 +1,15 @@
+#########################################################
+#            Loups-Garous UHC -  Version 0.4            #
+#                  Author : B_Goodes                    #
+#########################################################
+
+
+MultiWorld:
+  state: false
+  seed: 0
+  generateStructure: true
+
 Spawn:
   worldName: world
   location: 0, 200, 0
+  cage: true   #Permet de g�n�rer une cage au spawn !

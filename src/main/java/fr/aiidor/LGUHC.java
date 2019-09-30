@@ -10,8 +10,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -24,12 +27,15 @@ import org.bukkit.potion.PotionEffect;
 import fr.aiidor.commands.CommandLg;
 import fr.aiidor.commands.CommandOrga;
 import fr.aiidor.commands.CommandSpec;
+import fr.aiidor.effect.Sounds;
 import fr.aiidor.event.EventsManager;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.scoreboard.ScoreboardSign;
+import fr.aiidor.utils.LGCivilisation;
+import fr.aiidor.utils.UHCLootCrate;
 import fr.aiidor.utils.UHCNoFall;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand;
@@ -48,6 +54,10 @@ public class LGUHC extends JavaPlugin{
 
 	public ArrayList<Joueur> death = new ArrayList<>();
 
+	public Boolean coupleAlea = false;
+
+	public Boolean cage = true;
+
 	//ORGAS
 	private UHCState state;
 	public UUID host;
@@ -63,7 +73,10 @@ public class LGUHC extends JavaPlugin{
 	public int GroupLimit = 9;
 	public int ep = 1;
 
-	public String gameTag = "§b§l[§6§lLOUP-GAROUS§b§l] §r";
+	public final String gameTag = "§b§l[§6§lLOUP-GAROUS§b§l] §r";
+	public String gameName = "§f§lLG UHC";
+
+
 	public Location Spawn;
 	public World world;
 	public WorldBorder wb;
@@ -77,6 +90,7 @@ public class LGUHC extends JavaPlugin{
 	public Boolean DailyCycle = true;
 	public Integer pvp = 25;
 	public Integer announceRole = 20;
+	public Integer voteEp = 3;
 
 	public ItemStack[] startItem;
 	public ItemStack[] deathItem;
@@ -99,8 +113,17 @@ public class LGUHC extends JavaPlugin{
 
 	public Integer LimiteDePiece = 2;
 
-	public Boolean diamondLess = false;
+
 	public Boolean oreLess = false;
+	public Boolean diamondLess = true;
+	public Boolean goldLess = true;
+	public Boolean ironLess = true;
+	public Boolean coalLess = true;
+	public Boolean redstoneLess = true;
+	public Boolean lapisLess = true;
+	public Boolean quartzLess = true;
+
+	public Boolean enchantLess = false;
 
 	public Boolean FinalHeal = false;
 
@@ -120,8 +143,17 @@ public class LGUHC extends JavaPlugin{
 	public Integer apples = 1;
 	public Boolean infiniteEnc = false;
 	public Boolean noHunger = false;
+	public Boolean CatEyes = false;
 
-	public Boolean xpNerf = false;
+	public Boolean vanillaN = true;
+	public Boolean xpNerf = true;
+	public Boolean noNether = true;
+	public Boolean noMine = false;
+	public Integer noMineEp = 1;
+	public Integer noMineCouche = 32;
+
+	public Boolean NightMare = false;
+	public Boolean PoisonLess = false;
 
 	public Boolean fun = false;
 
@@ -129,15 +161,80 @@ public class LGUHC extends JavaPlugin{
 	public Boolean skyHigh = false;
 	public Boolean eggs = false;
 
+	public Boolean LootCrate = false;
+	public ArrayList<ItemStack> Loots = new ArrayList<>();
+
+	public Boolean Civilisation = false;
+	public Integer vilRange = 400;
+	public Integer vilSize = 50;
+	public List<String> civNames = new ArrayList<>();
+
+	public Boolean meetup = false;
+
+	public void addNames() {
+		civNames.add("Thiercelieux");
+		civNames.add("Bedburg");
+		civNames.add("Besançon");
+		civNames.add("Dole");
+		civNames.add("Edimbourg");
+	}
+
+	public int CivSize = 6;
+
+	public List<LGCivilisation> civilisations = new ArrayList<>();
+
 	//VOTE
 	public Boolean canVote = false;
 	public Boolean canSeeVote = false;
 
+	public final String ANSI_RESET = "\u001B[0m";
+	public final String ANSI_BLACK = "\u001B[30m";
+	public final String ANSI_RED = "\u001B[31m";
+	public final String ANSI_GREEN = "\u001B[32m";
+	public final String ANSI_YELLOW = "\u001B[33m";
+	public final String ANSI_BLUE = "\u001B[34m";
+	public final String ANSI_PURPLE = "\u001B[35m";
+	public final String ANSI_CYAN = "\u001B[36m";
+	public final String ANSI_WHITE = "\u001B[37m";
 
 	@Override
 	public void onEnable() {
 
 		saveDefaultConfig();
+		new ConfigManager(this).checkConfigFiles();
+
+		if (new ConfigManager(this).getAllConfig().size() > 0) {
+			System.out.println("[LOUP-GAROUS]" + ANSI_PURPLE + " fichier(s) de configuration trouve(s) : " + ANSI_RESET);
+			for (String name : new ConfigManager(this).getAllConfig()) {
+				System.out.println(ANSI_CYAN + "- " + name + ANSI_RESET);
+			}
+		} else {
+			System.out.println("[LOUP-GAROUS]" + ANSI_RED + " Aucun fichiers de configuration trouve" + ANSI_RESET);
+		}
+
+
+		if (Bukkit.getWorld(getConfig().getString("Spawn.worldName")) == null) {
+			if (getConfig().getBoolean("MultiWorld.state")) {
+
+				WorldCreator Wc = new WorldCreator(getConfig().getString("Spawn.worldName"));
+				if (getConfig().getLong("Multiword.seed") != 0) {
+					Wc.seed(getConfig().getLong("Multiword.seed"));
+				}
+
+				Wc.type(WorldType.NORMAL);
+				Wc.generateStructures(getConfig().getBoolean("Multiworld.generateStructure"));
+
+				System.out.println(ANSI_GREEN + "[LOUP-GAROUS] Création du monde : " + ANSI_WHITE + getConfig().getString("Spawn.worldName") + ANSI_RESET);
+
+				Wc.createWorld();
+
+			} else {
+				Bukkit.getPluginManager().disablePlugin(this);
+				System.out.println(ANSI_RED  + "[LOUP-GAROUS] Monde invalide ! (Plugin Off)" + ANSI_RESET);
+				return;
+			}
+
+		}
 
 		state = UHCState.WAITING;
 
@@ -145,6 +242,8 @@ public class LGUHC extends JavaPlugin{
 
 		world = Bukkit.getWorld(getConfig().getString("Spawn.worldName"));
 		Spawn = getLocation(getConfig().getString("Spawn.location"));
+		cage = getConfig().getBoolean("Spawn.cage");
+
 		wb = world.getWorldBorder();
 
 		//BORDER
@@ -170,8 +269,15 @@ public class LGUHC extends JavaPlugin{
 
 		getServer().addRecipe(recipe);
 
-		System.out.println("[LOUP-GAROU] Plugin foncionnel !");
+		System.out.println(ANSI_RED +  "========================================" + ANSI_RESET);
+		System.out.println(ANSI_GREEN + "Plugin LOUP-GAROU UHC - Version 0.4" + ANSI_RESET);
+		System.out.println(ANSI_YELLOW + "      Auteur : B_Goodes" + ANSI_RESET);
+		System.out.println(ANSI_RED +  "========================================" + ANSI_RESET);
+
+		addNames();
+		new UHCLootCrate(this).setLoots();
 	}
+
 
 	private Location getLocation(String loc) {
 		String[] args = loc.split(",");
@@ -182,6 +288,8 @@ public class LGUHC extends JavaPlugin{
 
 		return new Location(world, x, y, z);
 	}
+
+
 
 	//PERMISSIONS
 	public void setHost(UUID uuid) {
@@ -378,15 +486,24 @@ public class LGUHC extends JavaPlugin{
 	}
 
 	public void addLg(Joueur j) {
-		for (Joueur lg : getLg()) {
-			lg.getPlayer().sendMessage(gameTag + "§cUn nouveau joueur à rejoint votre camp ! Faites /lg role pour plus de détails !");
 
-			if (lg.getRole() == LGRoles.LGA && lg.getPower() == 1) {
-				lg.lglist.add(j);
+		if (!j.isLg()) {
+
+			for (Joueur lg : getLg()) {
+
+				if (lg.isConnected()) {
+					lg.getPlayer().sendMessage(gameTag + "§cUn nouveau joueur à rejoint votre camp ! Faites /lg role pour plus de détails !");
+					new Sounds(lg.getPlayer()).PlaySound(Sound.WOLF_GROWL);
+				}
+
+				if (lg.getRole() == LGRoles.LGA && lg.getPower() == 1) {
+					lg.lglist.add(j);
+				}
+
+				j.setCamp(LGCamps.LoupGarou);
+				j.getPlayer().sendMessage(gameTag + "§cVous pouvez voir la liste des loups-garous en vie grâce a la commande /lg rôle !");
 			}
 		}
-
-		j.setCamp(LGCamps.LoupGarou);
 	}
 
 	public boolean canSeeLgList() {
@@ -400,6 +517,27 @@ public class LGUHC extends JavaPlugin{
 			} else return false;
 		}
 		return true;
+	}
+
+	//CIVILISATION ----------------------------
+	public LGCivilisation getVillage(UUID uuid) {
+		if (fun && Civilisation) {
+			for (LGCivilisation civ : civilisations) {
+				if (civ.hasPlayer(uuid)) {
+					return civ;
+				}
+			}
+
+		}
+		return null;
+	}
+
+	public Boolean PlayerHasVillage(UUID uuid) {
+		if (fun && Civilisation) {
+			if (getVillage(uuid) != null) return true;
+		}
+		return false;
+
 	}
 
 	public void reset(Player player) {
@@ -444,8 +582,6 @@ public class LGUHC extends JavaPlugin{
 
 		Location teleportLocation = new Location(player.getWorld(), x + Spawn.getX(), y, z + Spawn.getZ());
 
-		world.getChunkAt(x, y).load();
-
 		player.teleport(teleportLocation);
 	}
 
@@ -456,8 +592,8 @@ public class LGUHC extends JavaPlugin{
 
 		Location teleportLocation = null;
 
-		int rangeMax = wbMax;
-		int rangeMin = -wbMax;
+		int rangeMax = (int) wb.getSize() /2 - 10;
+		int rangeMin = - (int) wb.getSize() /2 + 10;
 
 
 		int x = random.nextInt((rangeMax - rangeMin) + 1) + rangeMin;
@@ -472,6 +608,22 @@ public class LGUHC extends JavaPlugin{
 			new UHCNoFall(getPlayer(player.getUniqueId())).runTaskTimer(this, 0, 20);
 		}
 
+	}
+
+	public void respawn(Player player) {
+
+		player.setGameMode(GameMode.SURVIVAL);
+		respawnInstant(player);
+		player.setHealth(player.getMaxHealth());
+
+		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+
+			@Override
+			public void run() {
+				TpPower(player);
+			}
+
+		}, 5);
 	}
 
 	public void respawnInstant(final Player player) {
@@ -505,6 +657,7 @@ public class LGUHC extends JavaPlugin{
 		inv.setItem(10, getItem(Material.DIAMOND_SWORD, "§6Scénarios"));
 		inv.setItem(11, getItem(Material.BOOKSHELF, "§6Rôles"));
 		inv.setItem(12, getItem(Material.BEACON, "§6WorldBorder"));
+		inv.setItem(13, getItem(Material.ANVIL, "§6Règles LGUHC"));
 
 		inv.setItem(15, getItem(Material.WATCH, "§6Gestion Temps"));
 		inv.setItem(16, getItem(Material.CHEST, "§6Gestion Stuff"));

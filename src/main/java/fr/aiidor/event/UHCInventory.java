@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.UHCState;
+import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.task.UHCStart;
 
@@ -48,7 +49,7 @@ public class UHCInventory implements Listener{
 			}
 		}
 
-		if (main.LimiteDePiece > 0) {
+		if (main.LimiteDePiece != 4) {
 			if (e.getInventory().getHolder() == player) {
 
 				if ((clicked.getType() == Material.DIAMOND_HELMET || clicked.getType() == Material.DIAMOND_CHESTPLATE ||
@@ -64,18 +65,21 @@ public class UHCInventory implements Listener{
 					return;
 				}
 
-				if ((e.getSlotType() == SlotType.ARMOR) && e.getCursor() != null) {
+				if ((e.getSlotType() == SlotType.ARMOR)) {
 
-					if (e.getCursor().getType() == Material.DIAMOND_HELMET || e.getCursor().getType() == Material.DIAMOND_CHESTPLATE ||
-							e.getCursor().getType() == Material.DIAMOND_LEGGINGS || e.getCursor().getType() == Material.DIAMOND_BOOTS) {
+					if (e.getCursor() != null) {
+						if (e.getCursor().getType() == Material.DIAMOND_HELMET || e.getCursor().getType() == Material.DIAMOND_CHESTPLATE ||
+								e.getCursor().getType() == Material.DIAMOND_LEGGINGS || e.getCursor().getType() == Material.DIAMOND_BOOTS) {
 
-						if (!canEquipArmor(player)) {
-							e.setCancelled(true);
-							player.sendMessage(" ");
-							player.sendMessage(main.gameTag + "§cVous ne pouvez pas vous équiper avec plus de pièce en diamant !");
+							if (!canEquipArmor(player)) {
+								e.setCancelled(true);
+								player.sendMessage(" ");
+								player.sendMessage(main.gameTag + "§cVous ne pouvez pas vous équiper avec plus de pièce en diamant !");
+								return;
+							}
 							return;
 						}
-						return;
+
 					}
 
 				}
@@ -142,10 +146,16 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+			if (clicked.getType() == Material.ANVIL) {
+				InvConfigRulesBuilder(player);
+				return;
+			}
+
 			if (clicked.getType() == Material.BEACON) {
 				InvConfigWbBuilder(player);
 				return;
 			}
+
 			if (clicked.getType() == Material.WATCH) {
 				InvConfigTimeBuilder(player);
 				return;
@@ -183,6 +193,11 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+			if (clicked.getType() == Material.WOOD) {
+				invVanillaNBuilder(player);
+				return;
+			}
+
 			if (clicked.getType() == Material.TNT) {
 				invFunBuilder(player);
 				return;
@@ -206,6 +221,14 @@ public class UHCInventory implements Listener{
 
 				if (main.vanilla) main.vanilla = false;
 				else main.vanilla = true;
+				InvConfigBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 22) {
+
+				if (main.vanillaN) main.vanillaN = false;
+				else main.vanillaN = true;
 				InvConfigBuilder(player);
 				return;
 			}
@@ -300,6 +323,10 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+			if (clicked.getType() == Material.GOLD_ORE) {
+				invOreLimitBuiler(player);
+				return;
+			}
 
 			if (e.getSlot() == 18) {
 
@@ -359,19 +386,84 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+
 			if (e.getSlot() == 23) {
 
-				if (main.diamondLess) main.diamondLess  = false;
-				else main.diamondLess  = true;
+				if (main.oreLess) main.oreLess  = false;
+				else main.oreLess  = true;
 				invLimitBuiler(player);
 				return;
 			}
 
 			if (e.getSlot() == 24) {
 
-				if (main.oreLess) main.oreLess  = false;
-				else main.oreLess  = true;
+				if (main.enchantLess) main.enchantLess  = false;
+				else main.enchantLess  = true;
 				invLimitBuiler(player);
+				return;
+			}
+		}
+		if (inv.getName().equalsIgnoreCase("§bLimite de Stuff : §eOreLess")) {
+			e.setCancelled(true);
+
+			if (clicked.getType() == Material.BARRIER) {
+				invLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+
+				if (main.diamondLess) main.diamondLess = false;
+				else main.diamondLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+
+				if (main.goldLess) main.goldLess = false;
+				else main.goldLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 20) {
+
+				if (main.ironLess) main.ironLess = false;
+				else main.ironLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 21) {
+
+				if (main.lapisLess) main.lapisLess = false;
+				else main.lapisLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 22) {
+
+				if (main.coalLess) main.coalLess = false;
+				else main.coalLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 23) {
+
+				if (main.redstoneLess) main.redstoneLess = false;
+				else main.redstoneLess = true;
+				invOreLimitBuiler(player);
+				return;
+			}
+
+			if (e.getSlot() == 24) {
+
+				if (main.quartzLess) main.quartzLess = false;
+				else main.quartzLess = true;
+				invOreLimitBuiler(player);
 				return;
 			}
 		}
@@ -494,15 +586,8 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+
 			if (e.getSlot() == 20) {
-
-				if (main.xpNerf) main.xpNerf = false;
-				else main.xpNerf = true;
-				invVanillaBuilder(player);
-				return;
-			}
-
-			if (e.getSlot() == 21) {
 
 				if (main.infiniteEnc) main.infiniteEnc = false;
 				else main.infiniteEnc = true;
@@ -510,7 +595,7 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
-			if (e.getSlot() == 22) {
+			if (e.getSlot() == 21) {
 
 				if (main.noHunger) main.noHunger = false;
 				else main.noHunger = true;
@@ -518,13 +603,115 @@ public class UHCInventory implements Listener{
 				return;
 			}
 
+			if (e.getSlot() == 22) {
+
+				if (main.CatEyes) main.CatEyes = false;
+				else main.CatEyes = true;
+				invVanillaBuilder(player);
+				return;
+			}
+
 		}
+
+		if (inv.getName().equalsIgnoreCase("§6Scénarios : §cVanilla Nerf")) {
+			e.setCancelled(true);
+
+			if (clicked.getType() == Material.BARRIER) {
+				InvConfigBuilder(player);
+				return;
+			}
+
+			if (clicked.getType() == Material.COBBLESTONE) {
+				noMineBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+
+				if (main.xpNerf) main.xpNerf = false;
+				else main.xpNerf = true;
+				invVanillaNBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+
+				if (main.noNether) main.noNether = false;
+				else main.noNether = true;
+				invVanillaNBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 20) {
+
+				if (main.noMine) main.noMine = false;
+				else main.noMine = true;
+				invVanillaNBuilder(player);
+				return;
+			}
+		}
+
+		if (inv.getName().equalsIgnoreCase("§cVanilla Nerf : §4No Mine")) {
+			e.setCancelled(true);
+
+			if (clicked.getType() == Material.BARRIER) {
+				invVanillaNBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+				if (e.getClick() == ClickType.LEFT) {
+					if (main.noMineEp < 15) {
+						main.noMineEp++;
+					}
+				}
+				if (e.getClick() == ClickType.RIGHT) {
+					if (main.noMineEp > 1) {
+						main.noMineEp--;
+					}
+				}
+				noMineBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+				if (e.getClick() == ClickType.LEFT) {
+					if (main.noMineCouche < 64) {
+						main.noMineCouche++;
+					}
+				}
+				if (e.getClick() == ClickType.RIGHT) {
+					if (main.noMineCouche > 5) {
+						main.noMineCouche--;
+					}
+				}
+				noMineBuilder(player);
+				return;
+			}
+		}
+
 
 		if (inv.getName().equalsIgnoreCase("§6Scénarios : §ePVE")) {
 			e.setCancelled(true);
 
 			if (clicked.getType() == Material.BARRIER) {
 				InvConfigBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+
+				if (main.NightMare) main.NightMare = false;
+				else main.NightMare = true;
+				invPveBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+
+				if (main.PoisonLess) main.PoisonLess = false;
+				else main.PoisonLess = true;
+				invPveBuilder(player);
 				return;
 			}
 
@@ -562,6 +749,78 @@ public class UHCInventory implements Listener{
 				invFunBuilder(player);
 				return;
 			}
+
+			if (e.getSlot() == 21) {
+
+				if (main.LootCrate) main.LootCrate = false;
+				else main.LootCrate = true;
+				invFunBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 4 || e.getSlot() == 22) {
+				if (main.canJoin()) {
+					if (e.getSlot() == 4) {
+						invCivBuilder(player);
+						return;
+					}
+
+					if (e.getSlot() == 22) {
+
+						if (main.Civilisation) main.Civilisation = false;
+						else main.Civilisation = true;
+						invFunBuilder(player);
+						return;
+					} else {
+						if (!main.Civilisation) player.sendMessage(main.gameTag + "§cLa partie est déjà lancé ! Vous ne pouvez pas activer ce plugin !");
+						else player.sendMessage(main.gameTag + "§cLa partie est déjà lancé ! Vous ne pouvez pas désactiver ce plugin !");
+
+						player.closeInventory();
+						return;
+					}
+				}
+			}
+		}
+
+		if (inv.getName().equalsIgnoreCase("§cFUN : §eCivilisation")) {
+			e.setCancelled(true);
+
+			if (clicked.getType() == Material.BARRIER) {
+				invFunBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+				if (e.getClick() == ClickType.LEFT) {
+					if (main.CivSize < 50) {
+						main.CivSize = main.CivSize + 1;
+					}
+				}
+				if (e.getClick() == ClickType.RIGHT) {
+					if (main.CivSize > 1) {
+						main.CivSize = main.CivSize - 1;
+					}
+				}
+
+				invCivBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+				if (e.getClick() == ClickType.LEFT) {
+					if (main.vilSize < 200) {
+						main.vilSize = main.vilSize + 5;
+					}
+				}
+				if (e.getClick() == ClickType.RIGHT) {
+					if (main.vilSize > 10) {
+						main.vilSize = main.vilSize - 5;
+					}
+				}
+
+				invCivBuilder(player);
+				return;
+			}
 		}
 
 
@@ -582,12 +841,24 @@ public class UHCInventory implements Listener{
 
 			if (clicked.getType() == Material.WOOL) {
 				for (LGRoles role : LGRoles.values()) {
-					if (clicked.getItemMeta().getDisplayName().equalsIgnoreCase("§6"+role.name)) {
+					String name = clicked.getItemMeta().getDisplayName();
 
+
+					if (name.contains(role.name) && role != LGRoles.LG) {
+
+						//SOEUR
 						if (role == LGRoles.Soeur) {
 							if (role.number == 0) role.number = 2;
 							else role.number = 0;
 
+							//VOYANTE
+						} else if (role == LGRoles.Voyante){
+							if (name.equalsIgnoreCase("§a" + LGRoles.Voyante.name)) {
+								if (role.number == 0) role.number = 1;
+								else role.number = 0;
+							}
+
+							//AUTRE
 						} else {
 							if (role.number == 0) role.number = 1;
 							else role.number = 0;
@@ -642,6 +913,38 @@ public class UHCInventory implements Listener{
 
 				return;
 			}
+		}
+
+		//GESTIONS DE LA WORLDBORDER ////////////////////////
+		if (inv.getName().equalsIgnoreCase("§5Menu: §6Règles LGUHC")) {
+			e.setCancelled(true);
+
+			if (clicked.getType() == Material.BARRIER) {
+				main.configInvBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 18) {
+				if (main.meetup) main.meetup = false;
+				else main.meetup = true;
+				InvConfigRulesBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 19) {
+				if (main.hidecompo) main.hidecompo = false;
+				else main.hidecompo = true;
+				InvConfigRulesBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 20) {
+				if (main.coupleAlea) main.coupleAlea = false;
+				else main.coupleAlea = true;
+				InvConfigRulesBuilder(player);
+				return;
+			}
+
 		}
 
 		//GESTIONS DE LA WORLDBORDER ////////////////////////
@@ -712,7 +1015,7 @@ public class UHCInventory implements Listener{
 
 			if (e.getSlot() == 0) {
 				if (e.getClick() == ClickType.LEFT) {
-					if (main.epTime < 60) {
+					if (main.epTime < 20) {
 						main.epTime ++;
 					}
 				}
@@ -759,6 +1062,22 @@ public class UHCInventory implements Listener{
 				if (e.getClick() == ClickType.RIGHT) {
 					if (main.announceRole > 1) {
 						main.announceRole --;
+					}
+				}
+
+				InvConfigTimeBuilder(player);
+				return;
+			}
+
+			if (e.getSlot() == 4) {
+				if (e.getClick() == ClickType.LEFT) {
+					if (main.voteEp < 10) {
+						main.voteEp ++;
+					}
+				}
+				if (e.getClick() == ClickType.RIGHT) {
+					if (main.voteEp > 2) {
+						main.voteEp --;
 					}
 				}
 
@@ -862,7 +1181,11 @@ public class UHCInventory implements Listener{
 		inv.setItem(3, getItem(Material.LOG, "§aVanilla Boost", 1, true, true));
 		inv.setItem(21, getWool(null, main.vanilla));
 
-		inv.setItem(4, getItem(Material.SKULL_ITEM, "§ePVE", 1, true, true));
+		inv.setItem(4, getItem(Material.WOOD, "§cVanilla Nerf", 1, true, true));
+		inv.setItem(22, getWool(null, main.vanillaN));
+
+		inv.setItem(6, getItem(Material.SKULL_ITEM, "§ePVE", 1, true, true));
+		inv.setItem(24, getSign3());
 
 		inv.setItem(7, getItem(Material.TNT, "§cFUN", 1, true, true));
 		inv.setItem(25, getWool(null, main.fun));
@@ -904,6 +1227,19 @@ public class UHCInventory implements Listener{
 		signM.setLore(Arrays.asList("", "§7>> §fAbsorbtion : " + Abso, "§7>> §fPomme de notch : " + getString(main.Notch), "", "§7>> §fGolden Head : "
 						+ getString(main.GoldenHead), "§7>> §fGolden Head Heal :§a " + main.HeadHeal + " Ceours", "","§7>> §fFinal Heal : " +  getString(main.FinalHeal),
 				"§7>> §fCupid : " +  getString(main.Cupid)));
+		sign.setItemMeta(signM);
+
+		return sign;
+	}
+
+	private ItemStack getSign3() {
+
+		ItemStack sign = new ItemStack(Material.SIGN, 1);
+		ItemMeta signM = sign.getItemMeta();
+
+		signM.setDisplayName("§b<<§6Informations§b>>");
+
+		signM.setLore(Arrays.asList("", "§7>> §fMode Nightmare : " + getString(main.NightMare)));
 		sign.setItemMeta(signM);
 
 		return sign;
@@ -959,13 +1295,12 @@ public class UHCInventory implements Listener{
 		}
 
 		inv.setItem(0, getItem(Material.FIREBALL, "§6FireEnchantLess", 1, true));
-
 		inv.setItem(18, getWool(null, main.FireEnchantLess));
 
-		inv.setItem(1, getItem(Material.DIAMOND_CHESTPLATE, "§6Limite de piece en diamant", 1, true));
-		inv.setItem(19, getConfigItemSmall(Material.DIAMOND, "§cLimite : §3" + main.LimiteDePiece, main.LimiteDePiece, true));
+		inv.setItem(1, getItem(Material.DIAMOND_CHESTPLATE, "§6Limite de pièce en diamant", 1, true));
+		inv.setItem(19, getConfigItemSmall(Material.DIAMOND, "§bLimite : §3" + main.LimiteDePiece, main.LimiteDePiece, true));
 
-		inv.setItem(2, getItem(Material.INK_SACK, "§bBlood Diamond", 1, (byte)1, true));
+		inv.setItem(2, getItem(Material.INK_SACK, "§cBlood Diamond", 1, (byte)1, true));
 		inv.setItem(20, getWool(null, main.BloodDiamond));
 
 		inv.setItem(3, getItem(Material.DIAMOND_ORE, "§bDiamondLimit", 1, true));
@@ -974,11 +1309,44 @@ public class UHCInventory implements Listener{
 		inv.setItem(4, getItem(Material.FISHING_ROD, "§6RodLess", 1, true));
 		inv.setItem(22, getWool(null, main.RodLess ));
 
-		inv.setItem(5, getItem(Material.DIAMOND_BLOCK, "§bDiamondLess", 1, true));
-		inv.setItem(23, getWool(null, main.diamondLess ));
+		inv.setItem(5, getItem(Material.GOLD_ORE, "§eOreLess", 1, true, true));
+		inv.setItem(23, getWool(null, main.oreLess ));
 
-		inv.setItem(6, getItem(Material.GOLD_ORE, "§bOreLess", 1, true));
-		inv.setItem(24, getWool(null, main.oreLess ));
+		inv.setItem(6, getItem(Material.ENCHANTMENT_TABLE, "§5EnchantLess", 1, true));
+		inv.setItem(24, getWool(null, main.enchantLess));
+
+		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+
+		p.openInventory(inv);
+	}
+	private void invOreLimitBuiler(Player p) {
+
+		Inventory inv = Bukkit.createInventory(null, 27, "§bLimite de Stuff : §eOreLess");
+
+		for (int i = 9; i < 18; i ++) {
+			inv.setItem(i, vitre(3));
+		}
+
+		inv.setItem(0, getItem(Material.DIAMOND, "§bDiamond", 1, true));
+		inv.setItem(18, getWool(null, main.diamondLess));
+
+		inv.setItem(1, getItem(Material.GOLD_INGOT, "§eOr", 1, true));
+		inv.setItem(19, getWool(null, main.goldLess));
+
+		inv.setItem(2, getItem(Material.IRON_INGOT, "§7Fer", 1, true));
+		inv.setItem(20, getWool(null, main.ironLess));
+
+		inv.setItem(3, getItem(Material.INK_SACK, "§9Lapis", 1, (byte) 4, true));
+		inv.setItem(21, getWool(null, main.lapisLess));
+
+		inv.setItem(4, getItem(Material.COAL, "§8Charbon", 1, true));
+		inv.setItem(22, getWool(null, main.coalLess));
+
+		inv.setItem(5, getItem(Material.REDSTONE, "§cRedstone", 1, true));
+		inv.setItem(23, getWool(null, main.redstoneLess));
+
+		inv.setItem(6, getItem(Material.QUARTZ, "§fQuartz", 1, true));
+		inv.setItem(24, getWool(null, main.quartzLess));
 
 		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
 
@@ -1030,14 +1398,53 @@ public class UHCInventory implements Listener{
 		inv.setItem(1, getItem(Material.APPLE, "§aDrop de Pommes", 1, true));
 		inv.setItem(19, getConfigItem(Material.REDSTONE, "§aTaux de drop : §2" + main.apples + "%", main.apples, true));
 
-		inv.setItem(2, getItem(Material.EXP_BOTTLE, "§aXp Nerf", 1, true));
-		inv.setItem(20, getWool(null, main.xpNerf));
+		inv.setItem(2, getItem(Material.ENCHANTMENT_TABLE, "§2Infinite Enchanter", 1, true));
+		inv.setItem(20, getWool(null, main.infiniteEnc));
 
-		inv.setItem(3, getItem(Material.ENCHANTMENT_TABLE, "§aInfinite Enchanter", 1, true));
-		inv.setItem(21, getWool(null, main.infiniteEnc));
+		inv.setItem(3, getItem(Material.COOKED_BEEF, "§2No Food", 1, true));
+		inv.setItem(21, getWool(null, main.noHunger));
 
-		inv.setItem(4, getItem(Material.COOKED_BEEF, "§aNo Food", 1, true));
-		inv.setItem(22, getWool(null, main.noHunger));
+		inv.setItem(4, getItem(Material.EYE_OF_ENDER, "§5CatEyes", 1, true));
+		inv.setItem(22, getWool(null, main.CatEyes));
+
+		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+
+		p.openInventory(inv);
+	}
+
+	private void invVanillaNBuilder(Player p) {
+		Inventory inv = Bukkit.createInventory(null, 27, "§6Scénarios : §cVanilla Nerf");
+
+		for (int i = 9; i < 18; i ++) {
+			inv.setItem(i, vitre(12));
+		}
+
+		inv.setItem(0, getItem(Material.EXP_BOTTLE, "§4Xp Nerf", 1, true));
+		inv.setItem(18, getWool(null, main.xpNerf));
+
+		inv.setItem(1, getItem(Material.NETHERRACK, "§4No Nether", 1, true));
+		inv.setItem(19, getWool(null, main.noNether));
+
+		inv.setItem(2, getItem(Material.COBBLESTONE, "§4No Mine", 1, true, true));
+		inv.setItem(20, getWool(null, main.noMine));
+
+		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+
+		p.openInventory(inv);
+	}
+
+	private void noMineBuilder(Player p) {
+		Inventory inv = Bukkit.createInventory(null, 27, "§cVanilla Nerf : §4No Mine");
+
+		for (int i = 9; i < 18; i ++) {
+			inv.setItem(i, vitre(12));
+		}
+
+		inv.setItem(0, getItem(Material.WATCH, "§aEpisode", 1, true));
+		inv.setItem(18, getConfigItemSmall(Material.GOLD_BLOCK, "§bEpisode : §f" + main.noMineEp, main.noMineEp, true));
+
+		inv.setItem(1, getItem(Material.STONE, "§aCouche Minimal", 1, true));
+		inv.setItem(19, getConfigItemSmall(Material.GOLD_BLOCK, "§4Couche : §c" + main.noMineCouche, main.noMineCouche, true));
 
 		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
 
@@ -1050,6 +1457,12 @@ public class UHCInventory implements Listener{
 		for (int i = 9; i < 18; i ++) {
 			inv.setItem(i, vitre(4));
 		}
+
+		inv.setItem(0, getItem(Material.BED, "§cNightmare", 1, true));
+		inv.setItem(18, getWool(null, main.NightMare));
+
+		inv.setItem(1, getItem(Material.POISONOUS_POTATO, "§2PoisonLess", 1, true));
+		inv.setItem(19, getWool(null, main.PoisonLess));
 
 
 		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
@@ -1073,6 +1486,32 @@ public class UHCInventory implements Listener{
 		inv.setItem(2, getItem(Material.EGG, "§cEggs", 1, true));
 		inv.setItem(20, getWool(null, main.eggs));
 
+		inv.setItem(3, getItem(Material.CHEST, "§2LootCrate", 1, true, false));
+		inv.setItem(21, getWool(null, main.LootCrate));
+
+		inv.setItem(4, getItem(Material.HAY_BLOCK, "§aCivilisation", 1, true, true));
+		inv.setItem(22, getWool(null, main.Civilisation));
+
+
+
+		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+
+		p.openInventory(inv);
+	}
+
+	private void invCivBuilder(Player p) {
+		Inventory inv = Bukkit.createInventory(null, 27, "§cFUN : §eCivilisation");
+
+		for (int i = 9; i < 18; i ++) {
+			inv.setItem(i, vitre(4));
+		}
+
+		inv.setItem(0, getItem(Material.BREAD, "§aTaille des villages", 1, true));
+		inv.setItem(18, getConfigItemSmall(Material.WHEAT, "§eJoueurs : §f" + main.CivSize, main.CivSize, true));
+
+		inv.setItem(1, getItem(Material.COBBLE_WALL, "§aTerritoire des villages", 1, true));
+		inv.setItem(19, getConfigItem(Material.WHEAT, "§eTailles : §f" + main.vilSize, 1, true));
+
 		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
 
 		p.openInventory(inv);
@@ -1082,30 +1521,71 @@ public class UHCInventory implements Listener{
 	private void invConfigRolesBuiler(Player p) {
 		Inventory inv = Bukkit.createInventory(null, 36, "§5Menu: §6Rôles");
 
-		inv.setItem(0, getItem(Material.EXP_BOTTLE, "§2Simple Villageois", 1, true));
-		inv.setItem(1, getConfigItemSmall(Material.BONE, "§4Loup-Garou", LGRoles.LG.number, true));
+		inv.setItem(1, getConfigItemSmall(Material.BONE, "§cLoup-Garou", LGRoles.LG.number, true));
 
 		int slot = 2;
+		int compoNumber = 0;
+
 		for (LGRoles role : LGRoles.values()) {
-			if (role != LGRoles.SV && role != LGRoles.LG) {
-				if (role == LGRoles.Valentin) break;
+			if (role == LGRoles.SV) break;
 
-				inv.setItem(slot, getWool("§6"+role.name, role.number));
+			compoNumber = compoNumber + role.number;
+			if (role != LGRoles.LG) {
+
+				if (role == LGRoles.Soeur) inv.setItem(slot, getWool("§a"+role.name + " §f(x2)", role.number));
+				else if (role == LGRoles.LGA) inv.setItem(slot, getWool("§c"+role.name, role.number));
+				else if (role == LGRoles.EnfantS) inv.setItem(slot, getWool("§e"+role.name, role.number));
+				else if (role.camp == LGCamps.Village) inv.setItem(slot, getWool("§a"+role.name, role.number));
+				else if (role.camp == LGCamps.LoupGarou) inv.setItem(slot, getWool("§c"+role.name, role.number));
+				else if (role.camp == LGCamps.LGB) inv.setItem(slot, getWool("§4"+role.name, role.number));
+				else if (role.camp == LGCamps.Assassin) inv.setItem(slot, getWool("§6"+role.name, role.number));
+				else inv.setItem(slot, getWool("§e"+role.name, role.number));
+
+
 				slot++;
-
 			}
 		}
+
+		int SVNumber = main.getPlayers().size() - compoNumber;
+
+		if (SVNumber > 0) inv.setItem(0, getItem(Material.EXP_BOTTLE, "§2Simple Villageois §f(" + SVNumber + ") ", SVNumber, true));
+		else inv.setItem(0, getWool("§2Simple Villageois  §c(" + SVNumber + ") ", false));
+
 
 		inv.setItem(35, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
 		p.openInventory(inv);
 	}
 
 	private void invConfigRolesBuilerSSS(Player p) {
-		Inventory inv = Bukkit.createInventory(null, 27, "§5Menu: §6Rôles");
+		Inventory inv = Bukkit.createInventory(null, 9, "§5Menu: §6Rôles");
 
-		inv.setItem(0, getWool("§6"+LGRoles.Valentin.name, LGRoles.Valentin.number));
+
+
+		inv.setItem(8, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+		p.openInventory(inv);
+	}
+
+	//GESTIONS DES Règles ////////////////////////
+	private void InvConfigRulesBuilder(Player p) {
+
+		Inventory inv = Bukkit.createInventory(null, 27, "§5Menu: §6Règles LGUHC");
+
+		for (int i = 9; i < 18; i ++) {
+			inv.setItem(i, vitre(0));
+		}
+
+		inv.setItem(0, getItem(Material.EXP_BOTTLE, "§bMeetup", 1, true));
+		inv.setItem(18, getWool(null, main.meetup));
+
+		inv.setItem(1, getItem(Material.VINE, "§eComposition caché", 1, true));
+		inv.setItem(19, getWool(null, main.hidecompo));
+
+		inv.setItem(2, getItem(Material.ARROW, "§dCouple Aléatoire", 1, true));
+		inv.setItem(20, getWool(null, main.coupleAlea));
+
 
 		inv.setItem(26, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
+
 		p.openInventory(inv);
 	}
 
@@ -1132,6 +1612,7 @@ public class UHCInventory implements Listener{
 		inv.setItem(1, getConfigItem(Material.WATCH, "§9LG DailyCycle §f(x2)§9 : " + getString(main.DailyCycle), main.DailyCycle,  true));
 		inv.setItem(2, getConfigItemSmall(Material.DIAMOND_SWORD, "§9Activation Pvp : §3" + main.pvp + " §9Min", main.pvp, true));
 		inv.setItem(3, getConfigItemSmall(Material.BOOKSHELF, "§9Annonce des rôles : §3" + main.announceRole + " §9Min", main.announceRole, true));
+		inv.setItem(4, getConfigItemSmall(Material.PAPER, "§9Episode vote : §3" + main.voteEp, main.voteEp, true));
 
 		inv.setItem(8, getItem(Material.BARRIER, "§cRevenir en arrière", 1, false));
 
@@ -1383,6 +1864,8 @@ public class UHCInventory implements Listener{
 	}
 
 	private Boolean canEquipArmor(Player player){
+
+		if (main.LimiteDePiece == 0) return false;
 
 		int Piece = 0;
 		for (ItemStack it : player.getInventory().getArmorContents()) {

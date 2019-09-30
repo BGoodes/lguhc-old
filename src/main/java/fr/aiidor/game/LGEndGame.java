@@ -1,11 +1,19 @@
 package fr.aiidor.game;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.FireworkEffect.Type;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
+import fr.aiidor.scoreboard.ScoreboardKill;
+import fr.aiidor.scoreboard.ScoreboardManager;
 
 public class LGEndGame {
 	
@@ -30,7 +38,8 @@ public class LGEndGame {
 		int cupidon = 0;
 		
 		if (main.getJoueurs().size() == 0) {
-			Bukkit.broadcastMessage(main.gameTag + "§eVictoire de personne car tout le monde est mort ^^");
+			Bukkit.broadcastMessage(" ");
+			Bukkit.broadcastMessage(main.gameTag + "§eVictoire de personne car tout le monde est mort ^^'");
 			stopGame();
 			return;
 		}
@@ -68,40 +77,45 @@ public class LGEndGame {
 		//WIN DU VILLAGE
 		if (vil > 0 &&
 				lg + assassin + lgb + couple + voleur  == 0) {
+			Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§2Victoire du village ! Bravo à eux !");
 				stopGame();
 			}
 			//WIN DES LG
 			if (lg > 0 &&
 					vil + assassin + lgb + couple + voleur  == 0) {
+				Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§cVictoire des Loups-Garous ! Bravo à eux !");
 				stopGame();
 				}
 			
 			//WIN DE L'ASSASSIN
-			if (assassin > 0 &&
+			if (assassin == 1 &&
 					vil + lg + lgb + couple + voleur == 0) {
+				Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§eVictoire de l'Assassin ! Bravo à lui !");
 				stopGame();
 				}	
 			
 			//WIN DU LGB
-			if (lgb > 0 &&
+			if (lgb == 1 &&
 					lg + assassin + vil + couple + voleur == 0) {
-				Bukkit.broadcastMessage(main.gameTag + "§4Victoire du Loups-Blanc ! Bravo à lui !");
+				Bukkit.broadcastMessage(" ");
+				Bukkit.broadcastMessage(main.gameTag + "§4Victoire du Loup-Garou Blanc ! Bravo à lui !");
 				stopGame();
 				}	
 			
-			if (voleur > 0 &&
+			if (voleur == 1 &&
 					lg + assassin + vil + couple + lgb == 0) {
+				Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§eVictoire du Voleur ! Bravo à lui !");
 				stopGame();
 				}	
 			
 			//WIN DU COUPLE
-			if (couple> 0 && 
+			if (couple == 2 && 
 					lg + assassin + vil + lgb + voleur - cupidon == 0) {
-				
+				Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§5Victoire du couple ! Bravo à eux !");
 				stopGame();
 			}
@@ -118,7 +132,7 @@ public class LGEndGame {
 		StringBuilder msg = new StringBuilder();
 		
 		for (Joueur j : main.death) {
-			if (j.Rob) msg.append("§d§l§m" + j.getName() + "§d§m : " + LGRoles.Voleur.name);
+			if (j.Rob) msg.append("§d§l§m" + j.getName() + "§d§m : " + LGRoles.Voleur.name + " (" + j.getRole().name + ")");
 			else msg.append("§d§l§m" + j.getName() + "§d§m : " + j.getRole().name);
 			
 			if (j.isInfect()) msg.append(" §d§m(Infecté)");
@@ -137,7 +151,7 @@ public class LGEndGame {
 				Joueur j = main.getPlayer(p.getUniqueId());
 				
 				if (!j.isDead()) {
-					if (j.Rob) msg.append("§d§l" + j.getName() + "§d : " + LGRoles.Voleur.name);
+					if (j.Rob) msg.append("§d§l" + j.getName() + "§d : " + LGRoles.Voleur.name + " (" + j.getRole().name + ")");
 					else msg.append("§d§l" + j.getName() + "§d : " + j.getRole().name);
 					
 					if (j.isInfect()) msg.append(" §d(Infecté)");
@@ -151,6 +165,38 @@ public class LGEndGame {
 			}
 		}
 		
+		new ScoreboardManager(main).destroy();
+		
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			new ScoreboardKill(main, p).createScoreboard();
+		}
+		
+		for (Joueur j : main.getJoueurs()) {
+			if (j.isConnected()) {
+				FireWork(j.getPlayer());
+			}
+		}
+		
+	}
+	
+	private void FireWork(Player p) {
+		
+		Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+		f.detonate();
+		
+		FireworkMeta fM = f.getFireworkMeta();
+		
+		FireworkEffect effect = FireworkEffect.builder()
+				.flicker(true)
+				.withColor(Color.PURPLE)
+				.withFade(Color.ORANGE)
+				.with(Type.BALL)
+				.trail(true)
+				.build();
+		
+		fM.addEffect(effect);
+		fM.setPower(1);
+		f.setFireworkMeta(fM);
 		
 	}
 }

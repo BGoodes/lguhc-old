@@ -78,9 +78,9 @@ public class LGRole_IPL {
 			if (j.getPower() > 0 ) {
 
 				TextComponent msg = new TextComponent(main.gameTag + "§6Le joueur §f" + damaged.getName() + " §6 est Mort ! Vous avez 6 secondes pour l'infecter en cliquant "
-						+ "sur le message ou en faisant /lg infect <Pseudo>");
+						+ "sur le message !");
 
-				msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§cInfecter ?").create()));
+				msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Infecter ?").create()));
 				msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg infect " + damaged.getName()));
 				j.getPlayer().spigot().sendMessage(msg);
 				j.getPlayer().sendMessage("");

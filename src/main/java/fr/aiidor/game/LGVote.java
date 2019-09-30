@@ -141,6 +141,8 @@ public class LGVote {
 	private void checkvote() {
 		int max = 0;
 
+		Bukkit.broadcastMessage(main.gameTag + "§6RESULTAT DU VOTE :");
+
 		for (Joueur j : main.getJoueurs()) {
 			if (j.vote > max) {
 				max = j.vote;
@@ -177,7 +179,7 @@ public class LGVote {
 					for (Joueur j : main.getPlayerRoles(LGRoles.Bouc)) {
 						VoteEffect(j, true);
 					}
-					Bukkit.broadcastMessage(main.gameTag + "§bLes villageois sont indécis, c'est donc le Bouc Emissaire qui prend les votes !");
+					Bukkit.broadcastMessage(main.gameTag + "§bLes villageois sont indécis, c'est donc le Bouc Emissaire qui perd la moitié de sa vie !");
 					return;
 				}
 			}
@@ -201,6 +203,13 @@ public class LGVote {
 	}
 
 	private void VoteEffect(Joueur j, boolean bouc) {
+
+		if (j.isDead()) {
+			Bukkit.broadcastMessage(" ");
+			Bukkit.broadcastMessage(main.gameTag + "§bLe joueur §l" + j.getName() + " §bà obtenue la majorité des vote : §9" + j.vote + " §bvote(s). Mais puisqu'il est mort, les effets ne lui seront pas attribué !");
+			return;
+		}
+
 		j.getPlayer().setMaxHealth(j.getPlayer().getMaxHealth() / 2);
 		j.getPlayer().damage(0);
 
@@ -208,7 +217,7 @@ public class LGVote {
 
 		if (!bouc) {
 			Bukkit.broadcastMessage(" ");
-			Bukkit.broadcastMessage(main.gameTag + "§6Le joueur " + j.getName() + " §6à obtenue la majorité des vote : §b" + j.vote + " §6vote(s) !");
+			Bukkit.broadcastMessage(main.gameTag + "§bLe joueur §l" + j.getName() + " §bà obtenue la majorité des vote : §9" + j.vote + " §bvote(s). Il perd la moitié de sa vie !");
 
 			if (main.getPlayerRoles(LGRoles.Ange).size() > 0) {
 				for (Joueur ange : main.getPlayerRoles(LGRoles.Ange)) {

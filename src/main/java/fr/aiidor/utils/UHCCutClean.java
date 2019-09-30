@@ -31,6 +31,7 @@ public class UHCCutClean implements Listener {
 		Location loc = e.getBlock().getLocation();
 		
 		if (e.getBlock().getType() == Material.IRON_ORE) {
+			if (main.oreLess && main.ironLess) return;
 			
 			Integer choose = new Random().nextInt(10);
 			
@@ -47,6 +48,7 @@ public class UHCCutClean implements Listener {
 		}
 		
 		if (e.getBlock().getType() == Material.GOLD_ORE) {
+			if (main.oreLess && main.goldLess) return;
 			
 			ExperienceOrb orb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
 			orb.setExperience(1);
@@ -64,7 +66,7 @@ public class UHCCutClean implements Listener {
 		
 		if (main.run == false) return;
 		if (main.cutclean == false) return;
-		
+			
 		if (e.getEntity().getType() == EntityType.COW) {
 			
 			Random rand = new Random();

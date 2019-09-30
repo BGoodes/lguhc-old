@@ -101,7 +101,7 @@ public class LGRole_EnfantS {
 		Player p = j.getPlayer();
 
 		j.setPower(0);
-		p.sendMessage("§aVous avez bien choisit §6" + t.getName() + " §a comme modèle ! Si il vient à mourrir, vous passerez dans le camp des Loups-Garous !");
+		p.sendMessage(main.gameTag + "§aVous avez bien choisit " + t.getName() + " comme modèle ! Si il vient à mourrir, vous passerez dans le camp des Loups-Garous !");
 		j.Model = t;
 	}
 }

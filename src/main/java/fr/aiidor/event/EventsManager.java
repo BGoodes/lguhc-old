@@ -7,6 +7,7 @@ import fr.aiidor.LGUHC;
 import fr.aiidor.utils.UHCCutClean;
 import fr.aiidor.utils.UHCFastSmelting;
 import fr.aiidor.utils.UHCHasteyBoys;
+import fr.aiidor.utils.UHCNightmare;
 import fr.aiidor.utils.UHCTimber;
 
 public class EventsManager {
@@ -23,5 +24,6 @@ public class EventsManager {
 		pm.registerEvents(new UHCCutClean(pl), pl);
 		pm.registerEvents(new UHCFastSmelting(pl), pl);
 		pm.registerEvents(new UHCHasteyBoys(pl), pl);
+		pm.registerEvents(new UHCNightmare(pl), pl);
 	}
 }

@@ -23,11 +23,13 @@ public class LGRole_Chasseur {
 				cannotPan();
 			}
 		}, 1200);
-
-		j.setPower(1);
-		if (j.isConnected()) {
-			j.getPlayer().sendMessage(main.gameTag + "§bVous êtes mort mais vous pouvez faire §l/lg pan <pseudo> §bpour réduire la vie d'un joueur de moitié ! (Vous avez 1 minute)");
+		if (!j.noPower) {
+			j.setPower(1);
+			if (j.isConnected()) {
+				j.getPlayer().sendMessage(main.gameTag + "§bVous êtes mort mais vous pouvez faire §l/lg pan <pseudo> §bpour réduire la vie d'un joueur de moitié ! (Vous avez 1 minute)");
+			}
 		}
+
 
 	}
 

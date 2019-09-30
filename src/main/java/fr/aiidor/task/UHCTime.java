@@ -1,12 +1,16 @@
 package fr.aiidor.task;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGRoles;
+import net.minecraft.server.v1_8_R3.EntityLiving;
 
 public class UHCTime extends BukkitRunnable {
 
@@ -25,9 +29,29 @@ public class UHCTime extends BukkitRunnable {
 
 		time = world.getTime();
 		if (main.DailyCycle) {
-			world.setTime(time + 1);
+
+			if (time > 20500 && time < 23500);
+			else world.setTime(time + 1);
+
+			if (time > 10000 && time < 13000) {
+				world.setTime(time + 1);
+			}
+
 		}
 
+		if (main.PoisonLess) {
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.removePotionEffect(PotionEffectType.POISON);
+			}
+		}
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			EntityLiving cp = ((CraftPlayer)p.getPlayer()).getHandle();
+			if (cp.getAbsorptionHearts() != 0) {
+				if (!p.hasPotionEffect(PotionEffectType.ABSORPTION)) {
+					cp.setAbsorptionHearts(0);
+				}
+			}
+		}
 
 		if ((time == 13000 || time ==  13001 && main.DailyCycle) || (time == 13000 && !main.DailyCycle)) {
 			for (Joueur j : main.Players) {

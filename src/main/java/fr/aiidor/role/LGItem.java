@@ -68,7 +68,7 @@ public class LGItem {
 			return;
 		}
 
-		if (role == LGRoles.Sorciere) {
+		if (role == LGRoles.Sorcière) {
 
 			ItemStack item = new ItemStack(Material.POTION, 3);
 			Potion pot = new Potion(1);
@@ -181,7 +181,7 @@ public class LGItem {
 		else p.getInventory().addItem(it);
 	}
 
-	public boolean isInventoryFull()
+	private boolean isInventoryFull()
 	{
 		return p.getInventory().firstEmpty() == -1;
 	}
