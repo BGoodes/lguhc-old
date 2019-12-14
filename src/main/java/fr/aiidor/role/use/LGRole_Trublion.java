@@ -3,9 +3,12 @@ package fr.aiidor.role.use;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import fr.aiidor.LGUHC;
+import fr.aiidor.effect.Sounds;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
@@ -50,13 +53,6 @@ public class LGRole_Trublion {
 	
 	private void cannotChoose() {
 		
-		if (!main.canSeeLgList()) {
-			for (Joueur lg : main.getLg()) {
-				lg.getPlayer().sendMessage("");
-				lg.getPlayer().sendMessage(main.gameTag + "§6Vous pouvez désormais consulter la liste des Loups-Garous en faisant §l/lg role !");
-			}
-		}
-		
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Trublion) {
 				if (!j.isDead()) {
@@ -70,6 +66,16 @@ public class LGRole_Trublion {
 					}
 				}
 			}
+		}
+		
+		main.canSeeList = true;
+		
+		for (Joueur lg : main.getLg()) {
+			
+			new Sounds(lg.getPlayer()).PlaySound(Sound.LEVEL_UP);
+			
+			lg.getPlayer().sendMessage("");
+			lg.getPlayer().sendMessage(main.gameTag + "§6§lVous pouvez désormais consulter la liste des Loups-Garous en faisant §l/lg role !");
 		}
 	}
 	
@@ -127,18 +133,28 @@ public class LGRole_Trublion {
 		j.getPlayer().sendMessage(main.gameTag + "§aVous avez bien échangé les rôles de " + t.getName() + " et " + t2.getName());
 		j.getPlayer().sendMessage(" ");
 		
+		//ROLE
 		LGRoles role1 = t.getRole();
 		LGRoles role2 = t2.getRole();
 		
-		LGCamps camp1 = t.getRole().camp;
-		LGCamps camp2 = t2.getRole().camp;
+		t.setRole(role2);
+		t2.setRole(role1);
 		
+		//CAMP
+		LGCamps camp1 = t.getCamp();
+		LGCamps camp2 = t2.getCamp();
+		
+		t.setCamp(camp2);
+		t2.setCamp(camp1);
+		
+		//POWER
 		int power1 = t.getPower();
 		int power2 = t2.getPower();
 		
-		Joueur Soeur = t.Soeur;
-		Joueur Soeur2 = t2.Soeur;
+		t.setPower(power2);
+		t2.setPower(power1);
 		
+		//ROLES
 		if (t.getRole() == LGRoles.LGA || t2.getRole() == LGRoles.LGA) {
 			List<Joueur> list1 = t.lglist;
 			List<Joueur> list2 = t2.lglist;
@@ -158,41 +174,40 @@ public class LGRole_Trublion {
 			t2.Model = model1;
 		}
 		
-		//VOLEUR
-		if (t.Rob) {
-			power1 = 0;
-			role1 = LGRoles.Voleur;
+		if (t.getRole() == LGRoles.Soeur || t2.getRole() == LGRoles.Soeur) {
+			Joueur Soeur = t.Soeur;
+			Joueur Soeur2 = t2.Soeur;
+			
+			t.Soeur = Soeur2;
+			t2.Soeur = Soeur;
 		}
 		
-		if (t2.Rob) {
-			power2 = 0;
-			role2 = LGRoles.Voleur;
+		if (t.getRole() == LGRoles.Voleur || t2.getRole() == LGRoles.Voleur) {
+			Boolean rob1 = t.Rob;
+			Boolean rob2 = t2.Rob;
+			
+			t.Rob = rob2;
+			t2.Rob = rob1;
 		}
-		
+
 		t.getPlayer().setMaxHealth(20);
 		t2.getPlayer().setMaxHealth(20);
 		
 		if (role1 == LGRoles.LGB) t2.getPlayer().setMaxHealth(30);
 		if (role2 == LGRoles.LGB) t.getPlayer().setMaxHealth(30);
 		
-		t.setRole(role2);
-		t2.setRole(role1);
 		
-		if (t.isInfect()) t.setCamp(camp2);
-		if (t2.isInfect()) t2.setCamp(camp1);
+		//INFECT
+		Boolean infect1 = t.isInfect();
+		Boolean infect2 = t2.isInfect();
 		
-		t.setPower(power2);
-		t2.setPower(power1);
+		t.setInfect(infect2);
+		t2.setInfect(infect1);
 		
-		t.setPower(power2);
-		t2.setPower(power1);
+		//---------------------------
 		
 		t.trublion = true;
 		t2.trublion = true;
-		
-		t.Soeur = Soeur2;
-		t2.Soeur = Soeur;
-		
 		
 		//MSG
 		t.getPlayer().sendMessage("");
@@ -201,12 +216,7 @@ public class LGRole_Trublion {
 		t2.getPlayer().sendMessage("");
 		t2.getPlayer().sendMessage(main.gameTag + "§9Votre rôle viens d'être switché par le Trublion ! Prenez connaissance de votre nouveau rôle en faisant /lg role");
 		
-		
-		if (main.canSeeLgList()) {
-			for (Joueur lg : main.getLg()) {
-				lg.getPlayer().sendMessage("");
-				lg.getPlayer().sendMessage(main.gameTag + "§6Vous pouvez désormais consulter la liste des Loups-Garous en faisant §l/lg role !");
-			}
-		}
+		for(PotionEffect effect:t.getPlayer().getActivePotionEffects()){t.getPlayer().removePotionEffect(effect.getType());}
+		for(PotionEffect effect:t2.getPlayer().getActivePotionEffects()){t2.getPlayer().removePotionEffect(effect.getType());}
 	}
 }

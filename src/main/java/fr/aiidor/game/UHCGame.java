@@ -27,7 +27,7 @@ import fr.aiidor.role.use.LGRole_Salvateur;
 import fr.aiidor.role.use.LGRole_Trublion;
 import fr.aiidor.role.use.LGRole_Voyante;
 import fr.aiidor.scoreboard.ScoreboardSign;
-import fr.aiidor.task.UHCTime;
+import fr.aiidor.scoreboard.TabList;
 
 public final class UHCGame extends BukkitRunnable {
 
@@ -51,11 +51,6 @@ public final class UHCGame extends BukkitRunnable {
 	
 	@Override
 	public void run() {
-		
-		if (main.isState(UHCState.FINISH)) {
-			cancel();
-			return;
-		}
 		
 		timer ++;
 		main.setLimitGroup();
@@ -110,33 +105,44 @@ public final class UHCGame extends BukkitRunnable {
 		//EFFECT
 		long time = main.world.getTime();
 		
-		if (time > 13000 && time < 23500) {
+		if (time >= 13000 && time < 23500) {
 			nightEffect();
 		}
 		
-		if (time > 23500 || time < 13000) {
+		if (time >= 23500 || time < 13000) {
 			dayEffect();
 		}
 		
 		//TIME CYCLE
 		
-		if (main.epTime >= 5) {
-			if (timer == nextEp - 900) {
-				main.world.setTime(13000);
+		if (main.DailyCycle) {
+			
+			//20
+			if (main.epTime == 20) {
+				
+				if (timer == nextEp - 900) {
+					main.world.setTime(13000);
+				}
+			
+				if (timer == nextEp - 600) {
+					main.world.setTime(23500);
+				}
+
+				if (timer == nextEp - 300) {
+					main.world.setTime(13000);
+				}
 			}
-		}
-		
-		if (main.epTime >= 10) {
-			if (timer == nextEp - 600) {
-				main.world.setTime(23500);
+			
+			//10
+			if (main.epTime == 10) {
+				
+				if (timer == nextEp - 300) {
+					main.world.setTime(13000);
+				}
 			}
 		}
 
-		if (main.epTime >= 15) {
-			if (timer == nextEp - 300) {
-				main.world.setTime(13000);
-			}
-		}
+
 
 		
 		Permeffect();
@@ -202,6 +208,10 @@ public final class UHCGame extends BukkitRunnable {
 				}
 			}, 20);
 
+		}
+		
+		if (main.ep == main.wbEP - 1 && timer == nextEp - 600) {
+			Bukkit.broadcastMessage(main.gameTag + "§bLa world border diminuera dans 10 min !");
 		}
 		
 		if (main.ep == main.wbEP - 1 && timer == nextEp - 300) {
@@ -299,17 +309,15 @@ public final class UHCGame extends BukkitRunnable {
 
 		}
 		
-
-		
 		//WORLDBORDER
 		if (main.ep >= main.wbEP && timer == nextWb) {
 			//WB
 			if (Wb > main.wbMax) {
 				
-				Wb --;
+				Wb = Wb - main.wbSpeed;
 				main.wb.setSize(Wb * 2);
 				
-				nextWb = timer + 5;
+				nextWb = timer + main.wbSecond;
 			}
 		}
 		
@@ -317,9 +325,6 @@ public final class UHCGame extends BukkitRunnable {
 			if (main.ep == 1) {
 				
 				main.PlayerInGame.clear();
-				
-				UHCTime task = new UHCTime(main);
-				task.runTaskTimer(main, 0, 1);
 				
 				Bukkit.broadcastMessage("§b-------- Fin Episode " + main.ep + " --------");
 				
@@ -330,20 +335,25 @@ public final class UHCGame extends BukkitRunnable {
 						setAllRole();
 						getSoeur();
 						
+						main.PlayerHasRole = true;
+						
 						for (Joueur j : main.getJoueurs()) {
-							j.sendDesc();
+							if (j.isConnected()) {
+								j.sendDesc();
+								new TabList(main).set(j.getPlayer());
+							}
 						}
 						
-						main.PlayerHasRole = true;
 						
 						if (!main.compo.contains(LGRoles.Trublion)) {
 							for (Joueur j : main.getLg()) {	
 								new LGDesc(main).sendLGList(j.getPlayer());
 							}
+						} else {
+							main.canSeeList = false;
 						}
 						
 						main.setLimitGroup();
-
 					}
 				}, 40);
 				
@@ -437,7 +447,6 @@ public final class UHCGame extends BukkitRunnable {
 							
 							for (Joueur j : main.Players) {
 								j.salvation = false;
-								j.setNoFall(false);
 							}
 								
 							for (Player p : Bukkit.getOnlinePlayers()) {
@@ -481,21 +490,21 @@ public final class UHCGame extends BukkitRunnable {
 				
 			}
 			
-			//ROLE
+			//ROLE	
 			Random ran = new Random();
 			Integer Choose = ran.nextInt(main.allRoles().size());
 			LGRoles role = main.allRoles().get(Choose);
-			
+				
 			if (main.RoleIsEmpty()) {
 				setRole(pl, LGRoles.SV);
-				
+					
 			} else {
-				
+					
 				while (role.number <= 0) {
 					Choose = ran.nextInt(main.allRoles().size());
 					role = main.allRoles().get(Choose);
 				}
-				
+					
 				role.number --;
 				setRole(pl, role);
 			}
@@ -504,7 +513,7 @@ public final class UHCGame extends BukkitRunnable {
 	
 	private void setRole(Player p, LGRoles role) {
 		
-		main.Players.add(new Joueur(p.getUniqueId(), role, role.camp));
+		main.Players.add(new Joueur(p.getUniqueId(), role, role.camp, main));
 		
 		main.PlayerInGame.add(p.getUniqueId());
 		new LGItem(main.getPlayer(p.getUniqueId())).giveItem();
@@ -565,7 +574,6 @@ public final class UHCGame extends BukkitRunnable {
 				}
 				
 				if (j.salvation) {
-					j.setNoFall(true);
 					j.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0, false, false));
 				}
 				
@@ -636,10 +644,10 @@ public final class UHCGame extends BukkitRunnable {
 		for (Joueur j : main.getPlayerRoles(LGRoles.MontreurDours)) {
 			if (Bukkit.getOnlinePlayers().contains(j.getPlayer())) {
 				for (Player p : Bukkit.getOnlinePlayers()) {
-					if (main.getPlayer(p.getUniqueId()) != null) {
+					if (main.isInGame(p.getUniqueId())) {
 						Joueur j2 = main.getPlayer(p.getUniqueId());
 						
-						if (j2.isLg()) {
+						if (j2.isLg() && !j2.isDead()) {
 							if (p.getLocation().distance(j.getPlayer().getLocation()) <= 50) {
 								Bukkit.broadcastMessage(main.gameTag + "§6Grrrrrrrr");
 								
@@ -736,7 +744,7 @@ public final class UHCGame extends BukkitRunnable {
 		}
 		
 		if (distance > 1500 && distance <= 1800) {
-			new Titles().sendActionText(player, "§5Distance au centre : §c✈ Entre 1500 et 1800 blocs");
+			new Titles().sendActionText(player, "§5Distance au centre : §1✈ Entre 1500 et 1800 blocs");
 			return;
 		}
 		

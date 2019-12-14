@@ -25,7 +25,7 @@ public class LGRole_Sorciere {
 
 		Player p = sorcière.getPlayer();
 
-		if (sorcière.getRole() != LGRoles.Sorcière) {
+		if (sorcière.getRole() != LGRoles.Sorciere) {
 			p.sendMessage(main.gameTag + "§cErreur, vous devez être §oSorcière §cpour effectuer cette commande !");
 			return;
 		}
@@ -73,7 +73,7 @@ public class LGRole_Sorciere {
 
 	public void ReaMsg(Player damaged) {
 
-		for (Joueur j : main.getPlayerRoles(LGRoles.Sorcière)) {
+		for (Joueur j : main.getPlayerRoles(LGRoles.Sorciere)) {
 			if (j.getPower() > 0 ) {
 				TextComponent msg = new TextComponent(main.gameTag + "§6Le joueur §f" + damaged.getName() + " §6 est Mort ! Vous avez 6 secondes pour le réanimer en cliquant "
 						+ "sur le message !");

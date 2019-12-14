@@ -39,7 +39,7 @@ public class LGEndGame {
 		
 		if (main.getJoueurs().size() == 0) {
 			Bukkit.broadcastMessage(" ");
-			Bukkit.broadcastMessage(main.gameTag + "§eVictoire de personne car tout le monde est mort ^^'");
+			Bukkit.broadcastMessage(main.gameTag + "§e§lVictoire de personne car tout le monde est mort ^^'");
 			stopGame();
 			return;
 		}
@@ -78,14 +78,14 @@ public class LGEndGame {
 		if (vil > 0 &&
 				lg + assassin + lgb + couple + voleur  == 0) {
 			Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§2Victoire du village ! Bravo à eux !");
+				Bukkit.broadcastMessage(main.gameTag + "§2§lVictoire du village ! Bravo à eux !");
 				stopGame();
 			}
 			//WIN DES LG
 			if (lg > 0 &&
 					vil + assassin + lgb + couple + voleur  == 0) {
 				Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§cVictoire des Loups-Garous ! Bravo à eux !");
+				Bukkit.broadcastMessage(main.gameTag + "§c§lVictoire des Loups-Garous ! Bravo à eux !");
 				stopGame();
 				}
 			
@@ -93,7 +93,7 @@ public class LGEndGame {
 			if (assassin == 1 &&
 					vil + lg + lgb + couple + voleur == 0) {
 				Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§eVictoire de l'Assassin ! Bravo à lui !");
+				Bukkit.broadcastMessage(main.gameTag + "§e§lVictoire de l'Assassin ! Bravo à lui !");
 				stopGame();
 				}	
 			
@@ -101,14 +101,14 @@ public class LGEndGame {
 			if (lgb == 1 &&
 					lg + assassin + vil + couple + voleur == 0) {
 				Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§4Victoire du Loup-Garou Blanc ! Bravo à lui !");
+				Bukkit.broadcastMessage(main.gameTag + "§4§lVictoire du Loup-Garou Blanc ! Bravo à lui !");
 				stopGame();
 				}	
 			
 			if (voleur == 1 &&
 					lg + assassin + vil + couple + lgb == 0) {
 				Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§eVictoire du Voleur ! Bravo à lui !");
+				Bukkit.broadcastMessage(main.gameTag + "§e§lVictoire du Voleur ! Bravo à lui !");
 				stopGame();
 				}	
 			
@@ -116,7 +116,7 @@ public class LGEndGame {
 			if (couple == 2 && 
 					lg + assassin + vil + lgb + voleur - cupidon == 0) {
 				Bukkit.broadcastMessage(" ");
-				Bukkit.broadcastMessage(main.gameTag + "§5Victoire du couple ! Bravo à eux !");
+				Bukkit.broadcastMessage(main.gameTag + "§5§lVictoire du couple ! Bravo à eux !");
 				stopGame();
 			}
 	}
@@ -128,6 +128,7 @@ public class LGEndGame {
 		}
 		
 		main.setState(UHCState.FINISH);
+		Bukkit.getScheduler().cancelAllTasks();
 		
 		StringBuilder msg = new StringBuilder();
 		

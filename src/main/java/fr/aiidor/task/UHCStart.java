@@ -34,6 +34,11 @@ public class UHCStart extends BukkitRunnable {
 	
 	public UHCStart(LGUHC main) {
 		this.main = main;
+		
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			pl.setLevel(Timer);
+			main.removeOptionChat(pl.getUniqueId());
+		}
 	}
 	
 	
@@ -52,7 +57,15 @@ public class UHCStart extends BukkitRunnable {
 		    	sign.getValue().setLine(1, "§ePartie en Attente !");
 		     }
 		    
+			for (Player pl : Bukkit.getOnlinePlayers()) {
+				pl.setLevel(0);
+			}
+		    
 			return;
+		}
+		
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			pl.setLevel(Timer);
 		}
 		
 		if (Timer == 60) {
@@ -91,8 +104,6 @@ public class UHCStart extends BukkitRunnable {
 	     }
 	    
 		Timer --;
-		
-		main.world.setTime(23500);
 	}
 	
 	private void Start() {
@@ -101,7 +112,25 @@ public class UHCStart extends BukkitRunnable {
 		Bukkit.broadcastMessage(" ");
 		main.setState(UHCState.PREGAME);
 		
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule reducedDebugInfo " + main.cord.toString());
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule announceAdvancements false" + main.announceAdv.toString());
+		
+		main.world.setGameRuleValue("naturalRegeneration", "false");
+		main.world.setGameRuleValue("keepInventory", "true");
+		main.world.setGameRuleValue("showDeathMessages", "false");
+		
+		main.world.setPVP(false);
+		main.world.setTime(23500);
+		
 		main.wb.setSize(main.Map * 2);
+		
+		UHCTime task = new UHCTime(main);
+		task.runTaskTimer(main, 0, 1);
+		
+		if (main.Map < main.wbMax) {
+			main.wbMax = main.Map  - main.Map/2;
+			Bukkit.broadcastMessage(main.gameTag + "§cLa taille finale de la bordure est supérieur à la taille initiale. La taille finale sera désormais de " + main.wbMax);
+		}
 		
 		if (main.fun && main.Civilisation) {
 			createCivilisation();
@@ -109,7 +138,11 @@ public class UHCStart extends BukkitRunnable {
 		
 		
 		for (Player pl : Bukkit.getOnlinePlayers()) {
+			
+			pl.closeInventory();
 			main.reset(pl);
+			
+			main.removeOptionChat(pl.getUniqueId());
 			
 			if (main.Spectator.contains(pl.getUniqueId())) {
 				pl.setGameMode(GameMode.SPECTATOR);
@@ -129,13 +162,12 @@ public class UHCStart extends BukkitRunnable {
 						pl.sendMessage(main.gameTag + "§eVous faites partie du village §l" + main.getVillage(pl.getUniqueId()).getName() + "§e ! Esperons que vous y vivrez paisiblement !");
 						pl.sendMessage(" ");
 					} else {
-						main.randomTp(pl, main.Map);
+						main.randomTp(pl);
 					}
 					
 				} else {
-					main.randomTp(pl, main.Map);
+					main.randomTp(pl);
 				}
-				
 				
 				if (main.startItem != null) {
 					int slot = 0;
@@ -193,9 +225,14 @@ public class UHCStart extends BukkitRunnable {
 						for(PotionEffect effect:p.getActivePotionEffects()){p.removePotionEffect(effect.getType());}
 						
 						new Titles().sendTitle(p, "§cLG-UHC", "§6", 60);
+						
+						if (main.meetup) {
+							p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 1200, 1, true, true));
+						}
 					}
 				}
 				
+				Bukkit.broadcastMessage(" ");
 				Bukkit.broadcastMessage(main.gameTag + "§bDébut de la partie, bonne chance !");
 				Bukkit.broadcastMessage(" ");
 			}

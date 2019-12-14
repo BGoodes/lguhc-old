@@ -1,5 +1,5 @@
 package fr.aiidor.game;
 
 public enum UHCState {
-	WAITING, STARTING, PREGAME, GAME, FINISH;
+	WAITING, WAITING_GAME, STARTING, PREGAME, GAME, FINISH;
 }

@@ -27,6 +27,7 @@ import fr.aiidor.role.LGRoles;
 import fr.aiidor.role.use.LGRole_Chasseur;
 import fr.aiidor.role.use.LGRole_Soeur;
 import fr.aiidor.role.use.LGRole_Sorciere;
+import fr.aiidor.scoreboard.TabList;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 
 public class LGDeath extends BukkitRunnable {
@@ -151,6 +152,7 @@ public class LGDeath extends BukkitRunnable {
 		
 		j.setDead(true);
 		main.Spectator.add(dead);
+		if (j.isConnected()) new TabList(main).set(j.getPlayer());
 		
 		if (!main.isState(UHCState.FINISH)) main.death.add(j);
 		
@@ -159,6 +161,10 @@ public class LGDeath extends BukkitRunnable {
 		if (main.PlayerInGame.contains(dead)) main.PlayerInGame.remove(dead);
 		if (main.PlayerHasVillage(dead)) {
 			village = main.getVillage(dead).getName();
+		}
+		
+		if (j.LastWill != null) {
+			Bukkit.broadcastMessage("§8[MORT] §o" + j.getName() + "§8 >> §7" + j.LastWill);
 		}
 		
 		if (j.hasCouple() && j.getCouple().isDead()) {
@@ -266,7 +272,7 @@ public class LGDeath extends BukkitRunnable {
 					
 					if (j.getRole() == LGRoles.Ancien && k.getCamp() == LGCamps.Village && k.getRole() != LGRoles.LGA) {
 						if (k.isConnected()) {
-							k.getPlayer().setMaxHealth(10);
+							k.getPlayer().setHealth(k.getPlayer().getHealth() / 2);
 							k.getPlayer().damage(0);
 							k.getPlayer().sendMessage(main.gameTag + "§cVous avez tué l'ancien et perdez par conséquent la moitié de votre vie ainsi que votre pouvoir si vous en aviez un ");
 						}
@@ -356,8 +362,8 @@ public class LGDeath extends BukkitRunnable {
 						}
 					}
 				}
+				if (k.isConnected()) new TabList(main).set(k.getPlayer());
 			}
-				
 		}
 		
 		if (j.getRole() == LGRoles.Soeur) {
@@ -397,14 +403,12 @@ public class LGDeath extends BukkitRunnable {
 	}
 	
 	private void revive(Joueur Target, Boolean infect) {
-		
+		Target.setRea(false);
 		if (!Target.isConnected()) return;
 		
 		Target.setDyingState(null);
-		Target.setRea(false);
 		
 		Player player = Target.getPlayer();
-		Target.setDyingState(null);
 		
 		if (infect) {
 			
@@ -422,9 +426,8 @@ public class LGDeath extends BukkitRunnable {
 			player.sendMessage(main.gameTag + "§aLa sorcière à décidé de vous ressusciter !");
 		}
 		
-		if (!main.Spectator.contains(Target.getUUID())) main.Spectator.remove(Target.getUUID());
+		if (main.Spectator.contains(Target.getUUID())) main.Spectator.remove(Target.getUUID());
 		
-		Target.setNoFall(true);
 		main.TpPower(player);
 		
 		for(PotionEffect effect:player.getActivePotionEffects()){player.removePotionEffect(effect.getType());}

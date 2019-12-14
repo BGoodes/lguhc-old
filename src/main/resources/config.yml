@@ -1,15 +1,32 @@
 #########################################################
-#            Loups-Garous UHC -  Version 0.4            #
+#            Loups-Garous UHC -  Version 0.5            #
 #                  Author : B_Goodes                    #
 #########################################################
 
+Informations:
+  tabHeader: "&fServeur LG UHC\n &2%date\n" #Informations sur le dessus du tab
+  gameTag: "&b&l[&6&lLOUP-GAROUS&b&l]" #Nom du jeu dans les messages (devant les messages)
 
 MultiWorld:
   state: false
-  seed: 0
+  seed: 0   # 0 --> random
+  dimension: "NORMAL" # NORMAL | NETHER | END
   generateStructure: true
 
 Spawn:
-  worldName: world
+  worldName: "world"
   location: 0, 200, 0
-  cage: true   #Permet de g�n�rer une cage au spawn !
+  
+  #TP EN DEBUT DE PARTIE
+  maxY: 150   #Permet de definir la valeur max en Y lors des TPs
+  maxRange: 0   #Permet de mettre une limite de distance lors du TP. Si celle ci est egal a 0, elle sera remplace par la taille de la WorldBorder de la partie.
+
+Cage:  #Permet de generer une cage au spawn !
+  state: true   
+  cageSize: 60
+  cageHeight: 4
+
+HOST:
+  hostList: null  #Liste de joueurs (pseudo) qui peuvent Host. Si hostList = null, tout le monde peut host.
+  
+
