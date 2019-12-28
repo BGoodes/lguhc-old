@@ -20,9 +20,11 @@ import fr.aiidor.game.LGVote;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGDesc;
 import fr.aiidor.role.LGRoles;
+import fr.aiidor.role.use.LGRole_Ange;
 import fr.aiidor.role.use.LGRole_Chasseur;
 import fr.aiidor.role.use.LGRole_Citoyen;
 import fr.aiidor.role.use.LGRole_Cupidon;
+import fr.aiidor.role.use.LGRole_Detective;
 import fr.aiidor.role.use.LGRole_EnfantS;
 import fr.aiidor.role.use.LGRole_IPL;
 import fr.aiidor.role.use.LGRole_Renard;
@@ -56,11 +58,26 @@ public class CommandLg implements CommandExecutor {
 		//RACINE == /HELP
 		if (args.length == 0) {
 			player.sendMessage(main.gameTag + "§3 Les commandes :");
-			player.sendMessage("§9- /lg role : §6Permet d'avoir des infos sur son rôle !");
-			player.sendMessage("§9- /lg compo : §6Permet de voir la composition de la game !");
-			player.sendMessage("§9- /lg compo Chat : §6Permet de voir la composition de la game !");
+			player.sendMessage("§9- /lg role : §6Infos sur le rôle");
+			player.sendMessage("§9- /lg compo : §6Composition de la partie");
+			player.sendMessage("§9- /lg compo Chat");
 			player.sendMessage("§9- /lg msg <message> : §6Permet de laisser un dernière volonté !");
 			player.sendMessage("§9- /lg report: §6Permet de report les bugs, les joueurs, ...");
+			
+			
+			if (main.compo.contains(LGRoles.Chaman)) {
+				if (main.getPlayerRolesOff(LGRoles.Chaman).size() != 0) {
+					if (main.hasRole(player)) {
+						Joueur j = main.getPlayer(player.getUniqueId());
+						
+						if (j.isDead()) {
+							player.sendMessage(main.gameTag + "§cVous êtes mort mais vous pouvez encore agir dans la partie ! Grâce à la commande /lg chaman <message> "
+									+ "qui permet de laisser un message au chaman si vous vous déconnecter Sinon vous pouvez attendre que le chaman puisse \"écouter les mort\".");
+						}
+					}
+				}
+			}
+
 			player.sendMessage(" ");
 			
 			return true;
@@ -169,6 +186,11 @@ public class CommandLg implements CommandExecutor {
 					return true;
 				}
 				
+				if (args[1].equalsIgnoreCase("book")) {
+					newBook(player);
+					return true;
+				}
+				
 			}
 			
 			player.sendMessage(main.gameTag + "§cErreur, la commande est §e/lg compo OU /lg compo chat");
@@ -190,12 +212,9 @@ public class CommandLg implements CommandExecutor {
 			}
 			
 			player.sendMessage("§aVotre Report à bien été enregistré !");
-			for (Player p : Bukkit.getOnlinePlayers()) {
-				if (p.getUniqueId().equals(main.host) || main.orgas.contains(p.getUniqueId())) {
-					p.sendMessage("§3(Staff : §6Report§3) §8Le joueur §c" + player.getName() + " §8a report :");
-					p.sendMessage("§7" + bs.toString());
-				}
-			}
+			
+			main.sendStaffMsg("§3(Staff : §6Report§3) §8Le joueur §c" + player.getName() + " §8a report :");
+			main.sendStaffMsg("§7 > " + bs.toString());
 			
 			return true;
 		}
@@ -205,22 +224,29 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg vote <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
 			if (!canCommand(player)) return true;
 			
-			if (args.length > 2) {
-				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg vote <Joueur>");
-				player.sendMessage(" ");
-				return true;
-			}
 			
 			if (args.length == 2) {
 				new LGVote(main).vote(main.getPlayer(player.getUniqueId()), args[1]);
 				return true;
 			}
+			
+			if (args.length == 4) {
+				new LGVote(main).corbeauVote(main.getPlayer(player.getUniqueId()), args[1], args[2], args[3]);
+				return true;
+			}
+			
+			player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /lg vote <Joueur>");
+			
+			if (main.getPlayer(player.getUniqueId()).getRole() == LGRoles.Corbeau) {
+				player.sendMessage(main.gameTag + "§cMais elle peut aussi écrire /lg vote <Joueur1> <Joueur2> <Joueur3> car vous êtes le §ocorbeau §c!");
+			}
+			
+			return true;
 		}
 		
 		//FLAIRER
@@ -228,7 +254,6 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg flairer <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
@@ -238,7 +263,6 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg flairer <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
@@ -254,7 +278,6 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg see <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
@@ -262,7 +285,6 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg see <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
@@ -277,7 +299,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg revive <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -296,7 +318,6 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg revive <Joueur>");
-				player.sendMessage(" ");
 				return true;
 			}
 			
@@ -311,7 +332,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg infect <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -330,7 +351,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg infect <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -344,7 +365,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg pan <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -355,7 +376,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg pan <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -365,12 +386,48 @@ public class CommandLg implements CommandExecutor {
 			}
 		}
 		
+		if (args[0].equalsIgnoreCase("chaman")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg chaman <message>");
+				
+				return true;
+			}
+			
+			if (main.getPlayer(player.getUniqueId()) == null) {
+				player.sendMessage(main.gameTag + "§cVous devez avoir un rôle pour effectuer cette commande !");
+				return true;
+			}
+			
+			if (args.length < 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg chaman <message>");
+				return true;
+			}
+			
+			Joueur j = main.getPlayer(player.getUniqueId());
+			
+			StringBuilder bs = new StringBuilder();
+			boolean size = false;
+			
+			for (String s : args) {
+				if (size) {
+					bs.append(s + " ");
+				} else {
+					size = true;
+				}
+			}
+			
+			j.chamanMsg = bs.toString();
+			player.sendMessage(main.gameTag + "§aVotre message a bien été enregistré !");
+			return true;
+		}
+		
 		//ENFANTS
 		if (args[0].equalsIgnoreCase("choose")) {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg choose <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -378,7 +435,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg choose <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -393,7 +450,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg love <Joueur1> <Joueur2>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -401,7 +458,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length != 3) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg love <Joueur1> <Joueur2>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -416,7 +473,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg switch <Joueur1> <Joueur2>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -424,7 +481,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length != 3) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg switch <Joueur1> <Joueur2>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -434,12 +491,35 @@ public class CommandLg implements CommandExecutor {
 			}
 		}
 		
+		//DETECTIVE
+		if (args[0].equalsIgnoreCase("inspect")) {
+			
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg inspect <Joueur1> <Joueur2>");
+				
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length != 3) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg inspect <Joueur1> <Joueur2>");
+				
+				return true;
+			}
+			
+			if (args.length == 3) {
+				new LGRole_Detective(main).Inspect(main.getPlayer(player.getUniqueId()), args[1], args[2]);
+				return true;
+			}
+		}
+		
 		//CITOYEN
 		if (args[0].equalsIgnoreCase("SeeVote")) {
 			
 			if (args.length != 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg SeeVote");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -451,11 +531,27 @@ public class CommandLg implements CommandExecutor {
 			}
 		}
 		
+		if (args[0].equalsIgnoreCase("cancelVote")) {
+			
+			if (args.length != 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg cancelVote");
+				
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length == 1) {
+				new LGRole_Citoyen(main).cancelVote(main.getPlayer(player.getUniqueId()));
+				return true;
+			}
+		}
+		
 		if (args[0].equalsIgnoreCase("SeeKiller")) {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg SeeKiller role|name");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -471,7 +567,7 @@ public class CommandLg implements CommandExecutor {
 					return true;
 				}
 				player.sendMessage(main.gameTag + "§cErreur, La commande : /lg SeeKiller role|name");
-				player.sendMessage(" ");
+				
 			}
 		}
 		
@@ -479,7 +575,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg protect <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -487,7 +583,7 @@ public class CommandLg implements CommandExecutor {
 			
 			if (args.length > 2) {
 				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg protect <Joueur>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -497,12 +593,48 @@ public class CommandLg implements CommandExecutor {
 			}
 		}
 		
+		//ANGE
+		if (args[0].equalsIgnoreCase("angeType")) {
+			if (args.length == 1) {
+				player.sendMessage(main.gameTag + "§bLa commande : /lg angeType <déchu|gardien>");
+				
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length > 2) {
+				player.sendMessage(main.gameTag + "§cErreur, La commande :§e /lg angeType <déchu|gardien>");
+				return true;
+			}
+			
+			if (args.length == 2) {
+				new LGRole_Ange(main).choose(main.getPlayer(player.getUniqueId()), args[1]);
+				return true;
+			}
+		}
+		
+		if (args[0].equalsIgnoreCase("regen")) {
+			if (args.length != 1) {
+				player.sendMessage(main.gameTag + "§cLa commande : /lg regen");
+				
+				return true;
+			}
+			
+			if (!canCommand(player)) return true;
+			
+			if (args.length == 1) {
+				new LGRole_Ange(main).heal(main.getPlayer(player.getUniqueId()));
+				return true;
+			}
+		}
+		
 		//DON DE VIE
 		if (args[0].equalsIgnoreCase("don")) {
 			
 			if (args.length == 1) {
 				player.sendMessage(main.gameTag + "§bLa commande : /lg don <% de vie>");
-				player.sendMessage(" ");
+				
 				return true;
 			}
 			
@@ -556,7 +688,7 @@ public class CommandLg implements CommandExecutor {
 		player.sendMessage("§9- /lg compo : §6Permet de voir la composition de la game !");
 		player.sendMessage("§9- /lg compo Chat : §6Permet de voir la composition de la game !");
 		player.sendMessage("§9- /lg report: §6Permet de report les bugs, les joueurs, ...");
-		player.sendMessage(" ");
+		
 		return false;
 	}
 	
@@ -595,7 +727,7 @@ public class CommandLg implements CommandExecutor {
 			name.append("§a");
 			if (number != 0) itM.setOwner("Villager");
 		}
-		if (role.camp == LGCamps.LoupGarou || role == LGRoles.LGA) {
+		if (role.camp == LGCamps.LoupGarou) {
 			name.append("§c");
 			if (number != 0) itM.setOwner("Verzide");
 		}
@@ -604,11 +736,18 @@ public class CommandLg implements CommandExecutor {
 			name.append("§4");
 			if (number != 0) itM.setOwner("SomeWerewolf");
 		}
+		
 		if (role.camp == LGCamps.Assassin) {
 			name.append("§6");
 			if (number != 0) itM.setOwner("julagamer2007");
 		}
-		if (role.camp == LGCamps.Voleur) {
+		
+		if (role.camp == LGCamps.Ange) {
+			name.append("§d");
+			if (number != 0) itM.setOwner("K1ll3rK1tt3n");
+		}
+		
+		if (role.camp == LGCamps.Neutre) {
 			name.append("§b");
 			if (number != 0) itM.setOwner("Madben");
 		}
@@ -639,8 +778,8 @@ public class CommandLg implements CommandExecutor {
 		if (role.camp == LGCamps.LoupGarou) msg.append("§c");
 		if (role.camp == LGCamps.LGB) msg.append("§4");
 		if (role.camp == LGCamps.Assassin) msg.append("§6");
-		if (role.camp == LGCamps.Voleur) msg.append("§b");
-		if (role == LGRoles.LGA) msg.append("§c");
+		if (role.camp == LGCamps.Assassin) msg.append("§d");
+		if (role.camp == LGCamps.Neutre) msg.append("§b");
 		
 		if (number == 0) msg.append("§m");
 		msg.append(role.name);

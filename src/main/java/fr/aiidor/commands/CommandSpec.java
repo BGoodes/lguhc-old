@@ -15,6 +15,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.Joueur;
+import fr.aiidor.role.LGRoles;
+import fr.aiidor.role.use.LGAnge;
 
 public class CommandSpec implements CommandExecutor {
 	
@@ -109,9 +111,28 @@ public class CommandSpec implements CommandExecutor {
 					int food = (int) target.getFoodLevel();
 					
 					inv.setItem(50, getItem(Material.BREAD, "§5Vie : §d" + health + " §5/§d " + target.getMaxHealth(), health, true));
+					
 					if (main.getPlayer(target.getUniqueId()).Rob) {
 						inv.setItem(51, getItem(Material.BOOK, "§9Rôle : §b" + main.getPlayer(target.getUniqueId()).getRole().name + " (Voleur)" , true));
-					} else inv.setItem(51, getItem(Material.BOOK, "§9Rôle : §b" + main.getPlayer(target.getUniqueId()).getRole().name , true));
+					} else {
+						
+						Joueur Targetj = main.getPlayer(target.getUniqueId());
+						
+						StringBuilder name = new StringBuilder();
+						name.append("§9Rôle : §b" + Targetj.getRole().name);
+						
+						if (Targetj.getRole() == LGRoles.Ange) {
+							if (Targetj.ange == LGAnge.Gardien) name.append(" §aGardien");
+							if (Targetj.ange == LGAnge.Déchu) name.append(" §cDéchu");
+						}
+						
+						if (Targetj.hasCouple()) {
+							name.append(" §c♥");
+						}
+						
+						inv.setItem(51, getItem(Material.BOOK, name.toString() , true));
+					}
+					
 					inv.setItem(52, getItem(Material.EXP_BOTTLE, "§eExperience : §a" + target.getLevel() , target.getLevel(), true));
 					inv.setItem(53, getItem(Material.COOKED_CHICKEN, "§6Faim : §e" + food , food,  true));
 					
@@ -171,6 +192,13 @@ public class CommandSpec implements CommandExecutor {
 						else cible = all.whoVote.getName();
 						
 						player.sendMessage("§7" + all.getName() + " §b✉➔§7 " + cible);
+						
+						if (!all.voteCorbeau.isEmpty()) {
+							if (all.voteCorbeau.size() == 2) {
+								player.sendMessage("§7" + all.getName() + " §c✉➔§7 " + all.voteCorbeau.get(0).getName());
+								player.sendMessage("§7" + all.getName() + " §c✉➔§7 " + all.voteCorbeau.get(1).getName());
+							}
+						}
 					}
 				}
 				

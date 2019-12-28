@@ -74,6 +74,9 @@ public class LGRole_IPL {
 	
 	public void ReaMsg(Player damaged) {
 		
+		if (!main.compo.contains(LGRoles.IPL)) return;
+		if (main.getPlayerRoles(LGRoles.IPL).isEmpty()) return;
+		
 		for (Joueur j : main.getPlayerRoles(LGRoles.IPL)) {
 			if (j.getPower() > 0 ) {
 				

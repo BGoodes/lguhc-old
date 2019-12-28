@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.game.Joueur;
+import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 
 public class LGRole_Voyante {
@@ -27,11 +28,21 @@ public class LGRole_Voyante {
 		for (Joueur j : main.Players) {
 			if (j.getRole() == LGRoles.Voyante || j.getRole() == LGRoles.VoyanteB ) {
 				if (!j.isDead() && !j.noPower) {
-					j.setPower(1);
 					
-					if (j.isConnected()) {
-						j.getPlayer().sendMessage(main.gameTag + "§bVous avez 5 minutes pour connaître le rôle d'un joueur grâce à la commande /lg see <Pseudo> !");
+					if (j.cantSee) {
+						if (j.isConnected()) {
+							j.getPlayer().sendMessage(main.gameTag + "§bVous ne pourrez pas connaître le rôle d'un joueur cette épisode ci ! Attendez le prochain !");
+							j.cantSee = false;
+						}
+						
+					} else {
+						j.setPower(1);
+						
+						if (j.isConnected()) {
+							j.getPlayer().sendMessage(main.gameTag + "§bVous avez 5 minutes pour connaître le rôle d'un joueur grâce à la commande /lg see <Pseudo> !");
+						}
 					}
+
 				}
 			}
 		}
@@ -98,12 +109,29 @@ public class LGRole_Voyante {
 		Player p = j.getPlayer();
 		
 		j.setPower(0);
+		
+		LGRoles role = t.getRole();
+		
+		if (t.getRole() == LGRoles.LGFeutre) {
+			role = t.getFakeRole();
+		}
+		
 		p.sendMessage(" ");
-		p.sendMessage(main.gameTag + "§aLe joueur que vous avez espionné est " + t.getRole().name);
+		p.sendMessage(main.gameTag + "§aLe joueur que vous avez espionné est " + role.name);
 		
 		if (bavarde) {
-			Bukkit.broadcastMessage(main.gameTag + "§4La voyante Bavarde à espionné un joueur qui est... §l" + t.getRole().name);
+			Bukkit.broadcastMessage(main.gameTag + "§4La voyante Bavarde à espionné un joueur qui est... §l" + role.name);
 			Bukkit.broadcastMessage(" ");
+		}
+		
+		if (role.camp == LGCamps.Village) {
+			
+			p.sendMessage(main.gameTag + "§cMalheuresement, le joueur que vous avez espionné est du village ! Vous perdez donc 3 coeurs et vous ne pourrez pas utiliser votre pouvoir le prochain "
+					+ "épisode !");
+			j.cantSee = true;
+			
+			p.setHealth(p.getHealth() - 6);
+			p.damage(0);
 		}
 	}
 }

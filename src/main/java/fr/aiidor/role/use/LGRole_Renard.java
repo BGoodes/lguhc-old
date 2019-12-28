@@ -31,6 +31,11 @@ public class LGRole_Renard {
 			return;
 		}
 		
+		if (!main.isNight()) {
+			p.sendMessage(main.gameTag + "§cVous devez attendre la nuit pour flairer un joueur !");
+			return;
+		}
+		
 		if (Bukkit.getPlayer(targetname) == null) {
 			p.sendMessage(main.gameTag + "§cErreur, le joueur "+ targetname + " n'est pas connecté ou n'existe pas !");
 			return;
@@ -64,7 +69,9 @@ public class LGRole_Renard {
 		
 		Player p = renard.getPlayer();
 		
-		if (target.isLg()) {
+		target.isFlaire = true;
+		
+		if (target.isLgIG()) {
 			
 			p.sendMessage(main.gameTag + "§e Le joueur §f" + target.getPlayer().getName() + "§e appartient au camp des Loups-Garous !");
 			return;

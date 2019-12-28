@@ -1,12 +1,14 @@
 name: LOUP-GAROUS
-version: 0.5
+version: 0.6
 author: Aiidor
 main: fr.aiidor.LGUHC
 commands:
   config:
-    description: Commande Host/Orga
+    description: Commande Host/Organisateurs.
   lg:
-    description: Permet d'effectuer les commandes joueurs du LG
+    description: Permet d'effectuer les commandes joueurs du LG.
   spec:
-    description: Permet au spectateur d'obtenir des informations
+    description: Permet au spectateur d'obtenir des informations sur la partie.
+  ping:
+    description: Permet de voir son ping.
   

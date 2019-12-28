@@ -9,6 +9,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.Sounds;
+import fr.aiidor.files.StatAction;
+import fr.aiidor.files.StatManager;
 import fr.aiidor.game.Joueur;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.task.LGCompass;
@@ -118,7 +120,7 @@ public class LGRole_Cupidon {
 			p.sendMessage(" ");
 			j.setPower(0);
 			
-			p.sendMessage(main.gameTag + "§aVous avez bien mis §d" + t.getName() + "§a et §d" + t2.getName() + "§a en couple ! Si l'un meurt, l'autre ne pourrais supporter "
+			p.sendMessage(main.gameTag + "§aVous avez bien mis §l" + t.getName() + "§a et §l" + t2.getName() + "§a en couple ! Si l'un meurt, l'autre ne pourrais supporter "
 					+ "cette souffrance et se suiciderais immédiatement !");
 			p.sendMessage(main.gameTag + "§2Vous pouvez gagnez avec eux ou avec le village !");
 			p.sendMessage(" ");
@@ -129,19 +131,24 @@ public class LGRole_Cupidon {
 		
 		new Sounds(t.getPlayer()).PlaySound(Sound.LEVEL_UP);
 		t.getPlayer().sendMessage(" ");
-		t.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §6" + t2.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
+		t.getPlayer().sendMessage(main.gameTag + "§c♥§3 Vous êtes amoureux de §l" + t2.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
 				+ "Vous pouvez cependant lui offrir de votre vie grâve a la commande /lg don <% de vie>.");
 		
 		giveItemStack(t.getPlayer(), getItem(Material.COMPASS, "§dBoussole des amoureux"));
 		
 		new Sounds(t2.getPlayer()).PlaySound(Sound.LEVEL_UP);
 		t2.getPlayer().sendMessage(" ");
-		t2.getPlayer().sendMessage(main.gameTag +  "§c♥§3 Vous êtes amoureux de §6" + t.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
+		t2.getPlayer().sendMessage(main.gameTag +  "§c♥§3 Vous êtes amoureux de §l" + t.getName() + "§3 si il vient à mourrir, vous mourrerez aussitôt ! "
 				+ "Vous pouvez cependant lui offrir de votre vie grâve a la commande /lg don <% de vie>.");
 		
 		giveItemStack(t2.getPlayer(), getItem(Material.COMPASS, "§dBoussole des amoureux"));
 		
 		new LGCompass(main, t, t2).runTaskTimer(main, 0, 20);
+		
+		if (main.stats) {
+			new StatManager(main).changeState(t.getUUID(), "couple", StatAction.Increase);
+			new StatManager(main).changeState(t2.getUUID(), "vote", StatAction.Increase);
+		}
 	}
 	
 	private void giveItemStack(Player p, ItemStack it) {
@@ -149,8 +156,7 @@ public class LGRole_Cupidon {
 		else p.getInventory().addItem(it);
 	}
 	
-	public boolean isInventoryFull(Player p)
-	{
+	public boolean isInventoryFull(Player p) {
 	    return p.getInventory().firstEmpty() == -1;
 	}
 	

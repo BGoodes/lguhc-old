@@ -13,11 +13,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 
 import fr.aiidor.LGUHC;
+import fr.aiidor.Options.DecoOption;
+import fr.aiidor.files.StatManager;
 import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.scoreboard.ScoreboardKill;
 import fr.aiidor.scoreboard.ScoreboardSign;
 import fr.aiidor.scoreboard.TabList;
+import fr.aiidor.task.LGDeath;
 
 public class UHCJoin implements Listener{
 	
@@ -34,6 +37,10 @@ public class UHCJoin implements Listener{
 		
 		if (!main.world.equals(player.getWorld())) {
 			player.teleport(main.Spawn);
+		}
+		
+		if (main.stats) {
+			new StatManager(main).addPlayer(player);
 		}
 		
 		player.setOp(false);
@@ -96,36 +103,27 @@ public class UHCJoin implements Listener{
 		} else {
 			new ScoreboardKill(main, player).createScoreboard();
 		}
-
 		
 		if (!main.canJoin()) {
 			
-			
-			if (main.Spectator.contains(player.getUniqueId())) {
+			if (!main.isPlaying(player.getUniqueId())) {
 				spec(player);	
 				e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7) §b(Spectateur)");
+				
 				return;
 			}
-			 
-			if (!main.PlayersHasRole()) {
-				if (!main.PlayerInGame.contains(player.getUniqueId())) {
-					spec(player);	
-					e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7) §b(Spectateur)");
-					return;
+			
+			if (main.PlayerHasRole) {
+				if (main.hasRole(player)) {
+					main.getPlayer(player.getUniqueId()).setName();
 				}
-			} else {
-				
-				if (!main.isInGame(player.getUniqueId())) {
-					spec(player);	
-					e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7) §b(Spectateur)");
-					return;
-				}
-				
 			}
 			
 			e.setJoinMessage("§8[§a+§8] " + player.getName() + "§7(§e"+ Bukkit.getOnlinePlayers().size() + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
 			return;
-			}
+		}
+		
+		if (main.DecoInv.containsKey(player.getUniqueId())) main.DecoInv.remove(player.getUniqueId());
 		
 		player.teleport(main.Spawn.clone().add(0, 6, 0));
 		
@@ -147,7 +145,7 @@ public class UHCJoin implements Listener{
 		player.setPlayerListName("§8[Spectateur] §7" + player.getName());
 		
 		if (main.PlayerHasRole) {
-			if (main.isInGame(player.getUniqueId())) {
+			if (main.hasRole(player)) {
 				if (main.getPlayer(player.getUniqueId()).Rob) player.setPlayerListName("§8[MORT] §7" + player.getName() + " §8(" + LGRoles.Voleur.name + ")"); 
 				else player.setPlayerListName("§8[MORT] §7" + player.getName() + " §8(" + main.getPlayer(player.getUniqueId()).getRole().name + ")"); 
 				
@@ -155,7 +153,7 @@ public class UHCJoin implements Listener{
 			}
 		}
 		
-		if (!main.PlayerHasRole || !main.isInGame(player.getUniqueId())) {
+		if (!main.PlayerHasRole || !main.hasRole(player)) {
 			player.sendMessage(main.gameTag + "§cLa partie à déjà commencé ! Vous serez donc un spectateur !");
 		}
 		
@@ -182,12 +180,30 @@ public class UHCJoin implements Listener{
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
 		
+		Player player = e.getPlayer();
+		
 		int size = Bukkit.getOnlinePlayers().size() - 1;
-		e.setQuitMessage("§8[§c-§8] " + e.getPlayer().getName() + "§7(§e"+ size + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
+		e.setQuitMessage("§8[§c-§8] " + player.getName() + "§7(§e"+ size + " §7/§e" + Bukkit.getMaxPlayers() +"§7)");
 		
-		if (main.boards.containsKey(e.getPlayer())) main.boards.remove(e.getPlayer());
+		if (main.boards.containsKey(player)) main.boards.remove(player);
 		
-		main.removeOptionChat(e.getPlayer().getUniqueId(), false);
+		main.removeOptionChat(player.getUniqueId(), false);
+		
+		if (main.decoOption == DecoOption.Mort) {
+			if (main.isPlaying(player.getUniqueId())) {
+				main.kill(player.getUniqueId(), player.getName(), player.getLocation(), main.getInventory(player));
+				return;
+			}
+		}
+		
+		main.DecoInv.put(player.getUniqueId(), main.getInventory(player));
+		
+		if (main.decoOption == DecoOption.Temps) {
+			if (main.isPlaying(player.getUniqueId())) {
+				new LGDeath(main, player.getUniqueId(), null, player.getLocation(), main.getInventory(player)).runTaskTimer(main, 0, 20);
+			}
+			return;
+		}
 	}
 	
 

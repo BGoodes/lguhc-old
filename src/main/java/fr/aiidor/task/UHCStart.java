@@ -22,6 +22,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.Sounds;
 import fr.aiidor.effect.Titles;
+import fr.aiidor.files.StatAction;
+import fr.aiidor.files.StatManager;
 import fr.aiidor.game.UHCGame;
 import fr.aiidor.game.UHCState;
 import fr.aiidor.scoreboard.ScoreboardSign;
@@ -35,6 +37,14 @@ public class UHCStart extends BukkitRunnable {
 	public UHCStart(LGUHC main) {
 		this.main = main;
 		
+		if (main.start == null) {
+			main.start = this;
+		} else {
+			cancel();
+			return;
+		}
+		
+		
 		for (Player pl : Bukkit.getOnlinePlayers()) {
 			pl.setLevel(Timer);
 			main.removeOptionChat(pl.getUniqueId());
@@ -44,25 +54,6 @@ public class UHCStart extends BukkitRunnable {
 	
 	@Override
 	public void run() {
-		
-		if (main.cancelStart) {
-			main.cancelStart = false;
-			cancel();
-			
-			Bukkit.broadcastMessage(main.gameTag + "§cAnnulation de la partie");
-			
-			main.setState(UHCState.WAITING);
-			
-		    for (Entry<Player, ScoreboardSign> sign : main.boards.entrySet()) {
-		    	sign.getValue().setLine(1, "§ePartie en Attente !");
-		     }
-		    
-			for (Player pl : Bukkit.getOnlinePlayers()) {
-				pl.setLevel(0);
-			}
-		    
-			return;
-		}
 		
 		for (Player pl : Bukkit.getOnlinePlayers()) {
 			pl.setLevel(Timer);
@@ -106,14 +97,35 @@ public class UHCStart extends BukkitRunnable {
 		Timer --;
 	}
 	
+	public void stopStarting() {
+		cancel();
+		
+		Bukkit.broadcastMessage(main.gameTag + "§cAnnulation de la partie");
+		
+		main.setState(UHCState.WAITING);
+		
+	    for (Entry<Player, ScoreboardSign> sign : main.boards.entrySet()) {
+	    	sign.getValue().setLine(1, "§ePartie en Attente !");
+	     }
+	    
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			pl.setLevel(0);
+		}
+		
+		main.start = null;
+		return;
+	}
+	
 	private void Start() {
+		
+		cancel();
+		main.start = null;
 		
 		Bukkit.broadcastMessage(main.gameTag + "§6Début de la partie !");
 		Bukkit.broadcastMessage(" ");
 		main.setState(UHCState.PREGAME);
 		
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule reducedDebugInfo " + main.cord.toString());
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule announceAdvancements false" + main.announceAdv.toString());
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule reducedDebugInfo " + main.reduced.toString());
 		
 		main.world.setGameRuleValue("naturalRegeneration", "false");
 		main.world.setGameRuleValue("keepInventory", "true");
@@ -153,20 +165,22 @@ public class UHCStart extends BukkitRunnable {
 				pl.sendMessage(" ");
 				
 			} else {
+				
 				pl.setGameMode(GameMode.SURVIVAL);
 				main.PlayerInGame.add(pl.getUniqueId());
 				
-				if (main.fun && main.Civilisation) {
-					if (main.PlayerHasVillage(pl.getUniqueId())) {
-						pl.teleport(main.getVillage(pl.getUniqueId()).getSpawn());
-						pl.sendMessage(main.gameTag + "§eVous faites partie du village §l" + main.getVillage(pl.getUniqueId()).getName() + "§e ! Esperons que vous y vivrez paisiblement !");
-						pl.sendMessage(" ");
-					} else {
-						main.randomTp(pl);
-					}
+				if (main.fun && main.Civilisation && main.PlayerHasVillage(pl.getUniqueId())) {
+					
+					pl.teleport(main.getVillage(pl.getUniqueId()).getSpawn());
+					pl.sendMessage(main.gameTag + "§eVous faites partie du village §l" + main.getVillage(pl.getUniqueId()).getName() + "§e ! Esperons que vous y vivrez paisiblement !");
+					pl.sendMessage(" ");
 					
 				} else {
 					main.randomTp(pl);
+				}
+				
+				if (main.vanillaN && main.noNametag) {
+					main.nhide.addEntry(pl.getName());
 				}
 				
 				if (main.startItem != null) {
@@ -188,6 +202,7 @@ public class UHCStart extends BukkitRunnable {
 					}
 				}
 				
+				new StatManager(main).changeState(pl.getUniqueId(), "nombre_partie", StatAction.Increase);
 			}
 		}
 		

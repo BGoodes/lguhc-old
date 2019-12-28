@@ -19,6 +19,7 @@ public class EventsManager {
 		pm.registerEvents(new UHCListeners(pl), pl);
 		pm.registerEvents(new UHCInventory(pl), pl);
 		pm.registerEvents(new UHCPvp(pl), pl);
+		pm.registerEvents(new UHCChat(pl), pl);
 		
 		pm.registerEvents(new UHCTimber(pl), pl);
 		pm.registerEvents(new UHCCutClean(pl), pl);

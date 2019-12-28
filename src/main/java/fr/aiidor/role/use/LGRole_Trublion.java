@@ -137,15 +137,10 @@ public class LGRole_Trublion {
 		LGRoles role1 = t.getRole();
 		LGRoles role2 = t2.getRole();
 		
-		t.setRole(role2);
-		t2.setRole(role1);
-		
+
 		//CAMP
 		LGCamps camp1 = t.getCamp();
 		LGCamps camp2 = t2.getCamp();
-		
-		t.setCamp(camp2);
-		t2.setCamp(camp1);
 		
 		//POWER
 		int power1 = t.getPower();
@@ -154,24 +149,54 @@ public class LGRole_Trublion {
 		t.setPower(power2);
 		t2.setPower(power1);
 		
-		//ROLES
-		if (t.getRole() == LGRoles.LGA || t2.getRole() == LGRoles.LGA) {
-			List<Joueur> list1 = t.lglist;
-			List<Joueur> list2 = t2.lglist;
-			
-			t.lglist = list2;
-			t2.lglist = list1;
-			
-			if (!t.lglist.contains(t)) t.lglist.add(t);
-			if (!t2.lglist.contains(t2)) t2.lglist.add(t2);
-		}
+		//LGList
+		List<Joueur> lglist1 = t.LgList;
+		List<Joueur> lglist2 = t2.LgList;
 		
+		t.LgList = lglist2;
+		t2.LgList = lglist1;
+		
+		//ROLES
 		if (t.getRole() == LGRoles.EnfantS || t2.getRole() == LGRoles.EnfantS) {
 			Joueur model1 = t.Model;
 			Joueur model2 = t2.Model;
 			
 			t.Model = model2;
 			t2.Model = model1;
+		}
+		
+		if (t.getRole() == LGRoles.LGA || t2.getRole() == LGRoles.LGA) {
+			List<Joueur> list1 = t.LgList;
+			List<Joueur> list2 = t2.LgList;
+			
+			t.LgList = list2;
+			if (!list2.contains(t)) list2.add(t);
+			
+			t2.LgList = list1;
+			if (!list1.contains(t2)) list1.add(t2);
+		}
+		
+		if (t.getRole() == LGRoles.Ange || t2.getRole() == LGRoles.Ange) {
+			
+			LGAnge ange1 = t.ange;
+			LGAnge ange2 = t2.ange;
+			
+			Joueur angeT1 = t.angeTarget;
+			Joueur angeT2 = t2.angeTarget;
+			
+			t.angeTarget = angeT2;
+			t2.angeTarget = angeT1;
+			
+			t.ange = ange2;
+			t2.ange = ange1;
+		}
+		
+		if (t.getRole() == LGRoles.LGFeutre || t2.getRole() == LGRoles.LGFeutre) {
+			LGRoles fakerole1 = t.getFakeRole(); 
+			LGRoles fakerole2 = t2.getFakeRole(); 
+			
+			t.fakeRole = fakerole2;
+			t2.fakeRole = fakerole1;
 		}
 		
 		if (t.getRole() == LGRoles.Soeur || t2.getRole() == LGRoles.Soeur) {
@@ -182,20 +207,27 @@ public class LGRole_Trublion {
 			t2.Soeur = Soeur;
 		}
 		
-		if (t.getRole() == LGRoles.Voleur || t2.getRole() == LGRoles.Voleur) {
-			Boolean rob1 = t.Rob;
-			Boolean rob2 = t2.Rob;
-			
-			t.Rob = rob2;
-			t2.Rob = rob1;
+		Boolean rob1 = t.Rob;
+		Boolean rob2 = t2.Rob;
+		
+		t.Rob = rob2;
+		t2.Rob = rob1;
+		
+		double MaxHeath1 = t.getPlayer().getMaxHealth();
+		double MaxHeath2 = t2.getPlayer().getMaxHealth();
+		
+		t.getPlayer().setMaxHealth(MaxHeath2);
+		t2.getPlayer().setMaxHealth(MaxHeath1);
+		
+		if (t.isVoteCible()) {
+			t.getPlayer().setMaxHealth(t.getPlayer().getMaxHealth() / 2);
+			t2.getPlayer().setMaxHealth(t2.getPlayer().getMaxHealth() * 2);
 		}
-
-		t.getPlayer().setMaxHealth(20);
-		t2.getPlayer().setMaxHealth(20);
 		
-		if (role1 == LGRoles.LGB) t2.getPlayer().setMaxHealth(30);
-		if (role2 == LGRoles.LGB) t.getPlayer().setMaxHealth(30);
-		
+		if (t2.isVoteCible()) {
+			t2.getPlayer().setMaxHealth(t2.getPlayer().getMaxHealth() / 2);
+			t.getPlayer().setMaxHealth(t.getPlayer().getMaxHealth() * 2);
+		}
 		
 		//INFECT
 		Boolean infect1 = t.isInfect();
@@ -208,6 +240,12 @@ public class LGRole_Trublion {
 		
 		t.trublion = true;
 		t2.trublion = true;
+		
+		t.setRole(role2);
+		t2.setRole(role1);
+		
+		t.setCamp(camp2);
+		t2.setCamp(camp1);
 		
 		//MSG
 		t.getPlayer().sendMessage("");

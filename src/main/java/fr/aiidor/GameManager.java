@@ -14,6 +14,7 @@ import fr.aiidor.effect.Sounds;
 import fr.aiidor.effect.Titles;
 import fr.aiidor.game.UHCState;
 import fr.aiidor.role.LGRoles;
+import fr.aiidor.scoreboard.NameManager;
 import fr.aiidor.scoreboard.ScoreboardManager;
 import fr.aiidor.scoreboard.ScoreboardSign;
 import fr.aiidor.scoreboard.TabList;
@@ -47,11 +48,19 @@ public class GameManager {
 		main.canVote = false;
 		main.canSeeVote = false;
 		
+		main.cancelVote = false;
 		main.canSeeList = true;
 		
 		main.noFall = new ArrayList<>();
+		main.cannotVote = new ArrayList<>();
 		
 		main.ep = 1;
+		if (main.start != null) {
+			main.start.cancel();
+			main.start = null;
+		}
+		
+		main.DiamondPl  = new HashMap<>();
 		
 		main.civilisations = new ArrayList<>();
 		main.addNames();
@@ -62,6 +71,10 @@ public class GameManager {
 		
 		main.boards = new HashMap<>();
 		
+		//TEAM NHIDE
+		main.nhideReset();
+		
+		//PLAYER EFFECTS
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			
 			new Titles().sendTitle(player, "§fLGUHC", "§dRedémarrage ", 60);
@@ -99,6 +112,9 @@ public class GameManager {
 			
 			//TABLIST ---------------------
 			new TabList(main).set(player);
+			
+			//NAME
+			new NameManager(player).resetName();
 		}
 		
 		Bukkit.broadcastMessage(main.gameTag + "§6La partie vient d'être réinitialisé !");

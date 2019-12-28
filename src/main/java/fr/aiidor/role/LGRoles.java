@@ -5,7 +5,9 @@ public enum LGRoles {
 	LG("Loup-garou", LGCamps.LoupGarou, 1),
 	VPL("Vilain petit Loup", LGCamps.LoupGarou, 0),
 	IPL("Infect Père des Loups", LGCamps.LoupGarou, 0),
-	LGA("Loup-garou Amnésique", LGCamps.Village, 0),
+	LGFeutre("Loup-Garou Feutré", LGCamps.LoupGarou, 0),
+	LGP("Loup-Garou Perfide", LGCamps.LoupGarou, 0),
+	LGA("Loup-garou Amnésique", LGCamps.LoupGarou, 0),
 	
 	Voyante("Voyante", LGCamps.Village, 0),
 	VoyanteB("Voyante (Bavarde)", LGCamps.Village, 0),
@@ -16,8 +18,8 @@ public enum LGRoles {
 	Ancien("Ancien", LGCamps.Village, 0),
 	Sorciere("Sorciere", LGCamps.Village, 0),
 	Salvateur("Salvateur", LGCamps.Village, 0),
-	Ange("Ange", LGCamps.Village, 0),
 	Citoyen("Citoyen", LGCamps.Village, 0),
+	Detective("Detective", LGCamps.Village, 0),
 	Soeur("Soeur", LGCamps.Village, 0),
 	Cupidon("Cupidon", LGCamps.Village, 0),
 	Trublion("Trublion", LGCamps.Village, 0),
@@ -29,9 +31,11 @@ public enum LGRoles {
 	Bouc("Bouc Emissaire", LGCamps.Village, 0),
 	
 	EnfantS("Enfant Sauvage", LGCamps.Village, 0),
-	Voleur("Voleur", LGCamps.Voleur, 0),
+	Voleur("Voleur", LGCamps.Neutre, 0),
+	
 	Assassin("Assassin", LGCamps.Assassin, 0),
 	LGB("Loup-Garou Blanc", LGCamps.LGB, 0),
+	Ange("Ange", LGCamps.Neutre, 0),
 	
 	SV("Simple Villageois", LGCamps.Village, 50);
 	

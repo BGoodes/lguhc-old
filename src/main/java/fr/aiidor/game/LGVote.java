@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import fr.aiidor.LGUHC;
+import fr.aiidor.files.StatAction;
+import fr.aiidor.files.StatManager;
 import fr.aiidor.role.LGRoles;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -39,6 +41,11 @@ public class LGVote {
 			
 			j.getPlayer().sendMessage(main.gameTag + "§6Vous avez 1 minute pour voter en faisant /lg vote <Pseudo> !");
 			j.getPlayer().sendMessage(main.gameTag + "§6Le joueur ayant la majorité des votes perdra la moitié de sa vie !");
+			
+			if (j.getRole() == LGRoles.Corbeau) {
+				j.getPlayer().sendMessage(main.gameTag + "§bMais en tant que corbeau, vous pouvez utiliser votre malédiction en faisant la commande /lg vote <Pseudo1> <Pseudo2> <Pseudo3>.");
+			}
+			
 			j.getPlayer().sendMessage(" ");
 		}
 	}
@@ -55,9 +62,9 @@ public class LGVote {
 		main.canSeeVote = true;
 		if (main.compo.contains(LGRoles.Citoyen)) {
 			for (Joueur j : main.getPlayerRoles(LGRoles.Citoyen)) {
-				if (j.getPower() > 0) {
+				if (j.getPower() > 0 && !j.noPower) {
 					j.getPlayer().sendMessage(main.gameTag + "§3Vous avez la possiblité de consulter encore " + j.getPower() + " fois les votes des joueurs. "
-							+ "Attention, vous n'avez que 15 secondes pour vous décider ! ");
+							+ "Attention, vous n'avez que 30 secondes pour regarder ! ");
 					
 					TextComponent msg = new TextComponent("§b§l[CONSULTER LES VOTES]");
 					
@@ -71,7 +78,7 @@ public class LGVote {
 		
 		if (main.getSpectator().size() > 0) {
 			for (Player p : main.getSpectator()) {
-				p.sendMessage(main.gameTag + "§bVous pouvez consulter les votes (15 secondes) "); 
+				p.sendMessage(main.gameTag + "§bVous pouvez consulter les votes (30 secondes) "); 
 				TextComponent msg = new TextComponent("§9§l[CONSULTER LES VOTES]");
 				
 				msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§bConsulter ?").create()));
@@ -89,7 +96,7 @@ public class LGVote {
 				main.canSeeVote = false;
 				checkvote();
 			}
-		}, 300);
+		}, 600);
 		
 	}
 	
@@ -125,17 +132,69 @@ public class LGVote {
 		j.canVote = false;
 		j.whoVote = TargetJ;
 		
-		if (j.getRole() == LGRoles.Corbeau)  {
-			TargetJ.vote = TargetJ.vote + 3;
-			p.sendMessage(main.gameTag + "§aVotre malédiction atteint §f" + targetname + "§a et il reçoit par conséquent 3 votes !");
-		}
-		else {
-			TargetJ.vote ++;
-			p.sendMessage(main.gameTag + "§aVotre vote à bien été comptabilisé !");
-		}
+		TargetJ.vote ++;
+		p.sendMessage(main.gameTag + "§aVotre vote à bien été comptabilisé !");
 		
-		
+		if (main.stats) {
+			new StatManager(main).changeState(TargetJ.getUUID(), "nombre_vote", StatAction.Increase);
+		}
+	}
 	
+	public void corbeauVote(Joueur j, String targetname1, String targetname2, String targetname3) {
+		
+		Player p = j.getPlayer();
+		
+		if (!j.canVote || !main.canVote) {
+			p.sendMessage(main.gameTag + "§cVous ne pouvez pas voter pour le moment !");
+			return;
+		}
+		
+		if (j.getRole() != LGRoles.Corbeau) {
+			p.sendMessage(main.gameTag + "§cErreur, vous devez être §oCorbeau §cpour voter 3 joueurs !");
+			return;
+		}
+		
+		if (Bukkit.getPlayer(targetname1) == null || Bukkit.getPlayer(targetname2) == null || Bukkit.getPlayer(targetname3) == null) {
+			p.sendMessage(main.gameTag + "§cErreur, l'un des joueurs n'est pas connecté ou n'existe pas !");
+			return;
+		}
+		
+		Player Target1 = Bukkit.getPlayer(targetname1);
+		Player Target2 = Bukkit.getPlayer(targetname2);
+		Player Target3 = Bukkit.getPlayer(targetname3);
+		
+		if (!main.hasRole(Target1.getUniqueId()) || !main.hasRole(Target2.getUniqueId()) || !main.hasRole(Target3.getUniqueId())) {
+			p.sendMessage(main.gameTag + "§cErreur, l'un des joueurs n'est pas dans la partie !");
+			return;
+		}
+		
+		Joueur TargetJ1 = main.getPlayer(Target1.getUniqueId());
+		Joueur TargetJ2 = main.getPlayer(Target2.getUniqueId());
+		Joueur TargetJ3 = main.getPlayer(Target3.getUniqueId());
+		
+		if (TargetJ1.isDead() || TargetJ2.isDead() || TargetJ3.isDead()) {
+			p.sendMessage(main.gameTag + "§cErreur, l'un des joueurs est mort !");
+			return;
+		}
+		
+		j.canVote = false;
+		
+		j.whoVote = TargetJ1;
+		j.voteCorbeau.add(TargetJ2);
+		j.voteCorbeau.add(TargetJ3);
+		
+		TargetJ1.vote ++;
+		TargetJ2.vote ++;
+		TargetJ3.vote ++;
+		
+		p.sendMessage(main.gameTag + "§aVos votes ont bien été comptabilisés !");
+		
+		//STATS
+		if (main.stats) {
+			new StatManager(main).changeState(TargetJ1.getUUID(), "nombre_vote", StatAction.Increase);
+			new StatManager(main).changeState(TargetJ2.getUUID(), "nombre_vote", StatAction.Increase);
+			new StatManager(main).changeState(TargetJ3.getUUID(), "nombre_vote", StatAction.Increase);
+		}
 	}
 	
 	private void checkvote() {
@@ -157,7 +216,6 @@ public class LGVote {
 		
 		//0
 		if (max == 0) {
-			Bukkit.broadcastMessage(" ");
 			Bukkit.broadcastMessage(main.gameTag + "§bPersonne n'a voté donc personne ne perd de vie !");
 			reset();
 			return;
@@ -179,7 +237,9 @@ public class LGVote {
 					for (Joueur j : main.getPlayerRoles(LGRoles.Bouc)) {
 						VoteEffect(j, true);
 					}
+					
 					Bukkit.broadcastMessage(main.gameTag + "§bLes villageois sont indécis, c'est donc le Bouc Emissaire qui perd la moitié de sa vie !");
+					reset();
 					return;
 				}
 			}
@@ -199,14 +259,28 @@ public class LGVote {
 		for (Joueur j : main.Players) {
 			j.vote = 0;
 			j.whoVote = null;
+			j.voteCorbeau.clear();
 		}
 	}
 	
 	private void VoteEffect(Joueur j, boolean bouc) {
 		
+		if (main.cancelVote) {
+			Bukkit.broadcastMessage(main.gameTag + "§bLe citoyen a refusé la sanction du vote, personne ne perd de vie.");
+			main.cancelVote = false;
+			return;
+		}
+		
 		if (j.isDead()) {
 			Bukkit.broadcastMessage(" ");
 			Bukkit.broadcastMessage(main.gameTag + "§bLe joueur §l" + j.getName() + " §bà obtenue la majorité des vote : §9" + j.vote + " §bvote(s). Mais puisqu'il est mort, les effets ne lui seront pas attribué !");
+			return;
+		}
+		
+		
+		if (main.voteProtect && !bouc && main.cannotVote.contains(j)) {
+			Bukkit.broadcastMessage(" ");
+			Bukkit.broadcastMessage(main.gameTag + "§bLe joueur §l" + j.getName() + " §bà obtenue la majorité des vote : §9" + j.vote + " §bvote(s). Mais puisque celui ci à déjà pris les votes durant cette partie, les effets ne lui seront pas attribué ! ");
 			return;
 		}
 		
@@ -219,20 +293,12 @@ public class LGVote {
 			Bukkit.broadcastMessage(" ");
 			Bukkit.broadcastMessage(main.gameTag + "§bLe joueur §l" + j.getName() + " §bà obtenue la majorité des vote : §9" + j.vote + " §bvote(s). Il perd la moitié de sa vie !");
 			
-			if (main.getPlayerRoles(LGRoles.Ange).size() > 0) {
-				for (Joueur ange : main.getPlayerRoles(LGRoles.Ange)) {
-					if (ange.vote > 1) {
-						
-						int heart = ange.vote /2;
-						ange.getPlayer().setMaxHealth(ange.getPlayer().getMaxHealth() + heart * 2);
-						ange.getPlayer().sendMessage(main.gameTag + "§eVous avez été voté §6" + ange.vote + " §e fois, vous recevez donc §c" + heart + " §ecoeur(s) potentiel(s) supplémentaire(s) !");
-					} else {
-						
-						ange.getPlayer().sendMessage(main.gameTag + "§eVous avez été voté §6" + ange.vote + " §e fois.");
-					}
-				}
-			}
+			main.cannotVote.add(j);
 		}
+		
+		int timing = 6000;
+		
+		if (main.epTime == 20) timing = 12000;
 		
 		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
 			
@@ -243,14 +309,11 @@ public class LGVote {
 					if (j.isVoteCible()) {
 						j.setVoteCible(false);
 						
-						double angeHeart = 0;
-						if (j.getRole() == LGRoles.Ange) angeHeart = j.getPlayer().getHealth() - 10;
-						
-						j.getPlayer().setMaxHealth(j.getPlayer().getMaxHealth() * 2 + angeHeart);
+						j.getPlayer().setMaxHealth(j.getPlayer().getMaxHealth() * 2);
 					}
 				}
 			}
-		}, 6000);
+		}, timing);
 
 
 	}

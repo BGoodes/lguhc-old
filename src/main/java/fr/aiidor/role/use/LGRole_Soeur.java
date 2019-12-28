@@ -64,19 +64,21 @@ public class LGRole_Soeur {
 		if (j.noPower) return;
 		j.setPower(1);
 		
-		j.getPlayer().sendMessage(main.gameTag + "§cVotre Soeur est morte ! Mais vous avez la possiilité de récupérer une information sur le tueur !");
+		j.getPlayer().sendMessage(main.gameTag + "§3Votre Soeur est morte, vous êtes dévasté ! Mais vous avez la possiilité de récupérer une information sur le tueur !");
 		
-		TextComponent msg = new TextComponent("§6§l[VOIR NOM]");
+		TextComponent msg = new TextComponent("§3§l[VOIR NOM]");
 		
 		msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§cRegarder nom ?").create()));
 		msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg SeeKiller name"));
-		j.getPlayer().spigot().sendMessage(msg);
 		
-		TextComponent msg2 = new TextComponent("§6§l[VOIR ROLE]");
+		TextComponent msg2 = new TextComponent("§3§l[VOIR ROLE]");
 		
 		msg2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§cRegarder rôle ?").create()));
 		msg2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg SeeKiller role"));
-		j.getPlayer().spigot().sendMessage(msg2);
+		
+		TextComponent space = new TextComponent("   ");
+		
+		j.getPlayer().spigot().sendMessage(msg, space, msg2);
 		j.getPlayer().sendMessage("");
 	}
 }

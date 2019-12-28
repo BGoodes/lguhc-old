@@ -13,6 +13,7 @@ import org.bukkit.entity.Witch;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -34,7 +35,7 @@ public class UHCNightmare implements Listener {
 	@EventHandler
 	public void onEntitySpawn(EntitySpawnEvent e) {
 		
-		if (!main.NightMare) return;
+		if (!main.fun || !main.NightMare) return;
 		
 		if (e.getEntity() instanceof Witch) {
 			
@@ -73,13 +74,14 @@ public class UHCNightmare implements Listener {
 	
 	@EventHandler
 	public void onDamage(EntityDamageEvent e) {
-		if (!main.NightMare) return;
+		if (!main.fun || !main.NightMare) return;
 		
 		if (e.getEntity() instanceof Zombie) {
 			
 			if (e.getCause() == DamageCause.FIRE_TICK || e.getCause() == DamageCause.FIRE) {
 				if (new Random().nextBoolean()) {
 					e.setCancelled(true);
+					e.getEntity().setFireTicks(0);
 				}
 				return;
 			}
@@ -101,38 +103,13 @@ public class UHCNightmare implements Listener {
 	
 	@EventHandler
 	public void onDeath(EntityDeathEvent e) {
-		if (!main.NightMare) return;
+		if (!main.fun || !main.NightMare) return;
 		
-		if (e.getEntity() instanceof Spider) {
-			
-			for (int x = e.getEntity().getLocation().getBlockX()-4; x <= e.getEntity().getLocation().getBlockX() + 4; x++) {
-				for (int z = e.getEntity().getLocation().getBlockZ()-4; z <= e.getEntity().getLocation().getBlockZ() + 4; z++) {
-					
-					if (new Random().nextInt(3) == 0) {
-						
-						int choose = new Random().nextInt(2);
-						if (new Random().nextBoolean()) {
-							if (main.world.getBlockAt(x, e.getEntity().getLocation().getBlockY() + choose , z).getType() == Material.AIR) {
-								main.world.getBlockAt(x, e.getEntity().getLocation().getBlockY() + choose , z).setType(Material.WEB);
-							}
-							
-						}
-						else {
-							if (main.world.getBlockAt(x, e.getEntity().getLocation().getBlockY() - choose , z).getType() == Material.AIR) {
-								main.world.getBlockAt(x, e.getEntity().getLocation().getBlockY() - choose , z).setType(Material.WEB);
-							}
-						}
-						
-					}
-				}
-			}
-			return;
-		}
 	}
 	
 	@EventHandler
 	public void onBoom(EntityExplodeEvent e) {
-		if (!main.NightMare) return;
+		if (!main.fun || !main.NightMare) return;
 
 		
 		if (e.getEntity() instanceof Creeper) {
@@ -153,5 +130,22 @@ public class UHCNightmare implements Listener {
 		}
 	}
 	
+	@EventHandler
+	public void onAttack(EntityDamageByEntityEvent e) {
+		if (!main.fun || !main.NightMare) return;
+		
+		if (e.getDamager() instanceof Spider) {
+			
+			if (new Random().nextBoolean() && new Random().nextBoolean()) {
+				if (e.getEntity().getWorld().getBlockAt(e.getEntity().getLocation().add(0, 1, 0)).getType() == Material.AIR) {
+					e.getEntity().getWorld().getBlockAt(e.getEntity().getLocation().add(0, 1, 0)).setType(Material.WEB);
+				}
+			} else {
+				if (e.getEntity().getWorld().getBlockAt(e.getEntity().getLocation()).getType() == Material.AIR) {
+					e.getEntity().getWorld().getBlockAt(e.getEntity().getLocation()).setType(Material.WEB);
+				}
+			}
+		}
+	}
 	
 }

@@ -2,15 +2,18 @@ package fr.aiidor.game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGDecription;
 import fr.aiidor.role.LGRoles;
+import fr.aiidor.role.use.LGAnge;
 
 public class Joueur {
 	
@@ -36,6 +39,8 @@ public class Joueur {
 	public Boolean VoteCible = false;
 	public Integer vote = 0;
 	
+	public ArrayList<Joueur> voteCorbeau = new ArrayList<>();
+	
 	public Boolean salvation = false;
 	public Joueur whoProtect = null;
 	
@@ -49,8 +54,22 @@ public class Joueur {
 	public boolean noPower = false;
 	
 	public String LastWill = null;
+	public String chamanMsg = null;
 	
-	public List<Joueur> lglist = new ArrayList<Joueur>();
+	public LGRoles fakeRole = LGRoles.SV;
+	public Boolean cantSee = false;
+	
+	public Boolean canCancelVote = false;
+	public Boolean isFlaire = false;
+	
+	public List<Joueur> hasInspect = new ArrayList<>();
+	
+	public List<Joueur> LgList = new ArrayList<>();
+	
+	public LGAnge ange = null;
+	public Joueur angeTarget;
+	
+	public Location grave;
 	
 	private LGUHC main;
 	
@@ -63,6 +82,8 @@ public class Joueur {
 		setpower();
 		
 		this.main = main;
+		
+		LgList.add(this);
 	}
 	
 	
@@ -86,6 +107,10 @@ public class Joueur {
 		return role;
 	}
 	
+	public LGRoles getFakeRole() {
+		return fakeRole;
+	}
+	
 	public void setRole(LGRoles role) {
 		this.role = role;
 	}
@@ -99,7 +124,7 @@ public class Joueur {
 	}
 	
 	public boolean isLg() {
-		return camp == LGCamps.LoupGarou || camp == LGCamps.LGB || role == LGRoles.LGA;
+		return camp == LGCamps.LoupGarou || camp == LGCamps.LGB;
 	}
 	
 	public boolean isInfect() {
@@ -167,6 +192,10 @@ public class Joueur {
 			Power = 2;
 		}
 		
+		if (role == LGRoles.Citoyen) {
+			canCancelVote = true;
+		}
+		
 		if (role == LGRoles.Ancien) {
 			Power = 1;
 		}
@@ -209,5 +238,37 @@ public class Joueur {
 	
 	public void addkill() {
 		kill++;
+	}
+	
+	//LG FEUTRE
+	public boolean isLgIG() {
+		if (role == LGRoles.LGFeutre) {
+			return fakeRole.camp == LGCamps.LoupGarou || fakeRole.camp == LGCamps.LGB;
+		}
+		
+		else return camp == LGCamps.LoupGarou || camp == LGCamps.LGB;
+	}
+	
+	public void setFakeRole() {
+		
+		
+		if (!noPower) {
+			
+			if (main.getFakeRoles().size() == 0) {
+				if (isConnected()) {
+					getPlayer().sendMessage(main.gameTag + "§bIl n'y a pas de rôles disponible votre rôle ne sera donc pas caché !");
+				}
+				fakeRole = LGRoles.LGFeutre;
+				return;
+			}
+			
+			LGRoles fake = main.getFakeRoles().get(new Random().nextInt(main.getFakeRoles().size()));
+			
+			if (isConnected()) {
+				getPlayer().sendMessage(main.gameTag + "§bVotre rôle de façade à été changé pour le rôle : " + fake.name);
+			}
+			
+			fakeRole = fake;
+		}
 	}
 }

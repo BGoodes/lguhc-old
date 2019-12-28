@@ -57,13 +57,14 @@ public class LGItem {
 			Prot.setItemMeta(ProtM);
 			giveItemStack(Prot);
 			
-			//LIVRE POWER 3
-			ItemStack Power = new ItemStack(Material.ENCHANTED_BOOK);
-			EnchantmentStorageMeta PowerM = (EnchantmentStorageMeta) Power.getItemMeta();
-			PowerM.addStoredEnchant(Enchantment.ARROW_DAMAGE, 3, true);
+			//LIVRE PIOCHE
+			ItemStack Pioche = new ItemStack(Material.ENCHANTED_BOOK);
+			EnchantmentStorageMeta PiocheM = (EnchantmentStorageMeta) Pioche.getItemMeta();
+			PiocheM.addStoredEnchant(Enchantment.DIG_SPEED, 3, true);
+			PiocheM.addStoredEnchant(Enchantment.DURABILITY, 3, true);
 			
-			Power.setItemMeta(PowerM);
-			giveItemStack(Power);
+			Pioche.setItemMeta(PiocheM);
+			giveItemStack(Pioche);
 			
 			return;
 		}

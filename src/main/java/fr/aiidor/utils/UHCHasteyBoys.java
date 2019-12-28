@@ -22,7 +22,7 @@ public class UHCHasteyBoys implements Listener{
 	public void ChangeCraft(PrepareItemCraftEvent e) {
 		
 		if (main.run == false) return;
-		if (main.HasteyBoys == false) return;
+		if (main.HasteyBoys == false && main.noWodenTool == Material.WOOD) return;
 		
 		//Craft se passe dans une zone de craft
 		if (e.getInventory() instanceof CraftingInventory) {
@@ -32,6 +32,39 @@ public class UHCHasteyBoys implements Listener{
 			if (inv.getResult() == null) return;
 			
 			Material result = inv.getResult().getType();
+			
+			if (main.noWodenTool != Material.WOOD) {
+				if (result == Material.WOOD_SPADE || result == Material.WOOD_PICKAXE || result == Material.WOOD_AXE || result == Material.WOOD_SWORD) {
+					
+					ItemStack tool = new ItemStack(result);
+					
+					if (main.noWodenTool == Material.COBBLESTONE) {
+						if (result == Material.WOOD_SPADE) tool = new ItemStack(Material.STONE_SPADE);
+						if (result == Material.WOOD_PICKAXE) tool = new ItemStack(Material.STONE_PICKAXE);
+						if (result == Material.WOOD_AXE) tool = new ItemStack(Material.STONE_AXE);
+						if (result == Material.WOOD_SWORD) tool = new ItemStack(Material.STONE_SWORD);
+					}
+					
+					if (main.noWodenTool == Material.IRON_INGOT) {
+						if (result == Material.WOOD_SPADE) tool = new ItemStack(Material.IRON_SPADE);
+						if (result == Material.WOOD_PICKAXE) tool = new ItemStack(Material.IRON_PICKAXE);
+						if (result == Material.WOOD_AXE) tool = new ItemStack(Material.IRON_AXE);
+						if (result == Material.WOOD_SWORD) tool = new ItemStack(Material.IRON_SWORD);
+					}
+					
+					if (main.noWodenTool == Material.DIAMOND) {
+						if (result == Material.WOOD_SPADE) tool = new ItemStack(Material.DIAMOND_SPADE);
+						if (result == Material.WOOD_PICKAXE) tool = new ItemStack(Material.DIAMOND_PICKAXE);
+						if (result == Material.WOOD_AXE) tool = new ItemStack(Material.DIAMOND_AXE);
+						if (result == Material.WOOD_SWORD) tool = new ItemStack(Material.DIAMOND_SWORD);
+					}
+					
+					inv.setResult(tool);
+					result = tool.getType();
+				}
+			}
+			
+			if (main.HasteyBoys == false) return;
 			
 			if (result == Material.WOOD_SPADE || result == Material.WOOD_PICKAXE || result == Material.WOOD_AXE ||
 				result == Material.STONE_SPADE || result == Material.STONE_PICKAXE || result == Material.STONE_AXE ||

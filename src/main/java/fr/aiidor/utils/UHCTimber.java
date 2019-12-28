@@ -35,7 +35,7 @@ public class UHCTimber implements Listener{
 		
 		Material mat = e.getBlock().getType();
 		
-		if (mat == Material.LOG ||mat == Material.LOG_2) {
+		if (mat == Material.LOG || mat == Material.LOG_2) {
 			
 			final List<Block> bList = new ArrayList<>();
 			checkLeaves(e.getBlock());

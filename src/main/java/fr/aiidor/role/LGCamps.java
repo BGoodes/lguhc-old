@@ -1,5 +1,5 @@
 package fr.aiidor.role;
 
 public enum LGCamps {
-	Village, LoupGarou, LGB, Assassin, Voleur
+	Village, LoupGarou, LGB, Assassin, Ange, Neutre;
 }

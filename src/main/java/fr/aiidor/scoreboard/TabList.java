@@ -23,7 +23,7 @@ public class TabList {
 		String gameInfo = "";
 		
 		if (main.PlayerHasRole) {
-			if (main.isInGame(player.getUniqueId())) {
+			if (main.hasRole(player)) {
 				Joueur j = main.getPlayer(player.getUniqueId());
 				
 				gameInfo = "\n§b" + j.getRole().name + " §f--- §7" + j.getKills() + " kills";
@@ -38,7 +38,7 @@ public class TabList {
 		
 		PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
 		Object header = new ChatComponentText(main.TabName);
-		Object footer = new ChatComponentText("\n§l§fLGUHC" + gameInfo + "\n" + command + "\n\n§dPlugin Par Stigel");
+		Object footer = new ChatComponentText("\n§l§fLGUHC" + gameInfo + "\n" + command + "\n\n§bPlugin original par Lapin\n§dDéveloppé par B_Goodes");
 		try {
 			Field a = packet.getClass().getDeclaredField("a");
 			Field b = packet.getClass().getDeclaredField("b");

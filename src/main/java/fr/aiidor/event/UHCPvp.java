@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.FishHook;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
@@ -26,6 +25,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.WorldSound;
@@ -35,7 +35,6 @@ import fr.aiidor.role.LGCamps;
 import fr.aiidor.role.LGRoles;
 import fr.aiidor.role.use.LGRole_IPL;
 import fr.aiidor.task.LGDeath;
-import fr.aiidor.task.LGLga;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 
 public class UHCPvp implements Listener{
@@ -48,6 +47,7 @@ public class UHCPvp implements Listener{
 	//GAPPLE
 	@EventHandler
 	public void onEat(PlayerItemConsumeEvent e) {
+		
 		if (e.getItem().getType() == Material.GOLDEN_APPLE) {
 			Player player = e.getPlayer();
 			
@@ -136,61 +136,23 @@ public class UHCPvp implements Listener{
 		player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
 	}
 	
-	
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player player = e.getEntity().getPlayer();
 		Location loc = e.getEntity().getPlayer().getLocation();
 		
-		
 		if (!main.PlayerHasRole) {
-			
-			player.setPlayerListName("§7[Spec] §f" + player.getName());
-			
-			if (!main.Spectator.contains(player.getUniqueId())) main.Spectator.add(player.getUniqueId());
-			
-			main.respawnInstant(player);
-			
-			Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-				
-				@Override
-				public void run() {
-					
-					String village = "Le village";
-					
-					if (main.PlayerHasVillage(player.getUniqueId())) {
-						village = main.getVillage(player.getUniqueId()).getName();
-					}
-			
-					Bukkit.broadcastMessage("§c§l==========§4§k0§c§l==========");
-					Bukkit.broadcastMessage("§2" + village + " à perdu un de ses membres : §l" + player.getName());
-					Bukkit.broadcastMessage("§c§l=====================");	
-					
-					for (Player pl : Bukkit.getOnlinePlayers()) {
-				    	pl.playSound(pl.getLocation(), Sound.AMBIENCE_THUNDER, 8.0F, 0.8F);
-				    }
-					
-					player.sendMessage("§6===============§4§k0§6===============");
-					player.sendMessage("§bVous êtes spectateur : §9faites /spec §bpour accéder aux commandes des spectateurs !");
-					player.sendMessage("§6===============§4§k0§6===============");
-					player.sendMessage(" ");
-					
-					player.teleport(main.Spawn);
-					main.reset(e.getEntity());
-					player.setGameMode(GameMode.SPECTATOR);
-				}
-			}, 5);
+			main.kill(player.getUniqueId(), player.getName(), player.getLocation(), inv(player));
 			return;
 		}
 		
 		//LES ROLES SONT DEJA DONNE
-		
 		if (main.isState(UHCState.FINISH)) {
 			new LGDeath(main, player.getUniqueId(), null, loc, inv(player)).death();
 			return;
 		}
 		
-		if (!main.isInGame(player.getUniqueId())) return;	
+		if (!main.hasRole(player.getUniqueId())) return;	
 				
 		if (e.getEntity().getKiller() != null) {
 			
@@ -200,12 +162,12 @@ public class UHCPvp implements Listener{
 			
 			if (dead.getRole() == LGRoles.Ancien && dead.getPower() == 1) {
 				dead.setPower(0);
-				if (main.isInGame(killer.getUniqueId())) {
+				if (main.hasRole(killer.getUniqueId())) {
 					Joueur tueur = main.getPlayer(killer.getUniqueId());
 					if (tueur.isLg()) {
 						e.setDroppedExp(0);
 						
-						player.sendMessage(main.gameTag + "§bVotre pouvoir vous a sauvé !");
+						player.sendMessage(main.gameTag + "§aVous avez été tué par un Loup-Garou ! Par conséquent, vous êtes sauvé par votre aura. Mais attention, vous n'aurez pas deux fois cette chance !");
 						main.respawn(player);
 						
 						return;
@@ -213,23 +175,19 @@ public class UHCPvp implements Listener{
 				}
 			}
 			
-			
-			
 			player.sendMessage(main.gameTag + "§bVous êtes mort mais vous avez peut être une chance d'être réssuscité ! Veuillez attendre quelques secondes.");
 			player.sendMessage(" ");
 			
-			if (main.isInGame(killer.getUniqueId())) {
+			if (main.hasRole(killer)) {
+				
 				LGDeath task = new LGDeath(main, player.getUniqueId(), killer.getUniqueId(), loc, inv(player));
-				task.runTaskTimer(main, 0 , 20);
+				task.runTaskTimer(main, 0, 20);
 				
 				if (main.getPlayer(killer.getUniqueId()).isLg()) {
 					//INFECT
 					main.getPlayer(player.getUniqueId()).setDyingState(LGCamps.LoupGarou);
-					for (Joueur j : main.Players) {
-						if (j.getRole() == LGRoles.IPL) {
-							new LGRole_IPL(main).ReaMsg(player);
-						}
-					}
+					
+					new LGRole_IPL(main).ReaMsg(player);
 				}
 				return;
 			}
@@ -299,10 +257,7 @@ public class UHCPvp implements Listener{
 		if (e.getEntity() instanceof Player) {
 			
 			Player player = (Player) e.getEntity();
-			if (!main.isInGame(player.getUniqueId())) return;
-			
-			Joueur j = main.getPlayer(player.getUniqueId());
-			
+			if (!main.hasRole(player.getUniqueId())) return;
 			
 			//CUPIDON
 			if (e.getDamager() instanceof Arrow) {
@@ -311,7 +266,7 @@ public class UHCPvp implements Listener{
 					
 					Player damager = (Player) arrow.getShooter();
 					
-					if (main.isInGame(damager.getUniqueId())) {
+					if (main.hasRole(damager.getUniqueId())) {
 						if (main.getPlayer(damager.getUniqueId()).getRole() == LGRoles.Cupidon) {
 							if (new Random().nextInt(3) == 0) {
 								damager.sendMessage(main.gameTag + "§aGrâce a votre pouvoir, les dégats de cette flèche seront augmenté.");
@@ -324,31 +279,24 @@ public class UHCPvp implements Listener{
 
 			}
 			
-			//LGA
-			if (j.getRole() == LGRoles.LGA && j.getPower() == 0) {
-				if (e.getDamager() instanceof Player) {
-					Player damager = (Player) e.getDamager();
-					
-					if (!main.isInGame(damager.getUniqueId())) return;
-					Joueur k = main.getPlayer(damager.getUniqueId());
-					if (k.isLg()) {
-						
-						j.setPower(1);
-						
-						//LGA EFFECT
-						j.getPlayer().sendMessage(main.gameTag + "§cAu contact de votre agresseur, vous êtes frappé d'une révélation ! Soudainement la mémoire vous revient :"
-								+ " vous êtes Loup-Garou vous aussi !");
-						
-						
-						new LGLga(main, j).runTaskTimer(main, 0, 20);
-					}
-
-				}
+			//LGP ET PETITE FILLE
+			if (e.getDamager() instanceof Player) {
+				Player damager = (Player) e.getDamager();
 				
-				return;
+				if (main.hasRole(damager.getUniqueId())) {
+					Joueur damagerJ = main.getPlayer(damager.getUniqueId());
+					
+					if (damagerJ.getRole() == LGRoles.PetiteFille || damagerJ.getRole() == LGRoles.LGP) {
+						if (damager.hasPotionEffect(PotionEffectType.INVISIBILITY) && damager.hasPotionEffect(PotionEffectType.WEAKNESS)) {
+							
+							damager.removePotionEffect(PotionEffectType.INVISIBILITY);
+							damager.removePotionEffect(PotionEffectType.WEAKNESS);
+							
+							damager.sendMessage(main.gameTag + "§eVous êtes à nouveau visible !");
+						}
+					}
+				}
 			}
-			
-			
 		}
 	}
 	
@@ -378,7 +326,7 @@ public class UHCPvp implements Listener{
 				return;
 			}
 			
-			if (main.isInGame(pl.getUniqueId())) {
+			if (main.hasRole(pl)) {
 				if (main.getPlayer(pl.getUniqueId()).salvation) {
 					e.setCancelled(true);
 					return;
@@ -387,6 +335,16 @@ public class UHCPvp implements Listener{
 		}
 	}
 	
+	@EventHandler
+	public void onPlayerMount(EntityMountEvent e) {
+		if (main.horseLess) {
+			if (e.getEntity() instanceof Player) {
+				if (e.getMount() instanceof Horse) {
+					e.setCancelled(true);
+				}
+			}
+		}
+	}
 	
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {

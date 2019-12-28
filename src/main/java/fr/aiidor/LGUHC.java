@@ -1,25 +1,32 @@
 package fr.aiidor;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import fr.aiidor.Options.ChatOption;
+import fr.aiidor.Options.DecoOption;
+import fr.aiidor.Options.LGEnchants;
+import fr.aiidor.Options.LGOption;
+import fr.aiidor.commands.CommandLg;
+import fr.aiidor.commands.CommandOrga;
+import fr.aiidor.commands.CommandPing;
+import fr.aiidor.commands.CommandSpec;
+import fr.aiidor.effect.Sounds;
+import fr.aiidor.event.EventsManager;
+import fr.aiidor.files.ConfigManager;
+import fr.aiidor.files.HelpCreator;
+import fr.aiidor.files.StatAction;
+import fr.aiidor.files.StatManager;
+import fr.aiidor.game.Joueur;
+import fr.aiidor.game.UHCState;
+import fr.aiidor.role.LGCamps;
+import fr.aiidor.role.LGRoles;
+import fr.aiidor.scoreboard.ScoreboardSign;
+import fr.aiidor.task.UHCStart;
+import fr.aiidor.utils.LGCivilisation;
+import fr.aiidor.utils.UHCLootCrate;
+import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand;
+import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand.EnumClientCommand;
+import org.bukkit.*;
 import org.bukkit.World.Environment;
-import org.bukkit.WorldBorder;
-import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -34,26 +41,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
-import fr.aiidor.commands.CommandLg;
-import fr.aiidor.commands.CommandOrga;
-import fr.aiidor.commands.CommandSpec;
-import fr.aiidor.effect.Sounds;
-import fr.aiidor.event.EventsManager;
-import fr.aiidor.game.Joueur;
-import fr.aiidor.game.UHCState;
-import fr.aiidor.role.LGCamps;
-import fr.aiidor.role.LGRoles;
-import fr.aiidor.scoreboard.ScoreboardSign;
-import fr.aiidor.utils.LGChat;
-import fr.aiidor.utils.LGCivilisation;
-import fr.aiidor.utils.LGOption;
-import fr.aiidor.utils.UHCLootCrate;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand;
-import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand.EnumClientCommand;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class LGUHC extends JavaPlugin{
+	
+	public Boolean stats = true;
 	
 	public List<UUID> Spectator = new ArrayList<>();
 	public List<Joueur> Players = new ArrayList<>();
@@ -84,15 +83,15 @@ public class LGUHC extends JavaPlugin{
 	private HashMap<UUID, LGOption> OptionChat = new HashMap<>();
 	
 	//PERMS ORGA
-	public LGChat chat = LGChat.Off_IG;
+	public ChatOption chat = ChatOption.Off_IG;
 	public Boolean msg = false;
 	public Integer chatRegion = 40;
 	
 	public int PlayerMin = 1;
-	public boolean cancelStart = false;
+	public UHCStart start;
 	public boolean PlayerHasRole = false;
 	
-	public int GroupLimit = 9;
+	public int GroupLimit = 5;
 	public int ep = 1;
 	
 	public String gameTag = "§b§l[§6§lLOUP-GAROUS§b§l] §r";
@@ -107,47 +106,68 @@ public class LGUHC extends JavaPlugin{
 	public Integer MaxY = 150;
 	public Integer MaxRange = 0;
 	
+	public Boolean cancelVote = false;
+	
 	//OPTION
 	public Integer Map = 1000;
-	public Integer wbEP = 5;
+	public Integer wbTime = 100;
 	public Integer wbMax = 300;
 	public Integer wbSpeed = 1;
 	public Integer wbSecond = 5;
 	
 	public Integer epTime = 20;
 	public Boolean DailyCycle = true;
-	public Integer pvp = 25;
+	public Integer pvp = 30;
 	public Integer announceRole = 20;
 	public Integer voteEp = 3;
 	
 	public Boolean canSeeList = true;
 	
-	public ItemStack[] startItem;
-	public ItemStack[] deathItem;
+	public HashMap<UUID, List<ItemStack>> DecoInv = new HashMap<>();
+
+	public DecoOption decoOption = DecoOption.Amis;
+	public Integer decoTime = 60;
+	
+	public ItemStack[] startItem = {
+			new ItemStack(Material.COOKED_BEEF, 20)
+	};
+	
+	public ItemStack[] deathItem= {
+			new ItemStack(Material.GOLDEN_APPLE, 1)
+	};
 	
 	public boolean deathChat = false;
 	
+	public Team nhide;
+	
 	//GAMERULE
-	public Boolean cord = true;
+	public Boolean reduced = true;
 	public Boolean announceAdv = false;
 	
 	//SCENARIOS
 	public boolean run = false;
 	
-	public Boolean cutclean = true;
-	public Boolean timber = true;
+	public Boolean cutclean = false;
+	public Boolean timber = false;
+	public Boolean veinMiner = false;
 	public Boolean bleedingSweet = false;
-	public Boolean HasteyBoys = true;
+	public Boolean HasteyBoys = false;
 	public Boolean fastSmelting = false;
+	public Integer SpeedyMiner = 0;
+	public Material noWodenTool = Material.WOOD;
 	
+	
+	//LIMI
 	public Integer diamondlimit = 17;
 	public Boolean BloodDiamond = false;
 	
-	public Boolean FireEnchantLess = true;
 	
 	public Integer LimiteDePiece = 2;
 	
+	//LIMITE ENCHANT
+	public Boolean LimiteEnchant = true;
 	
+	//ORELESS
 	public Boolean oreLess = false;
 	public Boolean diamondLess = true;
 	public Boolean goldLess = true;
@@ -157,11 +177,13 @@ public class LGUHC extends JavaPlugin{
 	public Boolean lapisLess = true;
 	public Boolean quartzLess = true;
 	
+	public HashMap<UUID, Integer> DiamondPl = new HashMap<>();
+	
 	public Boolean enchantLess = false;
 	
 	public Boolean FinalHeal = false;
 	
-	public Integer Abso = 2;
+	public Integer Abso = 1;
 	public Boolean Notch = false;
 	
 	public Boolean GoldenHead = false;
@@ -170,22 +192,24 @@ public class LGUHC extends JavaPlugin{
 	
 	public Boolean RodLess  = true;
 	
-	public Integer SpeedyMiner = 1;
-	
-	public Boolean vanilla = false;
-	public Integer flint = 15;
+	public Boolean vanilla = true;
+	public Integer flint = 20;
 	public Integer apples = 1;
 	public Boolean infiniteEnc = false;
 	public Boolean noHunger = false;
 	public Boolean CatEyes = false;
+	public Boolean Utils = true;
 	
 	public Boolean vanillaN = true;
-	public Boolean xpNerf = true;
+	public Boolean xpNerf = false;
+	public double xpNerfVar = 2.00;
 	public Boolean noNether = true;
 	public Boolean noEnd = true;
 	public Boolean noMine = false;
-	public Integer noMineEp = 1;
+	public Integer noMineTime = 80;
 	public Integer noMineCouche = 32;
+	public Boolean noNametag = true;
+	public Boolean horseLess = true;
 	
 	public Boolean NightMare = false;
 	public Boolean PoisonLess = false;
@@ -209,6 +233,8 @@ public class LGUHC extends JavaPlugin{
 	
 	public Boolean meetup = false;
 	
+	public List<LGEnchants> enchantLimit = new ArrayList<>();
+	
 	public void addNames() {
 		 civNames.add("Thiercelieux");
 		 civNames.add("Bedburg");
@@ -216,11 +242,12 @@ public class LGUHC extends JavaPlugin{
 		 civNames.add("Dole");
 		 civNames.add("Edimbourg");
 	}
-
 	
 	//VOTE
 	public Boolean canVote = false;
 	public Boolean canSeeVote = false;
+	public Boolean voteProtect = true;
+	public ArrayList<Joueur> cannotVote = new ArrayList<>();
 	
 	public final String ANSI_RESET = "\u001B[0m";
 	public final String ANSI_BLACK = "\u001B[30m";
@@ -235,6 +262,8 @@ public class LGUHC extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		
+		System.out.println(ANSI_GREEN + "[LOUP-GAROUS] Le plugin est en cours de demarage !" + ANSI_RESET); 
+		
 		saveDefaultConfig();
 		new ConfigManager(this).checkConfigFiles();
 		
@@ -248,6 +277,12 @@ public class LGUHC extends JavaPlugin{
 		}
 		
 		new HelpCreator(this).create();
+		
+		stats = getConfig().getBoolean("Stats.state");
+		
+		if (stats) {
+			new StatManager(this).checkStatFiles();
+		}
 		
 		
 		TabName = getConfigString("Informations.tabHeader")
@@ -308,7 +343,7 @@ public class LGUHC extends JavaPlugin{
 		MaxRange = getConfig().getInt("Spawn.maxRange");
 		
 		wb = world.getWorldBorder();
-		
+				
 		///CAN HOST
 		if (getConfig().getString("HOST.hostList") != null) {
 			String configNames = getConfigString("HOST.hostList")
@@ -325,6 +360,18 @@ public class LGUHC extends JavaPlugin{
 			}
 		}
 		
+		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+		Team t = board.getTeam("nhide");
+		
+		if (t == null) {
+			t = board.registerNewTeam("nhide");
+			t.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OWN_TEAM);
+			t.setCanSeeFriendlyInvisibles(false);
+			t.setAllowFriendlyFire(true);
+		}	
+		
+		nhide = t;
+		
 		//BORDER
 		wb.setCenter(Spawn.getX(), Spawn.getZ());
 		wb.setSize(Map * 2);
@@ -332,6 +379,7 @@ public class LGUHC extends JavaPlugin{
 		getCommand("config").setExecutor(new CommandOrga(this));
 		getCommand("lg").setExecutor(new CommandLg(this));
 		getCommand("spec").setExecutor(new CommandSpec(this));
+		getCommand("ping").setExecutor(new CommandPing(this));
 		
 		world.setPVP(true);
 		
@@ -352,14 +400,21 @@ public class LGUHC extends JavaPlugin{
 		getServer().addRecipe(recipe);
 		
 		System.out.println(ANSI_RED +  "========================================" + ANSI_RESET);
-		System.out.println(ANSI_GREEN + "Plugin LOUP-GAROU UHC - Version 0.5" + ANSI_RESET);
-		System.out.println(ANSI_YELLOW + "         Auteur : Stigel" + ANSI_RESET);
+		System.out.println(ANSI_GREEN + "Plugin LOUP-GAROU UHC - Version 0.6" + ANSI_RESET);
+		System.out.println(ANSI_YELLOW + "       Auteur : B_Goodes" + ANSI_RESET);
 		System.out.println(ANSI_RED +  "========================================" + ANSI_RESET);
 		
 		addNames();
 		new UHCLootCrate(this).setLoots();
+		
+		setEnchantsLimit();
 	}
 	
+	@Override
+	public void onDisable() {
+		System.out.println("[LOUP-GAROUS] "+ ANSI_RED +"Le plugin est off." + ANSI_RESET);
+		nhide.unregister();
+	}
 	
 	private Location getLocation(String loc) {
 		String[] args = loc.split(",");
@@ -371,7 +426,7 @@ public class LGUHC extends JavaPlugin{
 		return new Location(world, x, y, z);
 	}
 	
-	private Environment getEnvironnement(String name) {
+	public Environment getEnvironnement(String name) {
 		if (name.equalsIgnoreCase("normal")) {
 			return Environment.NORMAL;
 		}
@@ -384,7 +439,43 @@ public class LGUHC extends JavaPlugin{
 		return null;
 	}
 	
-	private String getConfigString(String path) {
+	public void setEnchantsLimit() {
+		for (Enchantment ench : Enchantment.values()) {
+			
+			if (ench.equals(Enchantment.FIRE_ASPECT) || ench.equals(Enchantment.ARROW_FIRE)) {	
+				enchantLimit.add(new LGEnchants(ench, 0));
+					
+			} else {	
+				enchantLimit.add(new LGEnchants(ench));
+			}
+		}
+	}
+	
+	public LGEnchants getEnchant(String name) {
+		
+		for (LGEnchants ench : enchantLimit) {
+			if (ench.getEnchantName().equals(name)) {
+				
+				return ench;
+			}
+		}
+		
+		return null;
+	}
+	
+	public LGEnchants getEnchant(Enchantment enchant) {
+		
+		for (LGEnchants ench : enchantLimit) {
+			if (ench.getEnchant().equals(enchant)) {
+				
+				return ench;
+			}
+		}
+		
+		return null;
+	}
+	
+	public String getConfigString(String path) {
 		String string = getConfig().getString(path)
 				.replace("%date", date());
 		
@@ -397,6 +488,16 @@ public class LGUHC extends JavaPlugin{
 		
 		
 		return sdf.format(date);
+	}
+	
+	//TEAM NHIDE
+	public void nhideReset() {
+		
+		if (!nhide.getEntries().isEmpty()) {
+			for (String entry : nhide.getEntries()) {
+				nhide.removeEntry(entry);
+			}
+		}
 	}
 	
 	//CHAT OPTION
@@ -525,41 +626,61 @@ public class LGUHC extends JavaPlugin{
 		return joueurs;
 	}
 	
-	public int getLgGroup() {
-		int lg = 0;
+	public List<LGRoles> getFakeRoles() {
+		
+		List<LGRoles> compo = new ArrayList<>();
+		
 		for (Joueur j : getJoueursOff()) {
-			if (j.getRole().camp == LGCamps.LoupGarou || j.getRole().camp == LGCamps.LGB) {
-				if (!j.isDead()) {
-					lg ++;
-				}
+			if (j.getRole() != LGRoles.LGFeutre) {
+				if (!compo.contains(j.getRole())) compo.add(j.getRole());
 			}
 		}
-		return lg;
-	}
-	
-	public int getVillageGroup() {
-		int village = 0;
-		for (Joueur j : getJoueursOff()) {
-			if (j.getRole().camp == LGCamps.Village || j.getRole().camp == LGCamps.Assassin) {
-				if (!j.isDead()) {
-					village ++;
-				}
-			}
-		}
-		return village;
+		return compo;
 	}
 	
 	public void setLimitGroup() {
-		//LIMITE DE GROUPE
-		if (getLgGroup() <= getVillageGroup()) GroupLimit = getLgGroup();
-		else GroupLimit =  getVillageGroup();
-		if (GroupLimit < 3) GroupLimit = 3;
+		int size = getJoueursOff().size();
+		
+		if (size >= 15) {
+			GroupLimit = 5;
+			return;
+		}
+		
+		if (size >= 10) {
+			GroupLimit = 4;
+			return;
+		}
+		
+		GroupLimit = 3;
 	}
 	
-	public boolean isInGame(UUID uuid) {
+	public boolean hasRole(UUID uuid) {
 		
 		if (getPlayer(uuid) == null) return false;
 		else return true;
+	}
+	
+	public boolean hasRole(Player player) {
+		return hasRole(player.getUniqueId());
+	}
+	
+	public boolean isPlaying(UUID uuid) {
+		
+		if (Spectator.contains(uuid)) return false;
+		
+		if (PlayerHasRole) {
+			if (hasRole(uuid)) {
+				if (!getPlayer(uuid).isDead()) return true;
+			}
+			
+			return false;
+		} 
+		else {
+			if (PlayerInGame.contains(uuid)) return true;
+		}
+		
+		return false;
+
 	}
 	
 	
@@ -640,6 +761,16 @@ public class LGUHC extends JavaPlugin{
 		return joueurs;
 	}
 	
+	public boolean isNight() {
+		long time = world.getTime();
+		return time >= 13000 && time < 23500;
+	}
+	
+	public boolean isDay() {
+		long time = world.getTime();
+		return time >= 23500 || time < 13000;
+	}
+	
 	public void addLg(Joueur j) {
 		
 		if (j.getCamp() != LGCamps.LoupGarou) {
@@ -650,15 +781,27 @@ public class LGUHC extends JavaPlugin{
 					lg.getPlayer().sendMessage(gameTag + "§cUn nouveau joueur à rejoint votre camp ! Faites /lg role pour plus de détails !");
 					new Sounds(lg.getPlayer()).PlaySound(Sound.WOLF_GROWL);
 				}
-				
-				if (lg.getRole() == LGRoles.LGA && lg.getPower() == 1) {
-					lg.lglist.add(j);
-				}
-				
-				j.setCamp(LGCamps.LoupGarou);
-				j.getPlayer().sendMessage(gameTag + "§cVous pouvez voir la liste des loups-garous en vie grâce a la commande /lg rôle !");
 			}
+			
+			
+			j.setCamp(LGCamps.LoupGarou);
+			j.getPlayer().sendMessage(gameTag + "§cVous pouvez voir la liste des loups-garous en vie grâce a la commande /lg rôle !");
 		}
+	}
+	
+	public void revealLg(Joueur j) {
+		for (Joueur lg : getLg()) {
+			
+			if (!lg.equals(j)) {
+				if (lg.isConnected()) {
+					lg.getPlayer().sendMessage(gameTag + "§cUn nouveau joueur à rejoint votre camp ! Faites /lg role pour plus de détails !");
+					new Sounds(lg.getPlayer()).PlaySound(Sound.WOLF_GROWL);
+				}
+			}
+
+		}
+		
+		j.getPlayer().sendMessage(gameTag + "§cVous pouvez voir la liste des loups-garous en vie grâce a la commande /lg rôle !");
 	}
 	
 	//CIVILISATION ----------------------------
@@ -680,6 +823,15 @@ public class LGUHC extends JavaPlugin{
 		}
 		return false;
 
+	}
+	
+	public void sendStaffMsg(String msg) {
+		
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (p.getUniqueId().equals(host) || orgas.contains(p.getUniqueId())) {
+				p.sendMessage(msg);
+			}
+		}
 	}
 	
 	public void reset(Player player) {
@@ -707,6 +859,16 @@ public class LGUHC extends JavaPlugin{
 		}
 		
 		for(PotionEffect effect:player.getActivePotionEffects()){player.removePotionEffect(effect.getType());}
+	}
+	
+	public void clearInventory(Player player) {
+		
+		for(ItemStack item:player.getInventory().getContents()){
+			player.getInventory().remove(item);
+			player.updateInventory();
+		}
+		
+		clearArmor(player);
 	}
 	
 	//RANDOMTP
@@ -788,7 +950,7 @@ public class LGUHC extends JavaPlugin{
         @Override
         public void run() {
         	PacketPlayInClientCommand paquet = new PacketPlayInClientCommand (EnumClientCommand.PERFORM_RESPAWN);
-        	((CraftPlayer) player).getHandle ().playerConnection.a(paquet);
+        	((CraftPlayer) player).getHandle().playerConnection.a(paquet);
         }
      }, 5L);
    }
@@ -849,6 +1011,7 @@ public class LGUHC extends JavaPlugin{
 		inv.setItem(30, getItem(Material.WOOL, (byte) 13,"§aAjouter"));
 		inv.setItem(31, getItem(Material.WOOL, (byte) 14, "§cRetirer"));
 		inv.setItem(35, getItem(Material.BARRIER, "§cQuitter"));
+		
 		player.openInventory(inv);
 	}
 	
@@ -907,6 +1070,7 @@ public class LGUHC extends JavaPlugin{
 			if (player.getUniqueId().equals(host)) {
 				inv.setItem(0, getItem(Material.WOOL, (byte) 13,"§aAjouter Orga"));
 				inv.setItem(1, getItem(Material.WOOL, (byte) 14,"§cRetirer Orga"));
+				inv.setItem(7, getItem(Material.ANVIL,"§cNe plus être Host"));
 				inv.setItem(8, getItem(Material.ENDER_PEARL,"§6Changer Host"));
 			}
 		}
@@ -977,6 +1141,88 @@ public class LGUHC extends JavaPlugin{
         }
     }
 	
+	public List<ItemStack> getInventory(Player player) {
+		
+		List<ItemStack> inv = new ArrayList<>();
+		
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item != null) inv.add(item);
+		}
+		
+		for (ItemStack item : player.getInventory().getArmorContents()) {
+			if (item != null) inv.add(item);
+		}
+		
+		return inv;
+	}
+	
+	public void kill(UUID dead, String name, Location grave, List<ItemStack> inv) {
+		
+		String village = "Le village";
+		
+		if (PlayerHasVillage(dead)) {
+			village = getVillage(dead).getName();
+		}
+		
+		Bukkit.broadcastMessage("§c§l==========§4§k0§c§l==========");
+		Bukkit.broadcastMessage("§2" + village + " à perdu un de ses membres : §l" + name);
+		Bukkit.broadcastMessage("§c§l=====================");	
+		
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+		  	pl.playSound(pl.getLocation(), Sound.AMBIENCE_THUNDER, 8.0F, 0.8F);
+		}
+		
+		dropInventory(dead, grave, inv);
+		
+		if (!Spectator.contains(dead)) Spectator.add(dead);
+		
+		if (Bukkit.getPlayer(dead) != null) {
+			
+			Player player = Bukkit.getPlayer(dead);
+			
+			player.setPlayerListName("§7[Spec] §f" + name);
+			
+			player.sendMessage("§6===============§4§k0§6===============");
+			player.sendMessage("§bVous êtes spectateur : §9faites /spec §bpour accéder aux commandes des spectateurs !");
+			player.sendMessage("§6===============§4§k0§6===============");
+			player.sendMessage(" ");
+				
+			reset(player);
+			player.setGameMode(GameMode.SPECTATOR);
+		}
+		
+		if (stats) new StatManager(this).changeState(dead, "mort", StatAction.Increase);
+	}
+	
+	public void dropInventory(UUID uuid, Location grave, List<ItemStack> inv) {
+		
+		if (GoldenHead) {
+			
+		    ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+		    SkullMeta meta = (SkullMeta)head.getItemMeta();
+		    
+		    if (Bukkit.getPlayer(uuid) != null) {
+			    meta.setOwner(Bukkit.getPlayer(uuid).getName());
+			    meta.setDisplayName("§6Tête de §c" + Bukkit.getPlayer(uuid).getName());
+		    }
+
+		    meta.setLore(Arrays.asList(new String[] { "§bCette tête a été récupéré ", "§bsur un joueur" }));
+		    head.setItemMeta(meta);
+		}
+		
+		if (!inv.isEmpty()) {
+			
+			for (ItemStack it : inv) {
+				if (it != null) {
+					if (it.getType() != Material.AIR) {
+						grave.getWorld().dropItemNaturally(grave, it);
+					}
+				}
+			}
+		}
+		
+	}
+	
 	private ItemStack getHead(Player player) {
 		
 	    ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
@@ -1005,7 +1251,7 @@ public class LGUHC extends JavaPlugin{
 	    return head;
 	}
 	
-	private ItemStack getItem(Material material, String Name) {
+	public ItemStack getItem(Material material, String Name) {
 		
 		ItemStack Item = new ItemStack(material);
 		ItemMeta ItemM = Item.getItemMeta();
@@ -1015,6 +1261,19 @@ public class LGUHC extends JavaPlugin{
 		
 		return Item;
 	}
+	
+	
+	public ItemStack getItem(Material material, int number, String Name) {
+		
+		ItemStack Item = new ItemStack(material);
+		ItemMeta ItemM = Item.getItemMeta();
+		
+		ItemM.setDisplayName(Name);
+		Item.setItemMeta(ItemM);
+		
+		return Item;
+	}
+	
 	
 	private ItemStack getItem(Material material, byte tag, String Name) {
 		
@@ -1064,6 +1323,56 @@ public class LGUHC extends JavaPlugin{
     	
     	player.updateInventory();
     }
+    
+	public String getEnchantName(Enchantment enchant) {
+		
+		if (enchant.equals(Enchantment.ARROW_DAMAGE)) return "Power";
+		if (enchant.equals(Enchantment.ARROW_FIRE)) return "Flame";
+		if (enchant.equals(Enchantment.ARROW_INFINITE)) return "Infinity";
+		if (enchant.equals(Enchantment.ARROW_KNOCKBACK)) return "Punch";
+		if (enchant.equals(Enchantment.DAMAGE_ALL)) return "Sharpness";
+		if (enchant.equals(Enchantment.DAMAGE_ARTHROPODS)) return "Bane of arthropods";
+		if (enchant.equals(Enchantment.DAMAGE_UNDEAD)) return "Smite";
+		if (enchant.equals(Enchantment.DEPTH_STRIDER)) return "Depth Strider";
+		if (enchant.equals(Enchantment.DIG_SPEED)) return "Efficiency";
+		if (enchant.equals(Enchantment.DURABILITY)) return "Unbreaking";
+		if (enchant.equals(Enchantment.FIRE_ASPECT)) return "Fire Aspect";
+		if (enchant.equals(Enchantment.KNOCKBACK)) return "Knockback";
+		if (enchant.equals(Enchantment.LOOT_BONUS_BLOCKS)) return "Fortune";
+		if (enchant.equals(Enchantment.LOOT_BONUS_MOBS)) return "Looting";
+		if (enchant.equals(Enchantment.LUCK)) return "Luck of the sea";
+		if (enchant.equals(Enchantment.LURE)) return "Lure";
+		if (enchant.equals(Enchantment.OXYGEN)) return "Respiration";
+		if (enchant.equals(Enchantment.PROTECTION_ENVIRONMENTAL)) return "Protection";
+		if (enchant.equals(Enchantment.PROTECTION_EXPLOSIONS)) return "Blast Protection";
+		if (enchant.equals(Enchantment.PROTECTION_FALL)) return "Feather Falling";
+		if (enchant.equals(Enchantment.PROTECTION_FIRE)) return "Fire Protection";
+		if (enchant.equals(Enchantment.PROTECTION_PROJECTILE)) return "Projectile Protection";
+		if (enchant.equals(Enchantment.SILK_TOUCH)) return "Silk Touch";
+		if (enchant.equals(Enchantment.THORNS)) return "Thorns";
+		if (enchant.equals(Enchantment.WATER_WORKER)) return "Aqua Affinity";
+		
+		return null;
+	}
+	
+	public String getPotionName(PotionEffectType pot) {
+		
+		if (pot.equals(PotionEffectType.FIRE_RESISTANCE)) return "Fire Resistance";
+		if (pot.equals(PotionEffectType.HARM)) return "Instant Damage";
+		if (pot.equals(PotionEffectType.HEAL)) return "Instant Heal";
+		if (pot.equals(PotionEffectType.INCREASE_DAMAGE)) return "Strength";
+		if (pot.equals(PotionEffectType.INVISIBILITY)) return "Invisibility";
+		if (pot.equals(PotionEffectType.JUMP)) return "Jump";
+		if (pot.equals(PotionEffectType.NIGHT_VISION)) return "Night Vision";
+		if (pot.equals(PotionEffectType.POISON)) return "Poison";
+		if (pot.equals(PotionEffectType.REGENERATION)) return "Regeneration";
+		if (pot.equals(PotionEffectType.SLOW)) return "Slowness";
+		if (pot.equals(PotionEffectType.SPEED)) return "Speed";
+		if (pot.equals(PotionEffectType.WATER_BREATHING)) return "Water Breathing";
+		if (pot.equals(PotionEffectType.WEAKNESS)) return "Weakness";
+		
+		return null;
+	}
     
 }
        

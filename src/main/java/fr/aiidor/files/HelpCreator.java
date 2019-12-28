@@ -1,8 +1,10 @@
-package fr.aiidor;
+package fr.aiidor.files;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+
+import fr.aiidor.LGUHC;
 
 public class HelpCreator {
 	
@@ -14,6 +16,7 @@ public class HelpCreator {
 	
 	
 	public void create() {
+		
 		if (!main.getDataFolder().exists()) {
 			main.getDataFolder().mkdir();
 			System.out.println("[LOUP-GAROUS] "+ main.ANSI_GREEN + "Creation du fichier \"LOUP-GAROU\" ! " + main.ANSI_RESET);

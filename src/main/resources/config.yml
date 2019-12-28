@@ -1,5 +1,5 @@
 #########################################################
-#            Loups-Garous UHC -  Version 0.5            #
+#            Loups-Garous UHC -  Version 0.6            #
 #                  Author : B_Goodes                    #
 #########################################################
 
@@ -28,5 +28,8 @@ Cage:  #Permet de generer une cage au spawn !
 
 HOST:
   hostList: null  #Liste de joueurs (pseudo) qui peuvent Host. Si hostList = null, tout le monde peut host.
+  
+Stats:
+  state: true  #Permet de creer un fichier qui enregistre des Stats
   
 

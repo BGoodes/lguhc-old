@@ -13,11 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import fr.aiidor.ConfigManager;
 import fr.aiidor.GameManager;
 import fr.aiidor.LGUHC;
 import fr.aiidor.effect.Sounds;
 import fr.aiidor.effect.Titles;
+import fr.aiidor.files.ConfigManager;
 import fr.aiidor.game.UHCState;
 import fr.aiidor.scoreboard.ScoreboardManager;
 import fr.aiidor.utils.LGWaiting_Game;
@@ -48,15 +48,15 @@ public class CommandOrga implements CommandExecutor {
 		//RACINE == /HELP
 		if (args.length == 0) {
 			player.sendMessage(main.gameTag + "§6Les commandes :");
-			player.sendMessage(" §6- /config chest §9[ORGA & HOST]");
-			player.sendMessage(" §6- /config rename <name> §9[ORGA & HOST]");
-			player.sendMessage(" §6- /config broadcast|title <message> §9[ORGA & HOST]");
-			player.sendMessage(" §6- /config revive <player> §9[ORGA & HOST]");	
-			player.sendMessage(" §6- /config giveall <objet> [nombre] §9[ORGA & HOST]");
+			player.sendMessage(" §6- /config chest §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config rename <name> §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config broadcast|title <message> §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config giveall <objet> [nombre] §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config finalHeal §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config restart §9[HOST & ORGA]");
+			player.sendMessage(" §6- /config forceOp §9[HOST & ORGA]");
 			
 			if (player.getUniqueId().equals(main.host)) {
-				player.sendMessage(" §6- /config forceOp §c[HOST]");
-				player.sendMessage(" §6- /config restart §c[HOST]");
 				
 			}
 			
@@ -66,9 +66,20 @@ public class CommandOrga implements CommandExecutor {
 		}
 		
 		if (args[0].equalsIgnoreCase("test")) {
+			return true;
+		}
+		
+		if (args[0].equalsIgnoreCase("finalHeal")) {
 			if (args.length != 1) {
-				player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /config test");
+				player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /config finalHeal");
 				return true;
+			}
+			
+			Bukkit.broadcastMessage(main.gameTag + "§d" + player.getName() + " vient d'activer un Final Heal !");
+			
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.setHealth(p.getMaxHealth());
+				new Sounds(p).PlaySound(Sound.DRINK);
 			}
 			
 			return true;
@@ -328,6 +339,30 @@ public class CommandOrga implements CommandExecutor {
 			return true;
 		}
 		
+		if (args[0].equalsIgnoreCase("msg")) {	
+			if (args.length == 1) {
+				player.sendMessage("§6La commande : /config msg <message>");
+				return true;
+			}
+			StringBuilder bs = new StringBuilder();
+			int size = 0;
+			for (String s : args) {
+				if (size > 0) {
+					bs.append(s + " ");
+				}
+				size ++;
+			}
+			
+			String msg = bs.toString();
+			
+			Bukkit.broadcastMessage("§c[§6§l" + player.getName() + "§c] §a" + msg.replace("&", "§"));
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				new Sounds(p).PlaySound(Sound.CLICK);
+			}
+			
+			return true;
+		}
+		
 		if (args[0].equalsIgnoreCase("title")) {	
 			if (args.length == 1) {
 				player.sendMessage("§6La commande : /config title <message>");
@@ -372,68 +407,26 @@ public class CommandOrga implements CommandExecutor {
 			return true;
 		}
 		
-		 if (args[0].equalsIgnoreCase("revive")) {
-			 if (args.length == 1) {
-				 player.sendMessage(main.gameTag + "§6La commande s'écrit /config revive <player>");
-				 return true;
-			 }
-			 
-			 if (args.length != 2) {
-				 player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /config revive <player>");
-				 return true;
-			 }
-			 
-			 String targetname = args[1];
-			 if (Bukkit.getPlayer(targetname) == null) {
-		  		 player.sendMessage(main.gameTag + "§cErreur, le joueur "+ targetname + " n'est pas connecté ou n'existe pas !");
-				 return true;
-			}
-			 
-			 Player Target = Bukkit.getPlayer(targetname);
-			 
-			 
-			 if (!main.PlayerHasRole) {
-				 if (!main.PlayerInGame.contains(Target.getUniqueId())) {
-					 player.sendMessage(main.gameTag + "§cErreur, le joueur doit être dans la partie !");
-					 return true;
-				 }
-				 
-				 if (!main.Spectator.contains(player.getUniqueId())) {
-					 player.sendMessage(main.gameTag + "§cErreur, le joueur doit être mort !");
-					 return true;
-				 }
-				 
-				 player.sendMessage(main.gameTag + "§e" + targetname + " §6viens d'être réanimé !");
-				 main.randomTp(Target);
-				 
-				 main.noFall.add(Target.getUniqueId());
-				 Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-					
-					@Override
-					public void run() {
-						main.noFall.remove(Target.getUniqueId());
-					}
-				}, 200);
-				 return true;
-			 }
-			 player.sendMessage(main.gameTag + "Vous ne pouvez pas réanimer un joueur après l'épisode 1 !");
-			 return true;
-		 }
-		
-		//HOST
-		if (args[0].equalsIgnoreCase("forceOp")) {
-			if (!player.getUniqueId().equals(main.host)) {
-				player.sendMessage(main.gameTag + "§cSeul le Host peut utiliser cette commande !");
+		if (args[0].equalsIgnoreCase("restart")) {
+			
+			if (args.length != 1) {
+				player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /config restart");
 				return true;
 			}
 			
+			new GameManager(main).restart();
+			return true;
+		}
+		
+		if (args[0].equalsIgnoreCase("forceOp")) {
 			if (args.length != 1) {
 				player.sendMessage("§cErreur, la commande s'écrit /config forceOp");
 				return true;
 			}
 			
 			player.setOp(true);
-			Bukkit.broadcastMessage("§l§c>>> §6" + player.getName() + " §cviens de se forceOp !");
+			main.sendStaffMsg("§3(Staff : §4Alert§3) §6 " + player.getName() + " viens de se force Op !");
+			System.out.println(player.getName() + " viens de se forceOp !");
 			return true;
 		}
 		
@@ -482,7 +475,6 @@ public class CommandOrga implements CommandExecutor {
 					player.sendMessage(" ");
 					Target.setPlayerListName("§7[§9Orga§7] §f" + Target.getName());
 					
-					Target.setWhitelisted(true);
 					return true;
 				}
 				
@@ -508,37 +500,25 @@ public class CommandOrga implements CommandExecutor {
 					player.sendMessage(main.gameTag + "§aLe joueur §e" + targetname +  " §an'est plus organisateur !");
 					player.sendMessage(" ");
 					Target.setPlayerListName(Target.getName());
+					
+					if (!main.isState(UHCState.GAME) && !main.isState(UHCState.PREGAME)) {
+						main.clearInventory(Target);
+					}
+					
+					main.removeOptionChat(player.getUniqueId(), false);
+					
+					Target.setOp(false);
 					return true;
 				}
 						
 				return true;
 			}
-			
-
-		}
-		
-		//ORGA ------------------------------
-		
-		if (args[0].equalsIgnoreCase("restart")) {
-			
-			if (!player.getUniqueId().equals(main.host)) {
-				player.sendMessage(main.gameTag + "§cSeul le Host peut utiliser cette commande !");
-				return true;
-			}
-			
-			if (args.length != 1) {
-				player.sendMessage(main.gameTag + "§cErreur, la commande s'écrit /config restart");
-				return true;
-			}
-			
-			new GameManager(main).restart();
-			return true;
 		}
 		
 		player.sendMessage("§cErreur, la commande n'existe pas !");
 		return true;
 	}
-    
+	
 	
 	private ItemStack getItem(Material mat, String Name) {
 		
