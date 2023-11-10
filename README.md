@@ -6,7 +6,7 @@
 ## Introduction
 Welcome to the LG-UHC plugin, a customizable plugin for Minecraft servers running on Spigot 1.8. This plugin allows any server owner to host their own LG-UHC games, a unique blend of the classic "Loup-Garou de Thiercelieux" (Werewolf) and Ultra Hardcore (UHC) gameplay.
 
-## Note on the code quality and Personal Journey
+## Note on the code quality
 This plugin was my first project in Java, marking the beginning of my journey in software development. Reflecting my learning curve, the early versions of this code were written before I fully grasped object-oriented programming. It stands as a testament to my evolution as a developer, showing progress and a willingness to learn and improve.
 
 ## Getting Started
